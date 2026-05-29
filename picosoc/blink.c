@@ -92,14 +92,21 @@ static inline uint32_t rdcycle(void) {
     return c;
 }
 
-// Print a 32-bit number over UART as decimal
+// Print a 32-bit number over UART as decimal (no divide/modulo needed)
 void print_dec(uint32_t v) {
-    char buf[10];
-    int n = 0;
-    if (v == 0) { reg_uart_data = '0'; }
-    else {
-        while (v > 0) { buf[n++] = '0' + (v % 10); v /= 10; }
-        while (n > 0) reg_uart_data = buf[--n];
+    static const uint32_t powers[] = {
+        1000000000, 100000000, 10000000, 1000000,
+        100000, 10000, 1000, 100, 10, 1
+    };
+    int printing = 0;
+    for (int i = 0; i < 10; i++) {
+        uint32_t p = powers[i];
+        int d = 0;
+        while (v >= p) { v -= p; d++; }
+        if (d || printing || i == 9) {
+            reg_uart_data = '0' + d;
+            printing = 1;
+        }
     }
     reg_uart_data = '\r'; reg_uart_data = '\n';
 }
