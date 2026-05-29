@@ -19,6 +19,9 @@ extern uint32_t sram;
 #define reg_leds (*(volatile uint8_t*)0x03000000)
 #define reg_7seg (*(volatile uint8_t*)0x03000001)
 
+#define reg_cache_hit_count  (*(volatile uint32_t*)0x0200000C)
+#define reg_cache_miss_count (*(volatile uint32_t*)0x02000010)
+
 // --------------------------------------------------------
 
 extern uint32_t flashio_worker_begin;
@@ -82,6 +85,26 @@ void enable_flash_crm()
 
 // --------------------------------------------------------
 
+// Read the CPU cycle counter
+static inline uint32_t rdcycle(void) {
+    uint32_t c;
+    __asm__ volatile ("rdcycle %0" : "=r"(c));
+    return c;
+}
+
+// Print a 32-bit number over UART as hex (e.g. 0x0000ABCD)
+void print_hex(uint32_t v) {
+    reg_uart_data = '0'; reg_uart_data = 'x';
+    for (int i = 7; i >= 0; i--)
+        reg_uart_data = "0123456789abcdef"[(v >> (4*i)) & 0xF];
+    reg_uart_data = '\r'; reg_uart_data = '\n';
+}
+
+// Print a simple label string over UART
+void print_str(const char *s) {
+    while (*s) reg_uart_data = *s++;
+}
+
 void setup_picosoc(void){
 	reg_uart_clkdiv = 104; // Baud = 1152060
 	reg_7seg = 0x08;       // represents GB3 2026
@@ -95,12 +118,41 @@ void setup_picosoc(void){
 void main()
 {
     setup_picosoc();
-    
-    while (1){
+
+    // Reset cache counters before the benchmark
+    reg_cache_hit_count  = 0;
+    reg_cache_miss_count = 0;
+
+    // Snapshot cycle count before
+    uint32_t t0 = rdcycle();
+
+    // --- Your benchmark: the blink loop ---
+    for (int rep = 0; rep < 10; rep++) {
         for (int i = 0; i < DELAY_K; i++);
         reg_leds = 0x02;
-
         for (int i = 0; i < DELAY_K; i++);
         reg_leds = 0x00;
+    }
+    // --- End benchmark ---
+
+    // Snapshot cycle count after
+    uint32_t t1 = rdcycle();
+
+    // Read cache counters
+    uint32_t hits   = reg_cache_hit_count;
+    uint32_t misses = reg_cache_miss_count;
+
+    // Print results over UART
+    print_str("Cycles: ");      print_hex(t1 - t0);
+    print_str("Hits:   ");      print_hex(hits);
+    print_str("Misses: ");      print_hex(misses);
+    print_str("Total:  ");      print_hex(hits + misses);
+
+    // Blink to show we're done
+    while (1) {
+        reg_leds = 0x01;
+        for (int i = 0; i < DELAY_K; i++);
+        reg_leds = 0x00;
+        for (int i = 0; i < DELAY_K; i++);
     }
 }
