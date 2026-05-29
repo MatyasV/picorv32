@@ -245,14 +245,14 @@ module spimem_cache_foward (
 	input resetn,
 
 	input         cpu_valid, // request from CPU to read data
-	output        cpu_ready, // data is ready to be read by the CPU
 	input  [23:0] cpu_addr,	// address to read from
-	output [31:0] cpu_rdata, // data read by the CPU
-
-	output        spimem_valid, // request read from SPI flash
 	input         spimem_ready, // SPI flash is ready with data
-	output [23:0] spimem_addr, // address to read from SPI flash
 	input  [31:0] spimem_rdata // data read from SPI flash
+	
+	output        cpu_ready, // data is ready to be read by the CPU
+	output [31:0] cpu_rdata, // data read by the CPU
+	output        spimem_valid, // request read from SPI flash
+	output [23:0] spimem_addr, // address to read from SPI flash
 );
 	wire cache_hit = 1'b0;
 
@@ -271,14 +271,14 @@ module spimem_cache_direct_mapped #(
 	input resetn,
 
 	input         cpu_valid, // request from CPU to read data
-	output        cpu_ready, // data is ready to be read by the CPU
 	input  [23:0] cpu_addr,	// address to read from
-	output [31:0] cpu_rdata, // data read by the CPU
-
-	output        spimem_valid, // request read from SPI flash
 	input         spimem_ready, // SPI flash is ready with data
-	output [23:0] spimem_addr, // address to read from SPI flash
 	input  [31:0] spimem_rdata // data read from SPI flash
+	
+	output        cpu_ready, // data is ready to be read by the CPU
+	output [31:0] cpu_rdata, // data read by the CPU
+	output        spimem_valid, // request read from SPI flash
+	output [23:0] spimem_addr, // address to read from SPI flash
 );
 	reg [23:0] cache_addr [0:CACHE_SIZE-1];
 	reg [31:0] cache_data [0:CACHE_SIZE-1];
