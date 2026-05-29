@@ -153,10 +153,35 @@ void main()
     uint32_t misses = reg_cache_miss_count;
 
     // Print results over UART
-    print_str("Cycles: ");      print_dec(t1 - t0);
-    print_str("Hits:   ");      print_dec(hits);
-    print_str("Misses: ");      print_dec(misses);
-    print_str("Total:  ");      print_dec(hits + misses);
+    uint32_t total = hits + misses;
+    print_str("Cycles: ");  print_dec(t1 - t0);
+    print_str("Hits:   ");  print_dec(hits);
+    print_str("Misses: ");  print_dec(misses);
+    print_str("Total:  ");  print_dec(total);
+
+    // Miss rate as "XX.XX%" — no division operator (not available on rv32ic -nostdlib)
+    // Strategy: compute floor(misses*100/total) for whole%, then floor(rem*100/total) for frac%
+    print_str("Miss%:  ");
+    if (total == 0) {
+        print_str("N/A\r\n");
+    } else {
+        // whole percent: accumulate misses*100 via addition, then subtract total repeatedly
+        uint32_t acc = 0;
+        for (uint32_t j = 0; j < 100; j++) acc += misses;
+        uint32_t whole_pct = 0;
+        while (acc >= total) { acc -= total; whole_pct++; }
+        // acc is now the remainder; frac: floor(acc*100/total)
+        uint32_t acc2 = 0;
+        for (uint32_t j = 0; j < 100; j++) acc2 += acc;
+        uint32_t frac_pct = 0;
+        while (acc2 >= total) { acc2 -= total; frac_pct++; }
+
+        print_dec(whole_pct);
+        reg_uart_data = '.';
+        if (frac_pct < 10) reg_uart_data = '0';
+        print_dec(frac_pct);
+        print_str("%\r\n");
+    }
 
     // Blink to show we're done
     while (1) {
