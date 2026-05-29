@@ -92,11 +92,15 @@ static inline uint32_t rdcycle(void) {
     return c;
 }
 
-// Print a 32-bit number over UART as hex (e.g. 0x0000ABCD)
-void print_hex(uint32_t v) {
-    reg_uart_data = '0'; reg_uart_data = 'x';
-    for (int i = 7; i >= 0; i--)
-        reg_uart_data = "0123456789abcdef"[(v >> (4*i)) & 0xF];
+// Print a 32-bit number over UART as decimal
+void print_dec(uint32_t v) {
+    char buf[10];
+    int n = 0;
+    if (v == 0) { reg_uart_data = '0'; }
+    else {
+        while (v > 0) { buf[n++] = '0' + (v % 10); v /= 10; }
+        while (n > 0) reg_uart_data = buf[--n];
+    }
     reg_uart_data = '\r'; reg_uart_data = '\n';
 }
 
@@ -126,7 +130,7 @@ void main()
     uint32_t t0 = rdcycle();
 
     // --- Your benchmark: the blink loop ---
-    for (int rep = 0; rep < 10; rep++) {
+    for (int rep = 0; rep < 100; rep++) {
         for (int i = 0; i < DELAY_K; i++);
         reg_leds = 0x02;
         for (int i = 0; i < DELAY_K; i++);
@@ -142,10 +146,10 @@ void main()
     uint32_t misses = reg_cache_miss_count;
 
     // Print results over UART
-    print_str("Cycles: ");      print_hex(t1 - t0);
-    print_str("Hits:   ");      print_hex(hits);
-    print_str("Misses: ");      print_hex(misses);
-    print_str("Total:  ");      print_hex(hits + misses);
+    print_str("Cycles: ");      print_dec(t1 - t0);
+    print_str("Hits:   ");      print_dec(hits);
+    print_str("Misses: ");      print_dec(misses);
+    print_str("Total:  ");      print_dec(hits + misses);
 
     // Blink to show we're done
     while (1) {
