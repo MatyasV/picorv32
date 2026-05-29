@@ -106,11 +106,10 @@ void print_str(const char *s) {
 }
 
 void setup_picosoc(void){
-	reg_uart_clkdiv = 104; // Baud = 1152060
-	reg_7seg = 0x08;       // represents GB3 2026
+	reg_uart_clkdiv = 104; // ~115200 baud @ 12 MHz
 	reg_leds = 0x00;
 	set_flash_qspi_flag();
-
+	set_flash_mode_quad();
 }
 
 #define DELAY_K 10000
