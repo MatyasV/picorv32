@@ -270,7 +270,7 @@ module spimem_cache_foward (
 	input         cpu_valid, // request from CPU to read data
 	input  [23:0] cpu_addr,	// address to read from
 	input         spimem_ready, // SPI flash is ready with data
-	input  [31:0] spimem_rdata // data read from SPI flash
+	input  [31:0] spimem_rdata, // data read from SPI flash
 	
 	output        cpu_ready, // data is ready to be read by the CPU
 	output [31:0] cpu_rdata, // data read by the CPU
