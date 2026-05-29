@@ -189,7 +189,7 @@ module picosoc (
 		.spimem_valid  (spimem_cache_valid),
 		.spimem_ready  (spimem_ready),
 		.spimem_addr   (spimem_cache_addr),
-		.spimem_rdata  (spimem_rdata)
+		.spimem_rdata  (spimem_rdata),
 
 		    // --- new: performance counter ports ---
     	.hit_count        (cache_hit_count),
@@ -286,6 +286,8 @@ module spimem_cache_foward (
 	assign cpu_rdata = cache_hit ? 32'h 0000_0000 : spimem_rdata;
 endmodule
 
+
+
 module spimem_cache_direct_mapped #(
 	parameter integer CACHE_SIZE = 8 // number of cache lines
 	// TODO: parameter integer LINE_SIZE = 1  // number of words per cache line
@@ -298,10 +300,10 @@ module spimem_cache_direct_mapped #(
 	input         spimem_ready, // SPI flash is ready with data
 	input  [31:0] spimem_rdata, // data read from SPI flash
 	
-	output        cpu_ready, // data is ready to be read by the CPU
-	output [31:0] cpu_rdata, // data read by the CPU
-	output        spimem_valid, // request read from SPI flash
-	output [23:0] spimem_addr, // address to read from SPI flash
+	output reg       cpu_ready, // data is ready to be read by the CPU
+	output reg [31:0] cpu_rdata, // data read by the CPU
+	output  reg      spimem_valid, // request read from SPI flash
+	output reg [23:0] spimem_addr, // address to read from SPI flash
 
 	// --- new: performance counter outputs and reset inputs ---
     output reg  [31:0] hit_count,
@@ -366,16 +368,6 @@ module spimem_cache_direct_mapped #(
         end
     end
 
-	always @(posedge clk) begin
-		if (spimem_ready) begin
-			cache_addr[index] <= spimem_addr;
-			cache_data[index] <= spimem_rdata;
-			cache_valid[index] <= 1'b1;
-		end
-	end
-
-	assign cpu_ready = cpu_valid && (cache_hit || spimem_ready);
-	assign cpu_rdata = cache_hit ? cache_data[index] : spimem_rdata;	
 endmodule
 
 
