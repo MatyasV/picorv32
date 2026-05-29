@@ -181,7 +181,7 @@ module picosoc (
 		.clk           (clk),
 		.resetn        (resetn),
 
-		.cpu_valid     (mem_valid && mem_instr && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
+		.cpu_valid     (mem_valid && !mem_wstrb && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
 		.cpu_ready     (spimem_cache_ready),
 		.cpu_addr      (mem_addr[23:0]),
 		.cpu_rdata     (spimem_cache_rdata),
