@@ -1,12 +1,15 @@
 #include <stdint.h>
 #include <stdbool.h>
+#if defined(__has_include)
+#  if __has_include("perf.h")
+#    include "perf.h"
+#  endif
+#endif
 
 #ifdef ICEBREAKER
 #  define MEM_TOTAL 0x20000 /* 128 KB */
-#elif HX8KDEMO
-#  define MEM_TOTAL 0x200 /* 2 KB */
 #else
-#  error "Set -DICEBREAKER or -DHX8KDEMO when compiling firmware.c"
+#  error "Set -DICEBREAKER when compiling this C source file"
 #endif
 
 // a pointer to this is a null pointer, but the compiler does not
@@ -18,9 +21,6 @@ extern uint32_t sram;
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 #define reg_leds (*(volatile uint8_t*)0x03000000)
 #define reg_7seg (*(volatile uint8_t*)0x03000001)
-
-#define reg_cache_hit_count  (*(volatile uint32_t*)0x0200000C)
-#define reg_cache_miss_count (*(volatile uint32_t*)0x02000010)
 
 // --------------------------------------------------------
 
@@ -81,40 +81,13 @@ void enable_flash_crm()
 {
 	reg_spictrl |= 0x00100000;
 }
+void *memcpy(void *aa, const void *bb, long n) {
+	char *a = aa;
+	const char *b = bb;
+	while (n--) *(a++) = *(b++);
+	return aa;
+}
 #endif
-
-// --------------------------------------------------------
-
-// Read the CPU cycle counter
-static inline uint32_t rdcycle(void) {
-    uint32_t c;
-    __asm__ volatile ("rdcycle %0" : "=r"(c));
-    return c;
-}
-
-// Print a 32-bit number over UART as decimal (no divide/modulo needed)
-void print_dec(uint32_t v) {
-    static const uint32_t powers[] = {
-        1000000000, 100000000, 10000000, 1000000,
-        100000, 10000, 1000, 100, 10, 1
-    };
-    int printing = 0;
-    for (int i = 0; i < 10; i++) {
-        uint32_t p = powers[i];
-        int d = 0;
-        while (v >= p) { v -= p; d++; }
-        if (d || printing || i == 9) {
-            reg_uart_data = '0' + d;
-            printing = 1;
-        }
-    }
-    reg_uart_data = '\r'; reg_uart_data = '\n';
-}
-
-// Print a simple label string over UART
-void print_str(const char *s) {
-    while (*s) reg_uart_data = *s++;
-}
 
 void setup_picosoc(void){
 	reg_uart_clkdiv = 104; // ~115200 baud @ 12 MHz
@@ -123,71 +96,109 @@ void setup_picosoc(void){
 	set_flash_mode_quad();
 }
 
-#define DELAY_K 10000
+#define ARRAY_SIZE 100
+unsigned char run_workload() {
+    unsigned char numbers[ARRAY_SIZE] = {
+        142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
+         12, 165,  74, 201,  33, 150,  88, 245,  19, 111,
+        182,  63, 137,  95, 222,   4, 158,  81, 209,  47,
+        126,  71, 194,  28, 147, 252,  91,  16, 115, 170,
+         58, 239,  83, 132,   2, 205,  67, 149, 226,  38,
+        104, 188,  51, 161,  94, 242,  11, 123,  79, 217,
+        134,  45, 173,  89, 250,  23, 155,  61, 199, 108,
+         31, 140, 212,  76,   7, 185,  53, 167, 234,  92,
+        121,  14, 203,  69, 152,  41, 228,  85, 114, 191,
+         26, 179,  60, 247,  97, 136,   5, 221,  73, 162
+    };
+
+    int i, j, temp;
+    // Outer loop tracks the number of passes
+    for (i = 0; i < ARRAY_SIZE - 1; i++) {
+        // Inner loop performs the adjacent comparisons
+        // The last i elements are already in place
+        for (j = 0; j < ARRAY_SIZE - i - 1; j++) {
+            if (numbers[j] > numbers[j + 1]) {
+                // Swap numbers
+                temp = numbers[j];
+                numbers[j] = numbers[j + 1];
+                numbers[j + 1] = temp;
+            }
+        }
+    }
+
+    return numbers[ARRAY_SIZE - 1]; // 0xFC = 252
+}
+
+unsigned char run_workload_timed() {
+    uint32_t cycles_begin, cycles_end;
+	uint32_t instns_begin, instns_end;
+    uint32_t hits = 0, misses = 0;
+    
+#ifdef PERF_H
+    cache_counters_reset();
+#endif
+
+	__asm__ volatile ("rdcycle %0" : "=r"(cycles_begin));
+	__asm__ volatile ("rdinstret %0" : "=r"(instns_begin));
+
+    unsigned char x = run_workload();
+
+	__asm__ volatile ("rdcycle %0" : "=r"(cycles_end));
+	__asm__ volatile ("rdinstret %0" : "=r"(instns_end));
+
+#ifdef PERF_H
+    hits   = REG_CACHE_HIT_COUNT;
+    misses = REG_CACHE_MISS_COUNT;
+#endif
+
+    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses);
+
+    return x;
+}
+
+void run_test(void test(void)) {
+    uint32_t cycles_begin, cycles_end;
+	uint32_t instns_begin, instns_end;
+    uint32_t hits = 0, misses = 0;
+    
+#ifdef PERF_H
+    cache_counters_reset();
+#endif
+
+	__asm__ volatile ("rdcycle %0" : "=r"(cycles_begin));
+	__asm__ volatile ("rdinstret %0" : "=r"(instns_begin));
+
+    test();
+        
+	__asm__ volatile ("rdcycle %0" : "=r"(cycles_end));
+	__asm__ volatile ("rdinstret %0" : "=r"(instns_end));
+
+#ifdef PERF_H
+    hits   = REG_CACHE_HIT_COUNT;
+    misses = REG_CACHE_MISS_COUNT;
+#endif
+
+    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses);
+}
+
+void test_single_loop() {
+    for(int i = 0; i < 10000; i++) {
+        asm volatile("nop;");
+    }
+}
+
 
 void main()
 {
     setup_picosoc();
 
-    // Reset cache counters before the benchmark
-    reg_cache_hit_count  = 0;
-    reg_cache_miss_count = 0;
+    run_test(test_single_loop);
 
-    // Snapshot cycle count before
-    uint32_t t0 = rdcycle();
-
-    // --- Your benchmark: the blink loop ---
-    for (int rep = 0; rep < 100; rep++) {
-        for (int i = 0; i < DELAY_K; i++);
-        reg_leds = 0x02;
-        for (int i = 0; i < DELAY_K; i++);
-        reg_leds = 0x00;
-    }
-    // --- End benchmark ---
-
-    // Snapshot cycle count after
-    uint32_t t1 = rdcycle();
-
-    // Read cache counters
-    uint32_t hits   = reg_cache_hit_count;
-    uint32_t misses = reg_cache_miss_count;
-
-    // Print results over UART
-    uint32_t total = hits + misses;
-    print_str("Cycles: ");  print_dec(t1 - t0);
-    print_str("Hits:   ");  print_dec(hits);
-    print_str("Misses: ");  print_dec(misses);
-    print_str("Total:  ");  print_dec(total);
-
-    // Miss rate as "XX.XX%" — no division operator (not available on rv32ic -nostdlib)
-    // Strategy: compute floor(misses*100/total) for whole%, then floor(rem*100/total) for frac%
-    print_str("Miss%:  ");
-    if (total == 0) {
-        print_str("N/A\r\n");
-    } else {
-        // whole percent: accumulate misses*100 via addition, then subtract total repeatedly
-        uint32_t acc = 0;
-        for (uint32_t j = 0; j < 100; j++) acc += misses;
-        uint32_t whole_pct = 0;
-        while (acc >= total) { acc -= total; whole_pct++; }
-        // acc is now the remainder; frac: floor(acc*100/total)
-        uint32_t acc2 = 0;
-        for (uint32_t j = 0; j < 100; j++) acc2 += acc;
-        uint32_t frac_pct = 0;
-        while (acc2 >= total) { acc2 -= total; frac_pct++; }
-
-        print_dec(whole_pct);
-        reg_uart_data = '.';
-        if (frac_pct < 10) reg_uart_data = '0';
-        print_dec(frac_pct);
-        print_str("%\r\n");
-    }
-
-    // Blink to show we're done
+    unsigned char leds_value = 0x02;
     while (1) {
-        reg_leds = 0x01;
-        for (int i = 0; i < DELAY_K; i++);
-        reg_leds = 0x00;
-        for (int i = 0; i < DELAY_K; i++);
+        reg_7seg = run_workload(); // display
+        reg_leds = leds_value;
+        leds_value = leds_value ^ 0x02; // toggle LED1
     }
+
 }

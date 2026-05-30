@@ -29,6 +29,10 @@
 `define PICOSOC_MEM picosoc_mem
 `endif
 
+`ifndef SPIMEM_CACHE
+`define SPIMEM_CACHE spimem_cache_forward
+`endif
+
 // this macro can be used to check if the verilog files in your
 // design are read in the correct order.
 `define PICOSOC_V
@@ -73,7 +77,7 @@ module picosoc (
 	parameter [0:0] ENABLE_MUL = 1;
 	parameter [0:0] ENABLE_DIV = 1;
 	parameter [0:0] ENABLE_FAST_MUL = 0;
-	parameter [0:0] ENABLE_COMPRESSED = 1;
+	parameter [0:0] ENABLE_COMPRESSED = 0;
 	parameter [0:0] ENABLE_COUNTERS = 1;
 	parameter [0:0] ENABLE_IRQ_QREGS = 0;
 
@@ -106,11 +110,12 @@ module picosoc (
 	wire spimem_ready;
 	wire [31:0] spimem_rdata;
 
-	wire spimem_cache_valid;
-	wire spimem_cache_ready;
-	wire [23:0] spimem_cache_addr;
-	wire [31:0] spimem_cache_rdata;
-	// --- Performance counter wires (connected to cache module outputs) ---
+	wire spimem_cache_valid; // between CPU and cache
+	wire spimem_cache_ready; // between CPU and cache
+	wire [23:0] spimem_cache_addr; // between cache and SPI flash
+	wire [31:0] spimem_cache_rdata; // between cache and SPI flash
+
+	// Performance counter wires
 	wire [31:0] cache_hit_count;
 	wire [31:0] cache_miss_count;
 
@@ -143,13 +148,13 @@ module picosoc (
 
 	assign mem_ready = (iomem_valid && iomem_ready) || spimem_cache_ready || ram_ready || spimemio_cfgreg_sel ||
         simpleuart_reg_div_sel || (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait) ||
-        cache_hit_sel || cache_miss_sel;   // <-- added
+        cache_hit_sel || cache_miss_sel;
 
 	assign mem_rdata = (iomem_valid && iomem_ready) ? iomem_rdata : spimem_cache_ready ? spimem_cache_rdata : ram_ready ? ram_rdata :
         spimemio_cfgreg_sel ? spimemio_cfgreg_do : simpleuart_reg_div_sel ? simpleuart_reg_div_do :
         simpleuart_reg_dat_sel ? simpleuart_reg_dat_do :
-        cache_hit_sel  ? cache_hit_count  :   // <-- added
-        cache_miss_sel ? cache_miss_count :   // <-- added
+        cache_hit_sel  ? cache_hit_count  :
+        cache_miss_sel ? cache_miss_count :
         32'h 0000_0000;
 	
 	picorv32 #(
@@ -177,10 +182,10 @@ module picosoc (
 		.irq         (irq        )
 	);
 
-	spimem_cache_direct_mapped spimem_cache (
+	`SPIMEM_CACHE spimem_cache (
 		.clk           (clk),
 		.resetn        (resetn),
-
+		.mem_instr	   (mem_instr),
 		.cpu_valid     (mem_valid && !mem_wstrb && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
 		.cpu_ready     (spimem_cache_ready),
 		.cpu_addr      (mem_addr[23:0]),
@@ -191,7 +196,6 @@ module picosoc (
 		.spimem_addr   (spimem_cache_addr),
 		.spimem_rdata  (spimem_rdata),
 
-		    // --- new: performance counter ports ---
     	.hit_count        (cache_hit_count),
     	.miss_count       (cache_miss_count),
     	.hit_count_reset  (hit_count_reset),
@@ -263,19 +267,29 @@ module picosoc (
 endmodule
 
 // This is a simple cache that forwards read requests from the CPU to the SPI flash.
-module spimem_cache_foward (
+module spimem_cache_forward #(
+	parameter integer CACHE_SIZE = 8, // number of cache lines
+	parameter integer LINE_SIZE = 1  // number of words per cache line
+) (
 	input clk,
 	input resetn,
 
-	input         cpu_valid, // request from CPU to read data
-	input  [23:0] cpu_addr,	// address to read from
-	input         spimem_ready, // SPI flash is ready with data
-	input  [31:0] spimem_rdata, // data read from SPI flash
+	input        cpu_valid, // request from CPU to read data
+	input [23:0] cpu_addr,	// address to read from
+	input        mem_instr, // whether the current request is an instruction fetch
+	input        spimem_ready, // SPI flash is ready with data
+	input [31:0] spimem_rdata, // data read from SPI flash
 	
-	output        cpu_ready, // data is ready to be read by the CPU
-	output [31:0] cpu_rdata, // data read by the CPU
-	output        spimem_valid, // request read from SPI flash
-	output [23:0] spimem_addr, // address to read from SPI flash
+    input wire        hit_count_reset,
+    input wire        miss_count_reset,
+
+	output reg        cpu_ready, // data is ready to be read by the CPU
+	output reg [31:0] cpu_rdata, // data read by the CPU
+	output reg		  spimem_valid, // request read from SPI flash
+	output reg [23:0] spimem_addr, // address to read from SPI flash
+
+    output reg [31:0] hit_count,
+    output reg [31:0] miss_count
 );
 	wire cache_hit = 1'b0;
 
@@ -284,48 +298,57 @@ module spimem_cache_foward (
 
 	assign cpu_ready = cpu_valid && (cache_hit || spimem_ready);
 	assign cpu_rdata = cache_hit ? 32'h 0000_0000 : spimem_rdata;
-endmodule
+	
+	always @(posedge clk) begin
+		if (!resetn) begin
+			hit_count  <= 32'b0;
+			miss_count <= 32'b0;
+		end else begin
+			if (hit_count_reset)  hit_count  <= 32'b0;
+			if (miss_count_reset) miss_count <= 32'b0;
 
+			if (cpu_valid) begin
+				if (cache_hit) begin
+					hit_count <= hit_count + 1;
+				end else if (spimem_ready) begin
+					miss_count <= miss_count + 1;
+				end
+			end
+		end
+	end
+endmodule
 
 
 module spimem_cache_direct_mapped #(
 	parameter integer CACHE_SIZE = 8 // number of cache lines
-	// TODO: parameter integer LINE_SIZE = 1  // number of words per cache line
 ) ( 
 	input clk,
 	input resetn,
 
-	input         cpu_valid, // request from CPU to read data
-	input  [23:0] cpu_addr,	// address to read from
-	input         spimem_ready, // SPI flash is ready with data
-	input  [31:0] spimem_rdata, // data read from SPI flash
+	input        cpu_valid, // request from CPU to read data
+	input [23:0] cpu_addr,	// address to read from
+	input        mem_instr, // whether the current request is an instruction fetch
+	input        spimem_ready, // SPI flash is ready with data
+	input [31:0] spimem_rdata, // data read from SPI flash
 	
-	output reg       cpu_ready, // data is ready to be read by the CPU
+    input wire        hit_count_reset,
+    input wire        miss_count_reset,
+
+	output reg        cpu_ready, // data is ready to be read by the CPU
 	output reg [31:0] cpu_rdata, // data read by the CPU
-	output  reg      spimem_valid, // request read from SPI flash
+	output reg		  spimem_valid, // request read from SPI flash
 	output reg [23:0] spimem_addr, // address to read from SPI flash
 
-	// --- new: performance counter outputs and reset inputs ---
-    output reg  [31:0] hit_count,
-    output reg  [31:0] miss_count,
-    input  wire        hit_count_reset,
-    input  wire        miss_count_reset
+    output reg [31:0] hit_count,
+    output reg [31:0] miss_count
 );
-	// --- Cache storage arrays ---
     reg [23:0] cache_addr  [0:CACHE_SIZE-1];
     reg [31:0] cache_data  [0:CACHE_SIZE-1];
     reg        cache_valid [0:CACHE_SIZE-1];
 
-    // --- Index and hit detection (combinational) ---
-    // For 8 lines and 1 word per line:
-    // cpu_addr[1:0] = byte offset within word (always 00 for instruction fetches)
-    // cpu_addr[4:2] = 3-bit index selects which of the 8 lines to check
-    // cpu_addr[23:5] = tag, stored to detect aliasing
     wire [2:0] index     = cpu_addr[4:2];
     wire       cache_hit = cache_valid[index] && (cache_addr[index] == cpu_addr);
 
-    // --- Combinational outputs ---
-    // These are assign-style but written as always @(*) so they work with reg ports
     always @(*) begin
         cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
         cpu_rdata    = cache_hit ? cache_data[index] : spimem_rdata;
@@ -333,7 +356,6 @@ module spimem_cache_direct_mapped #(
         spimem_addr  = cpu_addr;
     end
 
-    // --- Sequential logic: cache fill + counters ---
     integer i;
     always @(posedge clk) begin
         if (!resetn) begin
@@ -364,7 +386,6 @@ module spimem_cache_direct_mapped #(
                     miss_count <= miss_count + 1;
                 end
             end
-
         end
     end
 

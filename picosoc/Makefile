@@ -1,5 +1,8 @@
-
+ifeq ($(wildcard /usr/local/apps/GB3-RISCV/riscv32imc/bin/riscv32-unknown-elf-gcc),)
+CROSS=riscv32-unknown-elf-
+else
 CROSS=/usr/local/apps/GB3-RISCV/riscv32imc/bin/riscv32-unknown-elf-
+endif
 CFLAGS=
 
 # ---- iCE40 HX8K Breakout Board ----
@@ -85,8 +88,11 @@ icebprog_fw: icebreaker_fw.bin
 icebreaker_sections.lds: sections.lds
 	$(CROSS)cpp -P -DICEBREAKER -o $@ $^
 
-icebreaker_fw.elf: icebreaker_sections.lds start.s blink.c
-	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32ic -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s blink.c
+blink.s: blink.c perf.h
+	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -S -o $@ blink.c
+
+icebreaker_fw.elf: icebreaker_sections.lds start.s blink.s
+	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s blink.s
 
 icebreaker_fw.hex: icebreaker_fw.elf
 	$(CROSS)objcopy -O verilog icebreaker_fw.elf icebreaker_fw.hex
