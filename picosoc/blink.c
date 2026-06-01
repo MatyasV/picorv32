@@ -22,6 +22,8 @@ extern uint32_t sram;
 #define reg_leds (*(volatile uint8_t*)0x03000000)
 #define reg_7seg (*(volatile uint8_t*)0x03000001)
 
+#define RUN_TEST(test) run_test(test, #test)
+
 // --------------------------------------------------------
 
 extern uint32_t flashio_worker_begin;
@@ -96,6 +98,74 @@ void setup_picosoc(void){
 	set_flash_mode_quad();
 }
 
+// Print a 32-bit number over UART as decimal (no divide/modulo needed)
+void print_dec(uint32_t v) {
+    static const uint32_t powers[] = {
+        1000000000, 100000000, 10000000, 1000000,
+        100000, 10000, 1000, 100, 10, 1
+    };
+    int printing = 0;
+    for (int i = 0; i < 10; i++) {
+        uint32_t p = powers[i];
+        int d = 0;
+        while (v >= p) { v -= p; d++; }
+        if (d || printing || i == 9) {
+            reg_uart_data = '0' + d;
+            printing = 1;
+        }
+    }
+}
+
+// Print a simple label string over UART
+void print_str(const char *s) {
+    while (*s) reg_uart_data = *s++;
+}
+
+void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misses, const char *test_name) {
+    // Print results over UART
+    uint32_t total = hits + misses;
+    if (total == 0) {
+        print_str("N/A\r\n");
+    } else {
+        // whole percent: accumulate misses*100 via addition, then subtract total repeatedly
+        uint32_t acc = 0;
+        for (uint32_t j = 0; j < 100; j++) acc += misses;
+        uint32_t whole_pct = 0;
+        while (acc >= total) { acc -= total; whole_pct++; }
+        // acc is now the remainder; frac: floor(acc*100/total)
+        uint32_t acc2 = 0;
+        for (uint32_t j = 0; j < 100; j++) acc2 += acc;
+        uint32_t frac_pct = 0;
+        while (acc2 >= total) { acc2 -= total; frac_pct++; }
+
+        uint32_t cpi_times_10 = 0, tmp = 0;
+        for(uint32_t i = 0; i < 10; i++) tmp += cycles;
+        while (tmp >= instns) { tmp -= instns; cpi_times_10++; }
+
+        uint32_t cpi_whole = 0, cpi_frac = 0;
+        while (cpi_times_10 >= 10) { cpi_times_10 -= 10; cpi_whole++; }
+        cpi_frac = cpi_times_10;
+
+        print_str("Results for "); print_str(test_name);
+        print_str("\r\nrdcycle:   ");  print_dec(cycles);
+        print_str("\r\nrdinstret: ");  print_dec(instns);
+        print_str("\r\nCPI:       ");
+        print_dec(cpi_whole);
+        reg_uart_data = '.';
+        print_dec(cpi_frac);
+        print_str("\r\nHits:      ");  print_dec(hits);
+        print_str("\r\nMisses:    ");  print_dec(misses);
+        print_str("\r\nTotal:     ");  print_dec(total);
+        print_str("\r\nMiss rate: ");
+
+        print_dec(whole_pct);
+        reg_uart_data = '.';
+        if (frac_pct < 10) reg_uart_data = '0';
+        print_dec(frac_pct);
+        print_str("%\r\n\r\n");
+    }
+}
+
 #define ARRAY_SIZE 100
 unsigned char run_workload() {
     unsigned char numbers[ARRAY_SIZE] = {
@@ -151,12 +221,12 @@ unsigned char run_workload_timed() {
     misses = REG_CACHE_MISS_COUNT;
 #endif
 
-    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses);
+    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses, "run_workload");
 
     return x;
 }
 
-void run_test(void test(void)) {
+void run_test(void test(void), const char *test_name) {
     uint32_t cycles_begin, cycles_end;
 	uint32_t instns_begin, instns_end;
     uint32_t hits = 0, misses = 0;
@@ -178,21 +248,34 @@ void run_test(void test(void)) {
     misses = REG_CACHE_MISS_COUNT;
 #endif
 
-    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses);
+    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses, test_name);
+}
+
+
+void test_empty_loop() {
+    for(int i = 0; i < 10000; i++);
 }
 
 void test_single_loop() {
     for(int i = 0; i < 10000; i++) {
+        // TODO: Do something
         asm volatile("nop;");
     }
+}
+
+void test_bubble_sort() {
+    run_workload();
 }
 
 
 void main()
 {
     setup_picosoc();
-
-    run_test(test_single_loop);
+    print_str("Start of benchmarks\r\n\r\n");
+    
+    RUN_TEST(test_empty_loop);
+    RUN_TEST(test_single_loop);
+    RUN_TEST(test_bubble_sort);
 
     unsigned char leds_value = 0x02;
     while (1) {

@@ -30,7 +30,7 @@
 `endif
 
 `ifndef SPIMEM_CACHE
-`define SPIMEM_CACHE spimem_cache_forward
+`define SPIMEM_CACHE spimem_cache_direct_mapped
 `endif
 
 // this macro can be used to check if the verilog files in your
@@ -342,12 +342,14 @@ module spimem_cache_direct_mapped #(
     output reg [31:0] hit_count,
     output reg [31:0] miss_count
 );
+    localparam INDEX_BITS = $clog2(CACHE_SIZE);
+
     reg [23:0] cache_addr  [0:CACHE_SIZE-1];
     reg [31:0] cache_data  [0:CACHE_SIZE-1];
     reg        cache_valid [0:CACHE_SIZE-1];
 
-    wire [2:0] index     = cpu_addr[4:2];
-    wire       cache_hit = cache_valid[index] && (cache_addr[index] == cpu_addr);
+    wire [INDEX_BITS-1:0] index = cpu_addr[INDEX_BITS+1:2];
+    wire cache_hit = cache_valid[index] && (cache_addr[index] == cpu_addr);
 
     always @(*) begin
         cpu_ready    = cpu_valid && (cache_hit || spimem_ready);

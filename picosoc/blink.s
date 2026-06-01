@@ -24,260 +24,6 @@ cache_counters_reset:
 	jr	ra
 	.size	cache_counters_reset, .-cache_counters_reset
 	.align	2
-	.globl	print_dec
-	.type	print_dec, @function
-print_dec:
-	addi	sp,sp,-48
-	sw	ra,44(sp)
-	sw	s0,40(sp)
-	addi	s0,sp,48
-	sw	a0,-36(s0)
-	sw	zero,-20(s0)
-	sw	zero,-24(s0)
-	j	.L3
-.L8:
-	lui	a5,%hi(powers.0)
-	addi	a4,a5,%lo(powers.0)
-	lw	a5,-24(s0)
-	slli	a5,a5,2
-	add	a5,a4,a5
-	lw	a5,0(a5)
-	sw	a5,-32(s0)
-	sw	zero,-28(s0)
-	j	.L4
-.L5:
-	lw	a4,-36(s0)
-	lw	a5,-32(s0)
-	sub	a5,a4,a5
-	sw	a5,-36(s0)
-	lw	a5,-28(s0)
-	addi	a5,a5,1
-	sw	a5,-28(s0)
-.L4:
-	lw	a4,-36(s0)
-	lw	a5,-32(s0)
-	bgeu	a4,a5,.L5
-	lw	a5,-28(s0)
-	bne	a5,zero,.L6
-	lw	a5,-20(s0)
-	bne	a5,zero,.L6
-	lw	a4,-24(s0)
-	li	a5,9
-	bne	a4,a5,.L7
-.L6:
-	lw	a5,-28(s0)
-	addi	a4,a5,48
-	li	a5,33554432
-	addi	a5,a5,8
-	sw	a4,0(a5)
-	li	a5,1
-	sw	a5,-20(s0)
-.L7:
-	lw	a5,-24(s0)
-	addi	a5,a5,1
-	sw	a5,-24(s0)
-.L3:
-	lw	a4,-24(s0)
-	li	a5,9
-	ble	a4,a5,.L8
-	nop
-	nop
-	lw	ra,44(sp)
-	lw	s0,40(sp)
-	addi	sp,sp,48
-	jr	ra
-	.size	print_dec, .-print_dec
-	.align	2
-	.globl	print_str
-	.type	print_str, @function
-print_str:
-	addi	sp,sp,-32
-	sw	ra,28(sp)
-	sw	s0,24(sp)
-	addi	s0,sp,32
-	sw	a0,-20(s0)
-	j	.L10
-.L11:
-	lw	a5,-20(s0)
-	addi	a4,a5,1
-	sw	a4,-20(s0)
-	lbu	a4,0(a5)
-	li	a5,33554432
-	addi	a5,a5,8
-	sw	a4,0(a5)
-.L10:
-	lw	a5,-20(s0)
-	lbu	a5,0(a5)
-	bne	a5,zero,.L11
-	nop
-	nop
-	lw	ra,28(sp)
-	lw	s0,24(sp)
-	addi	sp,sp,32
-	jr	ra
-	.size	print_str, .-print_str
-	.section	.rodata
-	.align	2
-.LC1:
-	.string	"N/A\r\n"
-	.align	2
-.LC2:
-	.string	"\r\nrdcycle:   "
-	.align	2
-.LC3:
-	.string	"\r\nrdinstret: "
-	.align	2
-.LC4:
-	.string	"\r\nHits:      "
-	.align	2
-.LC5:
-	.string	"\r\nMisses:    "
-	.align	2
-.LC6:
-	.string	"\r\nTotal:     "
-	.align	2
-.LC7:
-	.string	"\r\nMiss rate: "
-	.align	2
-.LC8:
-	.string	"%\r\n"
-	.text
-	.align	2
-	.globl	print_stats
-	.type	print_stats, @function
-print_stats:
-	addi	sp,sp,-64
-	sw	ra,60(sp)
-	sw	s0,56(sp)
-	addi	s0,sp,64
-	sw	a0,-52(s0)
-	sw	a1,-56(s0)
-	sw	a2,-60(s0)
-	sw	a3,-64(s0)
-	lw	a4,-60(s0)
-	lw	a5,-64(s0)
-	add	a5,a4,a5
-	sw	a5,-44(s0)
-	lw	a5,-44(s0)
-	bne	a5,zero,.L13
-	lui	a5,%hi(.LC1)
-	addi	a0,a5,%lo(.LC1)
-	call	print_str
-	j	.L24
-.L13:
-	sw	zero,-20(s0)
-	sw	zero,-24(s0)
-	j	.L15
-.L16:
-	lw	a4,-20(s0)
-	lw	a5,-64(s0)
-	add	a5,a4,a5
-	sw	a5,-20(s0)
-	lw	a5,-24(s0)
-	addi	a5,a5,1
-	sw	a5,-24(s0)
-.L15:
-	lw	a4,-24(s0)
-	li	a5,99
-	bleu	a4,a5,.L16
-	sw	zero,-28(s0)
-	j	.L17
-.L18:
-	lw	a4,-20(s0)
-	lw	a5,-44(s0)
-	sub	a5,a4,a5
-	sw	a5,-20(s0)
-	lw	a5,-28(s0)
-	addi	a5,a5,1
-	sw	a5,-28(s0)
-.L17:
-	lw	a4,-20(s0)
-	lw	a5,-44(s0)
-	bgeu	a4,a5,.L18
-	sw	zero,-32(s0)
-	sw	zero,-36(s0)
-	j	.L19
-.L20:
-	lw	a4,-32(s0)
-	lw	a5,-20(s0)
-	add	a5,a4,a5
-	sw	a5,-32(s0)
-	lw	a5,-36(s0)
-	addi	a5,a5,1
-	sw	a5,-36(s0)
-.L19:
-	lw	a4,-36(s0)
-	li	a5,99
-	bleu	a4,a5,.L20
-	sw	zero,-40(s0)
-	j	.L21
-.L22:
-	lw	a4,-32(s0)
-	lw	a5,-44(s0)
-	sub	a5,a4,a5
-	sw	a5,-32(s0)
-	lw	a5,-40(s0)
-	addi	a5,a5,1
-	sw	a5,-40(s0)
-.L21:
-	lw	a4,-32(s0)
-	lw	a5,-44(s0)
-	bgeu	a4,a5,.L22
-	lui	a5,%hi(.LC2)
-	addi	a0,a5,%lo(.LC2)
-	call	print_str
-	lw	a0,-52(s0)
-	call	print_dec
-	lui	a5,%hi(.LC3)
-	addi	a0,a5,%lo(.LC3)
-	call	print_str
-	lw	a0,-56(s0)
-	call	print_dec
-	lui	a5,%hi(.LC4)
-	addi	a0,a5,%lo(.LC4)
-	call	print_str
-	lw	a0,-60(s0)
-	call	print_dec
-	lui	a5,%hi(.LC5)
-	addi	a0,a5,%lo(.LC5)
-	call	print_str
-	lw	a0,-64(s0)
-	call	print_dec
-	lui	a5,%hi(.LC6)
-	addi	a0,a5,%lo(.LC6)
-	call	print_str
-	lw	a0,-44(s0)
-	call	print_dec
-	lui	a5,%hi(.LC7)
-	addi	a0,a5,%lo(.LC7)
-	call	print_str
-	lw	a0,-28(s0)
-	call	print_dec
-	li	a5,33554432
-	addi	a5,a5,8
-	li	a4,46
-	sw	a4,0(a5)
-	lw	a4,-40(s0)
-	li	a5,9
-	bgtu	a4,a5,.L23
-	li	a5,33554432
-	addi	a5,a5,8
-	li	a4,48
-	sw	a4,0(a5)
-.L23:
-	lw	a0,-40(s0)
-	call	print_dec
-	lui	a5,%hi(.LC8)
-	addi	a0,a5,%lo(.LC8)
-	call	print_str
-.L24:
-	nop
-	lw	ra,60(sp)
-	lw	s0,56(sp)
-	addi	sp,sp,64
-	jr	ra
-	.size	print_stats, .-print_stats
-	.align	2
 	.globl	flashio
 	.type	flashio, @function
 flashio:
@@ -345,8 +91,8 @@ flashio:
 	sw	a5,-20(s0)
 	lw	a5,-32(s0)
 	sw	a5,-24(s0)
-	j	.L26
-.L27:
+	j	.L3
+.L4:
 	lw	a4,-20(s0)
 	addi	a5,a4,4
 	sw	a5,-20(s0)
@@ -355,11 +101,11 @@ flashio:
 	sw	a3,-24(s0)
 	lw	a4,0(a4)
 	sw	a4,0(a5)
-.L26:
+.L3:
 	lw	a4,-20(s0)
 	lui	a5,%hi(flashio_worker_end)
 	addi	a5,a5,%lo(flashio_worker_end)
-	bne	a4,a5,.L27
+	bne	a4,a5,.L4
 	lw	a5,-32(s0)
 	lw	a4,-40(s0)
 	lbu	a3,-41(s0)
@@ -536,8 +282,8 @@ memcpy:
 	sw	a5,-20(s0)
 	lw	a5,-40(s0)
 	sw	a5,-24(s0)
-	j	.L35
-.L36:
+	j	.L12
+.L13:
 	lw	a4,-24(s0)
 	addi	a5,a4,1
 	sw	a5,-24(s0)
@@ -546,11 +292,11 @@ memcpy:
 	sw	a3,-20(s0)
 	lbu	a4,0(a4)
 	sb	a4,0(a5)
-.L35:
+.L12:
 	lw	a5,-44(s0)
 	addi	a4,a5,-1
 	sw	a4,-44(s0)
-	bne	a5,zero,.L36
+	bne	a5,zero,.L13
 	lw	a5,-36(s0)
 	mv	a0,a5
 	lw	ra,44(sp)
@@ -580,6 +326,328 @@ setup_picosoc:
 	addi	sp,sp,16
 	jr	ra
 	.size	setup_picosoc, .-setup_picosoc
+	.align	2
+	.globl	print_dec
+	.type	print_dec, @function
+print_dec:
+	addi	sp,sp,-48
+	sw	ra,44(sp)
+	sw	s0,40(sp)
+	addi	s0,sp,48
+	sw	a0,-36(s0)
+	sw	zero,-20(s0)
+	sw	zero,-24(s0)
+	j	.L17
+.L22:
+	lui	a5,%hi(powers.0)
+	addi	a4,a5,%lo(powers.0)
+	lw	a5,-24(s0)
+	slli	a5,a5,2
+	add	a5,a4,a5
+	lw	a5,0(a5)
+	sw	a5,-32(s0)
+	sw	zero,-28(s0)
+	j	.L18
+.L19:
+	lw	a4,-36(s0)
+	lw	a5,-32(s0)
+	sub	a5,a4,a5
+	sw	a5,-36(s0)
+	lw	a5,-28(s0)
+	addi	a5,a5,1
+	sw	a5,-28(s0)
+.L18:
+	lw	a4,-36(s0)
+	lw	a5,-32(s0)
+	bgeu	a4,a5,.L19
+	lw	a5,-28(s0)
+	bne	a5,zero,.L20
+	lw	a5,-20(s0)
+	bne	a5,zero,.L20
+	lw	a4,-24(s0)
+	li	a5,9
+	bne	a4,a5,.L21
+.L20:
+	lw	a5,-28(s0)
+	addi	a4,a5,48
+	li	a5,33554432
+	addi	a5,a5,8
+	sw	a4,0(a5)
+	li	a5,1
+	sw	a5,-20(s0)
+.L21:
+	lw	a5,-24(s0)
+	addi	a5,a5,1
+	sw	a5,-24(s0)
+.L17:
+	lw	a4,-24(s0)
+	li	a5,9
+	ble	a4,a5,.L22
+	nop
+	nop
+	lw	ra,44(sp)
+	lw	s0,40(sp)
+	addi	sp,sp,48
+	jr	ra
+	.size	print_dec, .-print_dec
+	.align	2
+	.globl	print_str
+	.type	print_str, @function
+print_str:
+	addi	sp,sp,-32
+	sw	ra,28(sp)
+	sw	s0,24(sp)
+	addi	s0,sp,32
+	sw	a0,-20(s0)
+	j	.L24
+.L25:
+	lw	a5,-20(s0)
+	addi	a4,a5,1
+	sw	a4,-20(s0)
+	lbu	a4,0(a5)
+	li	a5,33554432
+	addi	a5,a5,8
+	sw	a4,0(a5)
+.L24:
+	lw	a5,-20(s0)
+	lbu	a5,0(a5)
+	bne	a5,zero,.L25
+	nop
+	nop
+	lw	ra,28(sp)
+	lw	s0,24(sp)
+	addi	sp,sp,32
+	jr	ra
+	.size	print_str, .-print_str
+	.section	.rodata
+	.align	2
+.LC1:
+	.string	"N/A\r\n"
+	.align	2
+.LC2:
+	.string	"Results for "
+	.align	2
+.LC3:
+	.string	"\r\nrdcycle:   "
+	.align	2
+.LC4:
+	.string	"\r\nrdinstret: "
+	.align	2
+.LC5:
+	.string	"\r\nCPI:       "
+	.align	2
+.LC6:
+	.string	"\r\nHits:      "
+	.align	2
+.LC7:
+	.string	"\r\nMisses:    "
+	.align	2
+.LC8:
+	.string	"\r\nTotal:     "
+	.align	2
+.LC9:
+	.string	"\r\nMiss rate: "
+	.align	2
+.LC10:
+	.base64	"JQ0KDQoA"
+	.text
+	.align	2
+	.globl	print_stats
+	.type	print_stats, @function
+print_stats:
+	addi	sp,sp,-96
+	sw	ra,92(sp)
+	sw	s0,88(sp)
+	addi	s0,sp,96
+	sw	a0,-68(s0)
+	sw	a1,-72(s0)
+	sw	a2,-76(s0)
+	sw	a3,-80(s0)
+	sw	a4,-84(s0)
+	lw	a4,-76(s0)
+	lw	a5,-80(s0)
+	add	a5,a4,a5
+	sw	a5,-60(s0)
+	lw	a5,-60(s0)
+	bne	a5,zero,.L27
+	lui	a5,%hi(.LC1)
+	addi	a0,a5,%lo(.LC1)
+	call	print_str
+	j	.L44
+.L27:
+	sw	zero,-20(s0)
+	sw	zero,-24(s0)
+	j	.L29
+.L30:
+	lw	a4,-20(s0)
+	lw	a5,-80(s0)
+	add	a5,a4,a5
+	sw	a5,-20(s0)
+	lw	a5,-24(s0)
+	addi	a5,a5,1
+	sw	a5,-24(s0)
+.L29:
+	lw	a4,-24(s0)
+	li	a5,99
+	bleu	a4,a5,.L30
+	sw	zero,-28(s0)
+	j	.L31
+.L32:
+	lw	a4,-20(s0)
+	lw	a5,-60(s0)
+	sub	a5,a4,a5
+	sw	a5,-20(s0)
+	lw	a5,-28(s0)
+	addi	a5,a5,1
+	sw	a5,-28(s0)
+.L31:
+	lw	a4,-20(s0)
+	lw	a5,-60(s0)
+	bgeu	a4,a5,.L32
+	sw	zero,-32(s0)
+	sw	zero,-36(s0)
+	j	.L33
+.L34:
+	lw	a4,-32(s0)
+	lw	a5,-20(s0)
+	add	a5,a4,a5
+	sw	a5,-32(s0)
+	lw	a5,-36(s0)
+	addi	a5,a5,1
+	sw	a5,-36(s0)
+.L33:
+	lw	a4,-36(s0)
+	li	a5,99
+	bleu	a4,a5,.L34
+	sw	zero,-40(s0)
+	j	.L35
+.L36:
+	lw	a4,-32(s0)
+	lw	a5,-60(s0)
+	sub	a5,a4,a5
+	sw	a5,-32(s0)
+	lw	a5,-40(s0)
+	addi	a5,a5,1
+	sw	a5,-40(s0)
+.L35:
+	lw	a4,-32(s0)
+	lw	a5,-60(s0)
+	bgeu	a4,a5,.L36
+	sw	zero,-44(s0)
+	sw	zero,-48(s0)
+	sw	zero,-52(s0)
+	j	.L37
+.L38:
+	lw	a4,-48(s0)
+	lw	a5,-68(s0)
+	add	a5,a4,a5
+	sw	a5,-48(s0)
+	lw	a5,-52(s0)
+	addi	a5,a5,1
+	sw	a5,-52(s0)
+.L37:
+	lw	a4,-52(s0)
+	li	a5,9
+	bleu	a4,a5,.L38
+	j	.L39
+.L40:
+	lw	a4,-48(s0)
+	lw	a5,-72(s0)
+	sub	a5,a4,a5
+	sw	a5,-48(s0)
+	lw	a5,-44(s0)
+	addi	a5,a5,1
+	sw	a5,-44(s0)
+.L39:
+	lw	a4,-48(s0)
+	lw	a5,-72(s0)
+	bgeu	a4,a5,.L40
+	sw	zero,-56(s0)
+	sw	zero,-64(s0)
+	j	.L41
+.L42:
+	lw	a5,-44(s0)
+	addi	a5,a5,-10
+	sw	a5,-44(s0)
+	lw	a5,-56(s0)
+	addi	a5,a5,1
+	sw	a5,-56(s0)
+.L41:
+	lw	a4,-44(s0)
+	li	a5,9
+	bgtu	a4,a5,.L42
+	lw	a5,-44(s0)
+	sw	a5,-64(s0)
+	lui	a5,%hi(.LC2)
+	addi	a0,a5,%lo(.LC2)
+	call	print_str
+	lw	a0,-84(s0)
+	call	print_str
+	lui	a5,%hi(.LC3)
+	addi	a0,a5,%lo(.LC3)
+	call	print_str
+	lw	a0,-68(s0)
+	call	print_dec
+	lui	a5,%hi(.LC4)
+	addi	a0,a5,%lo(.LC4)
+	call	print_str
+	lw	a0,-72(s0)
+	call	print_dec
+	lui	a5,%hi(.LC5)
+	addi	a0,a5,%lo(.LC5)
+	call	print_str
+	lw	a0,-56(s0)
+	call	print_dec
+	li	a5,33554432
+	addi	a5,a5,8
+	li	a4,46
+	sw	a4,0(a5)
+	lw	a0,-64(s0)
+	call	print_dec
+	lui	a5,%hi(.LC6)
+	addi	a0,a5,%lo(.LC6)
+	call	print_str
+	lw	a0,-76(s0)
+	call	print_dec
+	lui	a5,%hi(.LC7)
+	addi	a0,a5,%lo(.LC7)
+	call	print_str
+	lw	a0,-80(s0)
+	call	print_dec
+	lui	a5,%hi(.LC8)
+	addi	a0,a5,%lo(.LC8)
+	call	print_str
+	lw	a0,-60(s0)
+	call	print_dec
+	lui	a5,%hi(.LC9)
+	addi	a0,a5,%lo(.LC9)
+	call	print_str
+	lw	a0,-28(s0)
+	call	print_dec
+	li	a5,33554432
+	addi	a5,a5,8
+	li	a4,46
+	sw	a4,0(a5)
+	lw	a4,-40(s0)
+	li	a5,9
+	bgtu	a4,a5,.L43
+	li	a5,33554432
+	addi	a5,a5,8
+	li	a4,48
+	sw	a4,0(a5)
+.L43:
+	lw	a0,-40(s0)
+	call	print_dec
+	lui	a5,%hi(.LC10)
+	addi	a0,a5,%lo(.LC10)
+	call	print_str
+.L44:
+	nop
+	lw	ra,92(sp)
+	lw	s0,88(sp)
+	addi	sp,sp,96
+	jr	ra
+	.size	print_stats, .-print_stats
 	.section	.rodata
 	.align	2
 .LC0:
@@ -603,11 +671,11 @@ run_workload:
 	mv	a0,a5
 	call	memcpy
 	sw	zero,-20(s0)
-	j	.L40
-.L44:
+	j	.L46
+.L50:
 	sw	zero,-24(s0)
-	j	.L41
-.L43:
+	j	.L47
+.L49:
 	lw	a5,-24(s0)
 	addi	a5,a5,-16
 	add	a5,a5,s0
@@ -617,7 +685,7 @@ run_workload:
 	addi	a5,a5,-16
 	add	a5,a5,s0
 	lbu	a5,-112(a5)
-	bleu	a4,a5,.L42
+	bleu	a4,a5,.L48
 	lw	a5,-24(s0)
 	addi	a5,a5,-16
 	add	a5,a5,s0
@@ -639,23 +707,23 @@ run_workload:
 	addi	a5,a5,-16
 	add	a5,a5,s0
 	sb	a4,-112(a5)
-.L42:
+.L48:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L41:
+.L47:
 	li	a4,99
 	lw	a5,-20(s0)
 	sub	a5,a4,a5
 	lw	a4,-24(s0)
-	blt	a4,a5,.L43
+	blt	a4,a5,.L49
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-.L40:
+.L46:
 	lw	a4,-20(s0)
 	li	a5,98
-	ble	a4,a5,.L44
+	ble	a4,a5,.L50
 	lbu	a5,-29(s0)
 	mv	a0,a5
 	lw	ra,124(sp)
@@ -663,6 +731,11 @@ run_workload:
 	addi	sp,sp,128
 	jr	ra
 	.size	run_workload, .-run_workload
+	.section	.rodata
+	.align	2
+.LC11:
+	.string	"run_workload"
+	.text
 	.align	2
 	.globl	run_workload_timed
 	.type	run_workload_timed, @function
@@ -675,13 +748,13 @@ run_workload_timed:
 	sw	zero,-24(s0)
 	call	cache_counters_reset
  #APP
-# 141 "blink.c" 1
+# 211 "blink.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-28(s0)
  #APP
-# 142 "blink.c" 1
+# 212 "blink.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -690,13 +763,13 @@ run_workload_timed:
 	mv	a5,a0
 	sb	a5,-33(s0)
  #APP
-# 146 "blink.c" 1
+# 216 "blink.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-40(s0)
  #APP
-# 147 "blink.c" 1
+# 217 "blink.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -714,10 +787,11 @@ run_workload_timed:
 	sub	a0,a4,a5
 	lw	a4,-44(s0)
 	lw	a5,-32(s0)
-	sub	a5,a4,a5
+	sub	a1,a4,a5
+	lui	a5,%hi(.LC11)
+	addi	a4,a5,%lo(.LC11)
 	lw	a3,-24(s0)
 	lw	a2,-20(s0)
-	mv	a1,a5
 	call	print_stats
 	lbu	a5,-33(s0)
 	mv	a0,a5
@@ -735,17 +809,18 @@ run_test:
 	sw	s0,56(sp)
 	addi	s0,sp,64
 	sw	a0,-52(s0)
+	sw	a1,-56(s0)
 	sw	zero,-20(s0)
 	sw	zero,-24(s0)
 	call	cache_counters_reset
  #APP
-# 168 "blink.c" 1
+# 238 "blink.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-28(s0)
  #APP
-# 169 "blink.c" 1
+# 239 "blink.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -753,13 +828,13 @@ run_test:
 	lw	a5,-52(s0)
 	jalr	a5
  #APP
-# 173 "blink.c" 1
+# 243 "blink.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-36(s0)
  #APP
-# 174 "blink.c" 1
+# 244 "blink.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -778,6 +853,7 @@ run_test:
 	lw	a4,-40(s0)
 	lw	a5,-32(s0)
 	sub	a5,a4,a5
+	lw	a4,-56(s0)
 	lw	a3,-24(s0)
 	lw	a2,-20(s0)
 	mv	a1,a5
@@ -789,6 +865,32 @@ run_test:
 	jr	ra
 	.size	run_test, .-run_test
 	.align	2
+	.globl	test_empty_loop
+	.type	test_empty_loop, @function
+test_empty_loop:
+	addi	sp,sp,-32
+	sw	ra,28(sp)
+	sw	s0,24(sp)
+	addi	s0,sp,32
+	sw	zero,-20(s0)
+	j	.L56
+.L57:
+	lw	a5,-20(s0)
+	addi	a5,a5,1
+	sw	a5,-20(s0)
+.L56:
+	lw	a4,-20(s0)
+	li	a5,8192
+	addi	a5,a5,1807
+	ble	a4,a5,.L57
+	nop
+	nop
+	lw	ra,28(sp)
+	lw	s0,24(sp)
+	addi	sp,sp,32
+	jr	ra
+	.size	test_empty_loop, .-test_empty_loop
+	.align	2
 	.globl	test_single_loop
 	.type	test_single_loop, @function
 test_single_loop:
@@ -797,21 +899,21 @@ test_single_loop:
 	sw	s0,24(sp)
 	addi	s0,sp,32
 	sw	zero,-20(s0)
-	j	.L50
-.L51:
+	j	.L59
+.L60:
  #APP
-# 186 "blink.c" 1
+# 262 "blink.c" 1
 	nop;
 # 0 "" 2
  #NO_APP
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-.L50:
+.L59:
 	lw	a4,-20(s0)
 	li	a5,8192
 	addi	a5,a5,1807
-	ble	a4,a5,.L51
+	ble	a4,a5,.L60
 	nop
 	nop
 	lw	ra,28(sp)
@@ -819,6 +921,35 @@ test_single_loop:
 	addi	sp,sp,32
 	jr	ra
 	.size	test_single_loop, .-test_single_loop
+	.align	2
+	.globl	test_bubble_sort
+	.type	test_bubble_sort, @function
+test_bubble_sort:
+	addi	sp,sp,-16
+	sw	ra,12(sp)
+	sw	s0,8(sp)
+	addi	s0,sp,16
+	call	run_workload
+	nop
+	lw	ra,12(sp)
+	lw	s0,8(sp)
+	addi	sp,sp,16
+	jr	ra
+	.size	test_bubble_sort, .-test_bubble_sort
+	.section	.rodata
+	.align	2
+.LC12:
+	.string	"Start of benchmarks\r\n\r\n"
+	.align	2
+.LC13:
+	.string	"test_empty_loop"
+	.align	2
+.LC14:
+	.string	"test_single_loop"
+	.align	2
+.LC15:
+	.string	"test_bubble_sort"
+	.text
 	.align	2
 	.globl	main
 	.type	main, @function
@@ -829,12 +960,27 @@ main:
 	sw	s1,20(sp)
 	addi	s0,sp,32
 	call	setup_picosoc
+	lui	a5,%hi(.LC12)
+	addi	a0,a5,%lo(.LC12)
+	call	print_str
+	lui	a5,%hi(.LC13)
+	addi	a1,a5,%lo(.LC13)
+	lui	a5,%hi(test_empty_loop)
+	addi	a0,a5,%lo(test_empty_loop)
+	call	run_test
+	lui	a5,%hi(.LC14)
+	addi	a1,a5,%lo(.LC14)
 	lui	a5,%hi(test_single_loop)
 	addi	a0,a5,%lo(test_single_loop)
 	call	run_test
+	lui	a5,%hi(.LC15)
+	addi	a1,a5,%lo(.LC15)
+	lui	a5,%hi(test_bubble_sort)
+	addi	a0,a5,%lo(test_bubble_sort)
+	call	run_test
 	li	a5,2
 	sb	a5,-17(s0)
-.L53:
+.L63:
 	li	a5,50331648
 	addi	s1,a5,1
 	call	run_workload
@@ -846,7 +992,7 @@ main:
 	lbu	a5,-17(s0)
 	xori	a5,a5,2
 	sb	a5,-17(s0)
-	j	.L53
+	j	.L63
 	.size	main, .-main
 	.section	.rodata
 	.align	2
