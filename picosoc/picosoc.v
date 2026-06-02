@@ -395,7 +395,7 @@ endmodule
 
 
 // Implementation note:
-// Replace the following two modules with wrappers for your SRAM cells.
+// Replace the following two modules with wrappers for SRAM cells.
 
 module picosoc_regs (
 	input clk, wen,
