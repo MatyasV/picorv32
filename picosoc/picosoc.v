@@ -320,74 +320,104 @@ endmodule
 
 
 module spimem_cache_direct_mapped #(
-	parameter integer CACHE_SIZE = 128 // number of cache lines
-) ( 
-	input clk,
-	input resetn,
+    parameter integer CACHE_SIZE = 128,
+    parameter integer LINE_SIZE  = 1
+) (
+    input clk,
+    input resetn,
 
-	input        cpu_valid, // request from CPU to read data
-	input [23:0] cpu_addr,	// address to read from
-	input        mem_instr, // whether the current request is an instruction fetch
-	input        spimem_ready, // SPI flash is ready with data
-	input [31:0] spimem_rdata, // data read from SPI flash
-	
-    input wire        hit_count_reset,
-    input wire        miss_count_reset,
+    input         cpu_valid,
+    output        cpu_ready,
+    input  [23:0] cpu_addr,
+    output [31:0] cpu_rdata,
 
-	output reg        cpu_ready, // data is ready to be read by the CPU
-	output reg [31:0] cpu_rdata, // data read by the CPU
-	output reg		  spimem_valid, // request read from SPI flash
-	output reg [23:0] spimem_addr, // address to read from SPI flash
-	
-	// --- new: performance counter outputs and reset inputs ---
-    output reg  [31:0] hit_count,
-    output reg  [31:0] miss_count
+    output        spimem_valid,
+    input         spimem_ready,
+    output [23:0] spimem_addr,
+    input  [31:0] spimem_rdata,
+
+    input         mem_instr,
+    input  wire   hit_count_reset,
+    input  wire   miss_count_reset,
+    output reg [31:0] hit_count,
+    output reg [31:0] miss_count
 );
-    localparam INDEX_BITS = $clog2(CACHE_SIZE);
+    localparam integer INDEX_BITS  = $clog2(CACHE_SIZE);
+    localparam integer CACHE_WORDS = CACHE_SIZE * LINE_SIZE;
 
-    reg [23:0] cache_addr  [0:CACHE_SIZE-1];
-    reg [31:0] cache_data  [0:CACHE_SIZE-1];
+    // Cache storage
+    reg [31:0] cache_tag   [0:CACHE_SIZE-1];  // line address
+    reg [31:0] cache_data  [0:CACHE_WORDS-1];
     reg        cache_valid [0:CACHE_SIZE-1];
 
-    wire [INDEX_BITS-1:0] index = cpu_addr[INDEX_BITS+1:2];
-    wire cache_hit = cache_valid[index] && (cache_addr[index] == cpu_addr);
+    // Fill state (cpu_addr is stable while cpu_valid held high, so no need to latch tag/index)
+    reg        fill_active;
+    reg [31:0] fill_count;
 
-    always @(*) begin
-        cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
-        cpu_rdata    = cache_hit ? cache_data[index] : spimem_rdata;
-        spimem_valid = cpu_valid && !cache_hit;
-        spimem_addr  = cpu_addr;
-    end
+    // Address decode
+    wire [31:0] cpu_word_addr = cpu_addr[23:2];
+    wire [31:0] cpu_line_addr = cpu_word_addr / LINE_SIZE;
+    wire [31:0] cpu_offset    = cpu_word_addr % LINE_SIZE;
+    wire [INDEX_BITS-1:0] index = cpu_line_addr[INDEX_BITS-1:0];
+
+    wire cache_hit = cache_valid[index] && (cache_tag[index] == cpu_line_addr);
+
+    // Fill helpers
+    wire start_fill = cpu_valid && !cache_hit && !fill_active;
+    wire [31:0] cur_count = fill_active ? fill_count : 0;
+
+    wire [31:0] fill_mem_addr   = cpu_line_addr * LINE_SIZE + cur_count;
+    wire [31:0] fill_cache_word = index * LINE_SIZE + cur_count;
+
+    // SPI interface
+    assign spimem_valid = fill_active || start_fill;
+    assign spimem_addr  = {fill_mem_addr[21:0], 2'b00};
+
+    // CPU outputs
+    assign cpu_ready =
+        cpu_valid &&
+        (cache_hit ||
+        (spimem_valid && spimem_ready && cur_count == LINE_SIZE - 1));
+
+    assign cpu_rdata =
+        cache_hit
+            ? cache_data[index * LINE_SIZE + cpu_offset]
+            : (cpu_offset == cur_count
+                ? spimem_rdata
+                : cache_data[fill_cache_word]);
 
     integer i;
     always @(posedge clk) begin
         if (!resetn) begin
-            // On reset: invalidate all cache lines and zero counters
+            fill_active <= 0;
+            fill_count  <= 0;
             for (i = 0; i < CACHE_SIZE; i = i + 1)
-                cache_valid[i] <= 1'b0;
+                cache_valid[i] <= 0;
             hit_count  <= 32'b0;
             miss_count <= 32'b0;
 
         end else begin
-
-            // Firmware can reset counters by writing to their memory-mapped address
             if (hit_count_reset)  hit_count  <= 32'b0;
             if (miss_count_reset) miss_count <= 32'b0;
 
-            // When a new request arrives from the CPU:
-            if (cpu_valid) begin
-                if (cache_hit) begin
-                    // HIT: data already in cache, increment hit counter
-                    // (cpu_ready and cpu_rdata are driven combinationally above)
-                    hit_count <= hit_count + 1;
+            if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
 
-                end else if (spimem_ready) begin
-                    // MISS + flash has responded: fill the cache line, increment miss counter
-                    cache_addr[index]  <= cpu_addr;
-                    cache_data[index]  <= spimem_rdata;
-                    cache_valid[index] <= 1'b1;
-                    miss_count <= miss_count + 1;
+            if (spimem_valid && spimem_ready) begin
+                cache_data[fill_cache_word] <= spimem_rdata;
+
+                if (cur_count == LINE_SIZE - 1) begin
+                    cache_tag[index]   <= cpu_line_addr;
+                    cache_valid[index] <= 1;
+                    fill_active        <= 0;
+                    fill_count         <= 0;
+                    miss_count         <= miss_count + 1;
+                end else begin
+                    fill_active <= 1;
+                    fill_count  <= cur_count + 1;
                 end
+            end else if (start_fill) begin
+                fill_active <= 1;
+                fill_count  <= 0;
             end
         end
     end
