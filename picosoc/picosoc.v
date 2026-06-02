@@ -310,6 +310,8 @@ module spimem_cache_direct_mapped #(
 	output  reg      spimem_valid, // request read from SPI flash
 	output reg [23:0] spimem_addr, // address to read from SPI flash
 
+	input         mem_instr,
+
 	// --- new: performance counter outputs and reset inputs ---
     output reg  [31:0] hit_count,
     output reg  [31:0] miss_count,
@@ -644,7 +646,7 @@ module spimem_cache_random #(
             ? cache_data[hit_index * LINE_SIZE + cpu_offset]
             : (cpu_offset == fill_cur_count
                 ? spimem_rdata
-                : cache_data[fill_cache_word]);
+                : cache_data[fill_cur_index * LINE_SIZE + cpu_offset]);
 
 
 endmodule
