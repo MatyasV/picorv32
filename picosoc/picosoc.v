@@ -30,7 +30,7 @@
 `endif
 
 `ifndef SPIMEM_CACHE
-`define SPIMEM_CACHE spimem_cache_fifo
+`define SPIMEM_CACHE spimem_cache_direct_mapped
 `endif
 
 // this macro can be used to check if the verilog files in your
@@ -321,7 +321,7 @@ endmodule
 
 module spimem_cache_direct_mapped #(
     parameter integer CACHE_SIZE = 128,
-    parameter integer LINE_SIZE  = 1
+    parameter integer LINE_SIZE  = 2
 ) (
     input clk,
     input resetn,
@@ -395,7 +395,7 @@ module spimem_cache_direct_mapped #(
 
             // cur_fill: narrow, only LOG_LINE bits
             wire [LOG_LINE-1:0] cur_fill = fill_active ? fill_count : {LOG_LINE{1'b0}};
-            wire                last_word = (cur_fill == LINE_SIZE[LOG_LINE-1:0] - 1);
+            wire                last_word = (cur_fill == LINE_SIZE - 1);
 
             // Compact array addresses: INDEX_BITS+LOG_LINE bits, clean for BRAM inference
             wire [INDEX_BITS+LOG_LINE-1:0] wr_addr = {index, fill_count};
