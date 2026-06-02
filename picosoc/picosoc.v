@@ -585,86 +585,134 @@ endmodule
 
 
 module spimem_cache_fifo #(
-	parameter integer CACHE_SIZE = 16, // number of cache lines
-	parameter integer LINE_SIZE  = 1  // words per cache line (only 1 currently supported)
+    parameter integer CACHE_SIZE = 8,
+    parameter integer LINE_SIZE  = 1
 ) (
-	input clk,
-	input resetn,
+    input clk,
+    input resetn,
 
-	input        cpu_valid,
-	input [23:0] cpu_addr,
-	input        mem_instr,
-	input        spimem_ready,
-	input [31:0] spimem_rdata,
+    input         cpu_valid,
+    output        cpu_ready,
+    input  [23:0] cpu_addr,
+    output [31:0] cpu_rdata,
 
-	input wire        hit_count_reset,
-	input wire        miss_count_reset,
+    output        spimem_valid,
+    input         spimem_ready,
+    output [23:0] spimem_addr,
+    input  [31:0] spimem_rdata,
 
-	output reg        cpu_ready,
-	output reg [31:0] cpu_rdata,
-	output reg        spimem_valid,
-	output reg [23:0] spimem_addr,
-
-	output reg [31:0] hit_count,
-	output reg [31:0] miss_count
+    input         mem_instr,
+    input  wire   hit_count_reset,
+    input  wire   miss_count_reset,
+    output reg [31:0] hit_count,
+    output reg [31:0] miss_count
 );
-	localparam FIFO_BITS = $clog2(CACHE_SIZE);
+    localparam integer CACHE_WORDS = CACHE_SIZE * LINE_SIZE;
+    localparam integer FIFO_BITS   = $clog2(CACHE_SIZE);
 
-	reg [23:0] cache_addr  [0:CACHE_SIZE-1];
-	reg [31:0] cache_data  [0:CACHE_SIZE-1];
-	reg        cache_valid [0:CACHE_SIZE-1];
-	reg [FIFO_BITS-1:0] fifo_head; // next line to evict
+    // Cache storage
+    reg [31:0] cache_tag   [0:CACHE_SIZE-1];  // line address
+    reg [31:0] cache_data  [0:CACHE_WORDS-1];
+    reg        cache_valid [0:CACHE_SIZE-1];
+    reg [FIFO_BITS-1:0] fifo_head;             // next line to evict
 
-	// Fully associative hit detection: scan all lines
-	reg        cache_hit;
-	reg [31:0] hit_rdata;
-	integer k;
-	always @(*) begin
-		cache_hit = 1'b0;
-		hit_rdata = 32'h0;
-		for (k = 0; k < CACHE_SIZE; k = k + 1)
-			if (cache_valid[k] && (cache_addr[k] == cpu_addr)) begin
-				cache_hit = 1'b1;
-				hit_rdata = cache_data[k];
-			end
-	end
+    // Fill state
+    reg        fill_active;
+    reg [31:0] fill_tag;
+    reg [31:0] fill_index;
+    reg [31:0] fill_count;
 
-	always @(*) begin
-		cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
-		cpu_rdata    = cache_hit ? hit_rdata : spimem_rdata;
-		spimem_valid = cpu_valid && !cache_hit;
-		spimem_addr  = cpu_addr;
-	end
+    // Address decode
+    wire [31:0] cpu_word_addr = cpu_addr[23:2];
+    wire [31:0] cpu_line_addr = cpu_word_addr / LINE_SIZE;
+    wire [31:0] cpu_offset    = cpu_word_addr % LINE_SIZE;
 
-	integer i;
-	always @(posedge clk) begin
-		if (!resetn) begin
-			for (i = 0; i < CACHE_SIZE; i = i + 1)
-				cache_valid[i] <= 1'b0;
-			fifo_head  <= 0;
-			hit_count  <= 32'b0;
-			miss_count <= 32'b0;
+    // Hit detection: fully associative scan
+    integer k;
+    reg        cache_hit;
+    reg [31:0] hit_index;
+    always @(*) begin
+        cache_hit = 1'b0;
+        hit_index = 0;
+        for (k = 0; k < CACHE_SIZE; k = k + 1)
+            if (cache_valid[k] && cache_tag[k] == cpu_line_addr) begin
+                cache_hit = 1'b1;
+                hit_index = k;
+            end
+    end
 
-		end else begin
+    // Fill helpers
+    wire start_fill = cpu_valid && !cache_hit && !fill_active;
 
-			if (hit_count_reset)  hit_count  <= 32'b0;
-			if (miss_count_reset) miss_count <= 32'b0;
+    wire [31:0] fill_cur_tag   = fill_active ? fill_tag   : cpu_line_addr;
+    wire [31:0] fill_cur_index = fill_active ? fill_index : {{(32-FIFO_BITS){1'b0}}, fifo_head};
+    wire [31:0] fill_cur_count = fill_active ? fill_count : 0;
 
-			if (cpu_valid) begin
-				if (cache_hit) begin
-					hit_count <= hit_count + 1;
+    wire [31:0] fill_cache_word = fill_cur_index * LINE_SIZE + fill_cur_count;
+    wire [31:0] fill_mem_addr   = fill_cur_tag  * LINE_SIZE + fill_cur_count;
 
-				end else if (spimem_ready) begin
-					// FIFO eviction: overwrite the oldest entry
-					cache_addr [fifo_head] <= cpu_addr;
-					cache_data [fifo_head] <= spimem_rdata;
-					cache_valid[fifo_head] <= 1'b1;
-					fifo_head  <= (fifo_head == CACHE_SIZE-1) ? 0 : fifo_head + 1;
-					miss_count <= miss_count + 1;
-				end
-			end
-		end
-	end
+    // SPI interface
+    assign spimem_valid = fill_active || start_fill;
+    assign spimem_addr  = {fill_mem_addr[21:0], 2'b00};
+
+    // Main state machine
+    integer i;
+    always @(posedge clk) begin
+        if (!resetn) begin
+            fill_active <= 0;
+            fifo_head   <= 0;
+            for (i = 0; i < CACHE_SIZE; i = i + 1)
+                cache_valid[i] <= 0;
+            hit_count  <= 32'b0;
+            miss_count <= 32'b0;
+
+        end else begin
+            if (hit_count_reset)  hit_count  <= 32'b0;
+            if (miss_count_reset) miss_count <= 32'b0;
+
+            if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
+
+            // Invalidate victim slot as soon as fill starts
+            if (start_fill)
+                cache_valid[fifo_head] <= 0;
+
+            if (spimem_valid && spimem_ready) begin
+                cache_data[fill_cache_word] <= spimem_rdata;
+
+                if (fill_cur_count == LINE_SIZE - 1) begin
+                    // Last word of line: commit tag, mark valid, advance FIFO pointer
+                    cache_tag  [fill_cur_index] <= fill_cur_tag;
+                    cache_valid[fill_cur_index] <= 1;
+                    fill_active <= 0;
+                    miss_count  <= miss_count + 1;
+                    fifo_head   <= (fifo_head == CACHE_SIZE-1) ? 0 : fifo_head + 1;
+                end else begin
+                    fill_active <= 1;
+                    fill_tag    <= fill_cur_tag;
+                    fill_index  <= fill_cur_index;
+                    fill_count  <= fill_cur_count + 1;
+                end
+            end else if (start_fill) begin
+                fill_active <= 1;
+                fill_tag    <= cpu_line_addr;
+                fill_index  <= {{(32-FIFO_BITS){1'b0}}, fifo_head};
+                fill_count  <= 0;
+            end
+        end
+    end
+
+    // CPU outputs
+    assign cpu_ready =
+        cpu_valid &&
+        (cache_hit ||
+        (spimem_valid && spimem_ready && fill_cur_count == LINE_SIZE - 1));
+
+    assign cpu_rdata =
+        cache_hit
+            ? cache_data[hit_index * LINE_SIZE + cpu_offset]
+            : (cpu_offset == fill_cur_count
+                ? spimem_rdata
+                : cache_data[fill_cur_index * LINE_SIZE + cpu_offset]);
 
 endmodule
 
