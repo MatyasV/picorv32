@@ -279,7 +279,7 @@ module spimem_cache_foward (
 );
 	wire cache_hit = 1'b0;
 
-	assign spimem_valid = cpu_valid && !cache_hit;
+	assign spimem_valid = cpu_valid;
 	assign spimem_addr = cpu_addr;
 
 	assign cpu_ready = cpu_valid && (cache_hit || spimem_ready);
@@ -367,6 +367,91 @@ module spimem_cache_direct_mapped #(
 
         end
     end
+
+endmodule
+
+
+module spimem_cache_fifo #(
+	parameter integer CACHE_SIZE = 8, // number of cache lines
+	parameter integer LINE_SIZE  = 1  // words per cache line (only 1 currently supported)
+) (
+	input clk,
+	input resetn,
+
+	input        cpu_valid,
+	input [23:0] cpu_addr,
+	input        mem_instr,
+	input        spimem_ready,
+	input [31:0] spimem_rdata,
+
+	input wire        hit_count_reset,
+	input wire        miss_count_reset,
+
+	output reg        cpu_ready,
+	output reg [31:0] cpu_rdata,
+	output reg        spimem_valid,
+	output reg [23:0] spimem_addr,
+
+	output reg [31:0] hit_count,
+	output reg [31:0] miss_count
+);
+	localparam FIFO_BITS = $clog2(CACHE_SIZE);
+
+	reg [23:0] cache_addr  [0:CACHE_SIZE-1];
+	reg [31:0] cache_data  [0:CACHE_SIZE-1];
+	reg        cache_valid [0:CACHE_SIZE-1];
+	reg [FIFO_BITS-1:0] fifo_head; // next line to evict
+
+	// Fully associative hit detection: scan all lines
+	reg        cache_hit;
+	reg [31:0] hit_rdata;
+	integer k;
+	always @(*) begin
+		cache_hit = 1'b0;
+		hit_rdata = 32'h0;
+		for (k = 0; k < CACHE_SIZE; k = k + 1)
+			if (cache_valid[k] && (cache_addr[k] == cpu_addr)) begin
+				cache_hit = 1'b1;
+				hit_rdata = cache_data[k];
+			end
+	end
+
+	always @(*) begin
+		cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
+		cpu_rdata    = cache_hit ? hit_rdata : spimem_rdata;
+		spimem_valid = cpu_valid && !cache_hit;
+		spimem_addr  = cpu_addr;
+	end
+
+	integer i;
+	always @(posedge clk) begin
+		if (!resetn) begin
+			for (i = 0; i < CACHE_SIZE; i = i + 1)
+				cache_valid[i] <= 1'b0;
+			fifo_head  <= 0;
+			hit_count  <= 32'b0;
+			miss_count <= 32'b0;
+
+		end else begin
+
+			if (hit_count_reset)  hit_count  <= 32'b0;
+			if (miss_count_reset) miss_count <= 32'b0;
+
+			if (cpu_valid) begin
+				if (cache_hit) begin
+					hit_count <= hit_count + 1;
+
+				end else if (spimem_ready) begin
+					// FIFO eviction: overwrite the oldest entry
+					cache_addr [fifo_head] <= cpu_addr;
+					cache_data [fifo_head] <= spimem_rdata;
+					cache_valid[fifo_head] <= 1'b1;
+					fifo_head  <= (fifo_head == CACHE_SIZE-1) ? 0 : fifo_head + 1;
+					miss_count <= miss_count + 1;
+				end
+			end
+		end
+	end
 
 endmodule
 
