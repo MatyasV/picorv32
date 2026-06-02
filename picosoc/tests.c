@@ -252,161 +252,186 @@ void run_test(void test(void), const char *test_name) {
 }
 
 
-void test_empty_loop() {
-    for(int i = 0; i < 10000; i++);
-}
+#define N_FUNCS 16
+#define ITERS   300
 
-void test_single_loop() {
-    uint32_t a = 0;
-    for(int i = 0; i < 10000; i++) {
-        a++;
-    }
-}
+__attribute__((noinline)) void f0(){ asm volatile(""); }
+__attribute__((noinline)) void f1(){ asm volatile(""); }
+__attribute__((noinline)) void f2(){ asm volatile(""); }
+__attribute__((noinline)) void f3(){ asm volatile(""); }
+__attribute__((noinline)) void f4(){ asm volatile(""); }
+__attribute__((noinline)) void f5(){ asm volatile(""); }
+__attribute__((noinline)) void f6(){ asm volatile(""); }
+__attribute__((noinline)) void f7(){ asm volatile(""); }
+__attribute__((noinline)) void f8(){ asm volatile(""); }
+__attribute__((noinline)) void f9(){ asm volatile(""); }
+__attribute__((noinline)) void f10(){ asm volatile(""); }
+__attribute__((noinline)) void f11(){ asm volatile(""); }
+__attribute__((noinline)) void f12(){ asm volatile(""); }
+__attribute__((noinline)) void f13(){ asm volatile(""); }
+__attribute__((noinline)) void f14(){ asm volatile(""); }
+__attribute__((noinline)) void f15(){ asm volatile(""); }
 
-void test_transpose_nested() {
-    int32_t s = 0;
-    int a[100][100], b[100][100];
-    for(int i = 0; i < 100; i++) {
-        for(int j = 0; j < 100; j++) {
-            b[i][j] = a[j][i];
+static void (*F[N_FUNCS])() = {
+    f0,f1,f2,f3,f4,f5,f6,f7,
+    f8,f9,f10,f11,f12,f13,f14,f15
+};
+
+volatile uint32_t sink = 0;
+
+/* =========================================================
+ * 1. Working set knee (capacity estimate)
+ * ========================================================= */
+void test_working_set_knee()
+{
+    for (int size = 1; size <= 16; size++) {
+        for (int i = 0; i < ITERS; i++) {
+            for (int j = 0; j < size; j++) {
+                F[j]();
+            }
         }
     }
 }
 
-uint32_t fib(int n) {
-    if(n <= 1) return n;
-    return fib(n - 1) + fib(n - 2);
-}
+/* =========================================================
+ * 2. Reuse distance curve (temporal locality sensitivity)
+ * ========================================================= */
+void test_reuse_distance()
+{
+    for (int d = 1; d <= 16; d++) {
 
-void test_recursive() {
-    fib(18);
-}
+        F[0]();
 
-void test_large_switch() {
-    uint32_t j = 0;
-    for(uint32_t i = 0; i < 10000; i++) {
-        switch (j) {
-            case (0): j += 1; break;
-            case (1): j += 1; break;
-            case (2): j += 2; break;
-            case (3): j += 3; break;
-            case (4): j += 4; break;
-            case (5): j += 5; break;
-            case (6): j += 6; break;
-            case (7): j += 7; break;
-            case (8): j += 8; break;
-            case (9): j += 9; break;
-            case (10): j += 10; break;
-            case (11): j += 11; break;
-            case (12): j += 12; break;
-            case (13): j += 13; break;
-            case (14): j += 14; break;
-            case (15): j += 15; break;
-            case (16): j += 16; break;
-            case (17): j += 17; break;
-            case (18): j += 18; break;
-            case (19): j += 19; break;
-            case (20): j += 20; break;
-            case (21): j += 21; break;
-            case (22): j += 22; break;
-            case (23): j += 23; break;
-            case (24): j += 24; break;
-            case (25): j += 25; break;
-            case (26): j += 26; break;
-            case (27): j += 27; break;
-            case (28): j += 28; break;
-            case (29): j += 29; break;
-            case (30): j += 30; break;
-            case (31): j += 31; break;
-            case (32): j += 32; break;
-            case (33): j += 33; break;
-            case (34): j += 34; break;
-            case (35): j += 35; break;
-            case (36): j += 36; break;
-            case (37): j += 37; break;
-            case (38): j += 38; break;
-            case (39): j += 39; break;
-            case (40): j += 40; break;
-            case (41): j += 41; break;
-            case (42): j += 42; break;
-            case (43): j += 43; break;
-            case (44): j += 44; break;
-            case (45): j += 45; break;
-            case (46): j += 46; break;
-            case (47): j += 47; break;
-            case (48): j += 48; break;
-            case (49): j += 49; break;
-            case (50): j += 50; break;
-            case (51): j += 51; break;
-            case (52): j += 52; break;
-            case (53): j += 53; break;
-            case (54): j += 54; break;
-            case (55): j += 55; break;
-            case (56): j += 56; break;
-            case (57): j += 57; break;
-            case (58): j += 58; break;
-            case (59): j += 59; break;
-            case (60): j += 60; break;
-            case (61): j += 61; break;
-            case (62): j += 62; break;
-            case (63): j += 63; break;
-            case (64): j += 64; break;
-            case (65): j += 65; break;
-            case (66): j += 66; break;
-            case (67): j += 67; break;
-            case (68): j += 68; break;
-            case (69): j += 69; break;
-            case (70): j += 70; break;
-            case (71): j += 71; break;
-            case (72): j += 72; break;
-            case (73): j += 73; break;
-            case (74): j += 74; break;
-            case (75): j += 75; break;
-            case (76): j += 76; break;
-            case (77): j += 77; break;
-            case (78): j += 78; break;
-            case (79): j += 79; break;
-            case (80): j += 80; break;
-            case (81): j += 81; break;
-            case (82): j += 82; break;
-            case (83): j += 83; break;
-            case (84): j += 84; break;
-            case (85): j += 85; break;
-            case (86): j += 86; break;
-            case (87): j += 87; break;
-            case (88): j += 88; break;
-            case (89): j += 89; break;
-            case (90): j += 90; break;
-            case (91): j += 91; break;
-            case (92): j += 92; break;
-            case (93): j += 93; break;
-            case (94): j += 94; break;
-            case (95): j += 95; break;
-            case (96): j += 96; break;
-            case (97): j += 97; break;
-            case (98): j += 98; break;
-            case (99): j += 99; break;
-        }
-        if(j >= 100) j -= 100;
+        for (int i = 1; i <= d; i++)
+            F[i]();
+
+        F[0]();
     }
 }
 
-void test_bubble_sort() {
-    run_workload();
+/* =========================================================
+ * 3. Thrashing survival (hot line under pressure)
+ * ========================================================= */
+void test_thrashing_survival()
+{
+    for (int i = 0; i < ITERS; i++) {
+
+        for (int k = 0; k < 50; k++)
+            F[0]();
+
+        for (int j = 1; j < 9; j++)
+            F[j]();
+
+        F[0]();
+    }
+}
+
+/* =========================================================
+ * 4. Variance / randomness probe
+ * ========================================================= */
+void test_variance()
+{
+    for (int i = 0; i < ITERS * 50; i++) {
+
+        F[0](); F[1](); F[2](); F[3]();
+        F[4](); F[5](); F[6](); F[7]();
+
+        F[8]();
+        F[0]();
+
+        sink += i;
+    }
+}
+
+/* =========================================================
+ * 5. Conflict collapse (direct-mapped sensitivity)
+ * ========================================================= */
+void test_conflict_collapse()
+{
+    for (int i = 0; i < 1000; i++) {
+        F[0](); F[8];
+        F[0](); F[8];
+        F[0](); F[8];
+    }
+}
+
+/* =========================================================
+ * 6. LRU stack behavior test (stack property)
+ * ========================================================= */
+void test_lru_stack_shape()
+{
+    for (int i = 0; i < 1000; i++) {
+
+        F[0](); F[1](); F[2](); F[3()];
+        F[4](); F[5](); F[6](); F[7]();
+
+        F[0]();   // reuse oldest after full fill
+        F[1]();   // second reuse
+    }
+}
+
+/* =========================================================
+ * 7. Interleaved working sets
+ * ========================================================= */
+void test_interleaved_sets()
+{
+    for (int i = 0; i < 500; i++) {
+
+        F[0](); F[1](); F[2](); F[3()];
+        F[4](); F[5](); F[6](); F[7]();
+
+        F[8](); F[9](); F[10](); F[11]();
+        F[12](); F[13](); F[14](); F[15]();
+
+        F[0](); F[4](); F[8](); F[12]();
+    }
+}
+
+/* =========================================================
+ * 8. Burst locality (clustered reuse)
+ * ========================================================= */
+void test_burst_locality()
+{
+    for (int i = 0; i < 1000; i++) {
+
+        for (int k = 0; k < 20; k++) F[0]();
+        for (int k = 0; k < 20; k++) F[1]();
+        for (int k = 0; k < 20; k++) F[2]();
+        for (int k = 0; k < 20; k++) F[3]();
+
+        F[4](); F[5](); F[6](); F[7]();
+    }
+}
+
+/* =========================================================
+ * 9. Micro-oscillation (replacement churn stress)
+ * ========================================================= */
+void test_micro_oscillation()
+{
+    for (int i = 0; i < 2000; i++) {
+
+        F[0](); F[1](); F[2](); F[3()];
+        F[4](); F[5](); F[6](); F[7]();
+
+        F[8](); F[0]();
+        F[9](); F[1]();
+        F[10](); F[2]();
+    }
 }
 
 void main()
 {
     setup_picosoc();
     print_str("Start of benchmarks\r\n\r\n");
-    
-    RUN_TEST(test_empty_loop);
-    RUN_TEST(test_single_loop);
-    RUN_TEST(test_bubble_sort);
-    RUN_TEST(test_transpose_nested);
-    RUN_TEST(test_recursive);
-    RUN_TEST(test_large_switch);
-
+    RUN_TEST(test_working_set_knee);
+    RUN_TEST(test_reuse_distance);
+    RUN_TEST(test_thrashing_survival);
+    RUN_TEST(test_variance);
+    RUN_TEST(test_conflict_collapse);
+    RUN_TEST(test_lru_stack_shape);
+    RUN_TEST(test_interleaved_sets);
+    RUN_TEST(test_burst_locality);
+    RUN_TEST(test_micro_oscillation);
     unsigned char leds_value = 0x02;
     while (1) {
         reg_7seg = run_workload(); // display
