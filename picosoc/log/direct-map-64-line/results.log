@@ -1,0 +1,56 @@
+Start of benchmarks
+
+Results for test_empty_loop
+rdcycle:   320582
+rdinstret: 70019
+CPI:       4.5
+Hits:      79997
+Misses:    37
+Total:     80034
+Miss rate: 0.04%
+
+Results for test_single_loop
+rdcycle:   470631
+rdinstret: 100020
+CPI:       4.7
+Hits:      109994
+Misses:    41
+Total:     110035
+Miss rate: 0.03%
+
+Results for test_bubble_sort
+rdcycle:   646066
+rdinstret: 142361
+CPI:       4.5
+Hits:      149918
+Misses:    242
+Total:     150160
+Miss rate: 0.16%
+
+Results for test_transpose_nested
+rdcycle:   1256170
+rdinstret: 281125
+CPI:       4.4
+Hits:      291167
+Misses:    73
+Total:     291240
+Miss rate: 0.02%
+
+Results for test_recursive
+rdcycle:   811961
+rdinstret: 179774
+CPI:       4.5
+Hits:      183909
+Misses:    60
+Total:     183969
+Miss rate: 0.03%
+
+Results for test_large_switch
+rdcycle:   930932
+rdinstret: 210020
+CPI:       4.4
+Hits:      239981
+Misses:    54
+Total:     240035
+Miss rate: 0.02%
+
