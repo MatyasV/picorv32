@@ -1,0 +1,7 @@
+ make icebprog
+yosys -ql icebreaker.log -p 'synth_ice40 -dsp -top icebreaker -json icebreaker.json' icebreaker.v ice40up5k_spram.v spimemio.v simpleuart.v picosoc.v ../picorv32.v
+nextpnr-ice40 -ql icebreaker.nplog --freq 13 --up5k --package sg48 --asc icebreaker.asc --pcf icebreaker.pcf --json icebreaker.json
+ERROR: Failed to expand region (0, 0) |_> (25, 31) of 6010 ICESTORM_LCs
+0 warnings, 1 error
+make: *** [Makefile:75: icebreaker.asc] Error 255
+

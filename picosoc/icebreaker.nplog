@@ -30,12 +30,12 @@ Info: flash_io2 feeds SB_IO flash_io_buf[2], removing $nextpnr_iobuf flash_io2.
 Info: flash_io1 feeds SB_IO flash_io_buf[1], removing $nextpnr_iobuf flash_io1.
 Info: flash_io0 feeds SB_IO flash_io_buf[0], removing $nextpnr_iobuf flash_io0.
 Info: Packing LUT-FFs..
-Info:     3920 LCs used as LUT4 only
-Info:      910 LCs used as LUT4 and DFF
+Info:     3687 LCs used as LUT4 only
+Info:      858 LCs used as LUT4 and DFF
 Info: Packing non-LUT FFs..
-Info:     1552 LCs used as DFF only
+Info:     1347 LCs used as DFF only
 Info: Packing carries..
-Info:      120 LCs used as CARRY only
+Info:      122 LCs used as CARRY only
 Info: Packing indirect carry+LUT pairs...
 Info:       33 LUTs merged into carry LCs
 Info: Packing RAMs..
@@ -43,20 +43,20 @@ Info: Placing PLLs..
 Info: Packing special functions..
 Info: Packing PLLs..
 Info: Promoting globals..
-Info: promoting clk$SB_IO_IN (fanout 2478)
-Info: promoting iomem_ready_SB_LUT4_I1_1_O[1] [reset] (fanout 598)
-Info: promoting soc.spimem_cache.fill_index_SB_DFFE_Q_D_SB_LUT4_O_I2_SB_LUT4_I1_O[3] [reset] (fanout 42)
-Info: promoting ser_tx_SB_DFFESS_Q_E [reset] (fanout 32)
-Info: promoting soc.cpu.is_lui_auipc_jal_SB_DFF_Q_D_SB_LUT4_I2_O [reset] (fanout 31)
+Info: promoting clk$SB_IO_IN (fanout 2221)
+Info: promoting iomem_ready_SB_LUT4_I1_1_O[1] [reset] (fanout 569)
+Info: promoting soc.simpleuart.send_dummy_SB_LUT4_I1_I2_SB_LUT4_I0_O [reset] (fanout 32)
+Info: promoting soc.cpu.instr_slli_SB_LUT4_I0_O_SB_LUT4_I2_O [reset] (fanout 31)
 Info: promoting soc.cpu.decoder_pseudo_trigger_SB_LUT4_I2_O[0] [cen] (fanout 70)
-Info: promoting soc.spimemio.rd_wait_SB_DFFESR_Q_R_SB_LUT4_I1_1_O_SB_LUT4_I1_O [cen] (fanout 68)
-Info: promoting soc.cpu.genblk1.pcpi_mul.active_SB_LUT4_I2_O [cen] (fanout 66)
+Info: promoting soc.cpu.genblk1.pcpi_mul.active_SB_LUT4_I2_1_O [cen] (fanout 66)
+Info: promoting soc.cpu.reg_next_pc_SB_DFFESR_Q_28_D_SB_LUT4_O_I3_SB_LUT4_O_1_I2_SB_LUT4_I3_O [cen] (fanout 65)
+Info: promoting soc.cpu.reg_pc_SB_DFFESS_Q_E[1] [cen] (fanout 62)
 Info: Constraining chains...
-Info:       26 LCs used to legalise carry chains.
-Info: Checksum: 0x495f32ad
+Info:       27 LCs used to legalise carry chains.
+Info: Checksum: 0xb66bdc43
 
 Info: Device utilisation:
-Info: 	         ICESTORM_LC:    6497/   5280   123%
+Info: 	         ICESTORM_LC:    6010/   5280   113%
 Info: 	        ICESTORM_RAM:       4/     30    13%
 Info: 	               SB_IO:      24/     96    25%
 Info: 	               SB_GB:       8/      8   100%
@@ -73,5 +73,11 @@ Info: 	         SB_RGBA_DRV:       0/      1     0%
 Info: 	      ICESTORM_SPRAM:       4/      4   100%
 
 Info: Placed 24 cells based on constraints.
-ERROR: Unable to place cell 'flash_io1_di_SB_LUT4_I0_O_SB_LUT4_I3_O_SB_LUT4_I2_O_SB_LUT4_O_1_I3_SB_LUT4_O_1_I3_SB_LUT4_O_1_I3_SB_LUT4_O_1_LC', no BELs remaining to implement cell type 'ICESTORM_LC'
+Info: Creating initial analytic placement for 5196 cells, random placement wirelen = 143087.
+Info:     at initial placer iter 0, wirelen = 2594
+Info:     at initial placer iter 1, wirelen = 2482
+Info:     at initial placer iter 2, wirelen = 2873
+Info:     at initial placer iter 3, wirelen = 2517
+Info: Running main analytical placer, max placement attempts per cell = 4581364.
+ERROR: Failed to expand region (0, 0) |_> (25, 31) of 6010 ICESTORM_LCs
 0 warnings, 1 error

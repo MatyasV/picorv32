@@ -30,7 +30,7 @@
 `endif
 
 `ifndef SPIMEM_CACHE
-`define SPIMEM_CACHE spimem_cache_random
+`define SPIMEM_CACHE spimem_cache_fifo
 `endif
 
 // this macro can be used to check if the verilog files in your
@@ -585,7 +585,7 @@ endmodule
 
 
 module spimem_cache_fifo #(
-	parameter integer CACHE_SIZE = 8, // number of cache lines
+	parameter integer CACHE_SIZE = 16, // number of cache lines
 	parameter integer LINE_SIZE  = 1  // words per cache line (only 1 currently supported)
 ) (
 	input clk,
