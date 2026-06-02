@@ -343,6 +343,7 @@ module spimem_cache_direct_mapped #(
     output reg [31:0] miss_count
 );
     localparam integer INDEX_BITS  = $clog2(CACHE_SIZE);
+    localparam integer LOG_LINE    = (LINE_SIZE > 1) ? $clog2(LINE_SIZE) : 0;
     localparam integer CACHE_WORDS = CACHE_SIZE * LINE_SIZE;
 
     // Cache storage
@@ -354,10 +355,10 @@ module spimem_cache_direct_mapped #(
     reg        fill_active;
     reg [31:0] fill_count;
 
-    // Address decode
+    // Address decode — shifts/masks only, no divider or multiplier circuits
     wire [31:0] cpu_word_addr = cpu_addr[23:2];
-    wire [31:0] cpu_line_addr = cpu_word_addr / LINE_SIZE;
-    wire [31:0] cpu_offset    = cpu_word_addr % LINE_SIZE;
+    wire [31:0] cpu_line_addr = cpu_word_addr >> LOG_LINE;       // / LINE_SIZE
+    wire [31:0] cpu_offset    = cpu_word_addr & (LINE_SIZE - 1); // % LINE_SIZE
     wire [INDEX_BITS-1:0] index = cpu_line_addr[INDEX_BITS-1:0];
 
     wire cache_hit = cache_valid[index] && (cache_tag[index] == cpu_line_addr);
@@ -366,8 +367,9 @@ module spimem_cache_direct_mapped #(
     wire start_fill = cpu_valid && !cache_hit && !fill_active;
     wire [31:0] cur_count = fill_active ? fill_count : 0;
 
-    wire [31:0] fill_mem_addr   = cpu_line_addr * LINE_SIZE + cur_count;
-    wire [31:0] fill_cache_word = index * LINE_SIZE + cur_count;
+    // Shift+OR replaces multiply+add (valid for power-of-2 LINE_SIZE: lower LOG_LINE bits are 0)
+    wire [31:0] fill_mem_addr   = (cpu_line_addr << LOG_LINE) | cur_count;
+    wire [31:0] fill_cache_word = ({25'b0, index} << LOG_LINE) | cur_count;
 
     // SPI interface
     assign spimem_valid = fill_active || start_fill;
@@ -381,7 +383,7 @@ module spimem_cache_direct_mapped #(
 
     assign cpu_rdata =
         cache_hit
-            ? cache_data[index * LINE_SIZE + cpu_offset]
+            ? cache_data[({25'b0, index} << LOG_LINE) | cpu_offset]
             : (cpu_offset == cur_count
                 ? spimem_rdata
                 : cache_data[fill_cache_word]);
