@@ -186,7 +186,6 @@ module picosoc (
 		.clk           (clk),
 		.resetn        (resetn),
 		.mem_instr	   (mem_instr),
-		.mem_instr     (mem_instr),
 		.cpu_valid     (mem_valid && !mem_wstrb && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
 		.cpu_ready     (spimem_cache_ready),
 		.cpu_addr      (mem_addr[23:0]),
@@ -339,14 +338,10 @@ module spimem_cache_direct_mapped #(
 	output reg [31:0] cpu_rdata, // data read by the CPU
 	output reg		  spimem_valid, // request read from SPI flash
 	output reg [23:0] spimem_addr, // address to read from SPI flash
-
-	input         mem_instr,
-
+	
 	// --- new: performance counter outputs and reset inputs ---
     output reg  [31:0] hit_count,
-    output reg  [31:0] miss_count,
-    input  wire        hit_count_reset,
-    input  wire        miss_count_reset
+    output reg  [31:0] miss_count
 );
     localparam INDEX_BITS = $clog2(CACHE_SIZE);
 
