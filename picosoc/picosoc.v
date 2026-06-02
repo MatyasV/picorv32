@@ -346,83 +346,108 @@ module spimem_cache_direct_mapped #(
     localparam integer LOG_LINE    = (LINE_SIZE > 1) ? $clog2(LINE_SIZE) : 0;
     localparam integer CACHE_WORDS = CACHE_SIZE * LINE_SIZE;
 
-    // Cache storage
-    reg [31:0] cache_tag   [0:CACHE_SIZE-1];  // line address
+    reg [31:0] cache_tag   [0:CACHE_SIZE-1];
     reg [31:0] cache_data  [0:CACHE_WORDS-1];
     reg        cache_valid [0:CACHE_SIZE-1];
 
-    // Fill state (cpu_addr is stable while cpu_valid held high, so no need to latch tag/index)
-    reg        fill_active;
-    reg [31:0] fill_count;
-
-    // Address decode — shifts/masks only, no divider or multiplier circuits
     wire [31:0] cpu_word_addr = cpu_addr[23:2];
-    wire [31:0] cpu_line_addr = cpu_word_addr >> LOG_LINE;       // / LINE_SIZE
-    wire [31:0] cpu_offset    = cpu_word_addr & (LINE_SIZE - 1); // % LINE_SIZE
+    wire [31:0] cpu_line_addr = cpu_word_addr >> LOG_LINE;
     wire [INDEX_BITS-1:0] index = cpu_line_addr[INDEX_BITS-1:0];
-
     wire cache_hit = cache_valid[index] && (cache_tag[index] == cpu_line_addr);
 
-    // Fill helpers
-    wire start_fill = cpu_valid && !cache_hit && !fill_active;
-    wire [31:0] cur_count = fill_active ? fill_count : 0;
-
-    // Shift+OR replaces multiply+add (valid for power-of-2 LINE_SIZE: lower LOG_LINE bits are 0)
-    wire [31:0] fill_mem_addr   = (cpu_line_addr << LOG_LINE) | cur_count;
-    wire [31:0] fill_cache_word = ({25'b0, index} << LOG_LINE) | cur_count;
-
-    // SPI interface
-    assign spimem_valid = fill_active || start_fill;
-    assign spimem_addr  = {fill_mem_addr[21:0], 2'b00};
-
-    // CPU outputs
-    assign cpu_ready =
-        cpu_valid &&
-        (cache_hit ||
-        (spimem_valid && spimem_ready && cur_count == LINE_SIZE - 1));
-
-    assign cpu_rdata =
-        cache_hit
-            ? cache_data[({25'b0, index} << LOG_LINE) | cpu_offset]
-            : (cpu_offset == cur_count
-                ? spimem_rdata
-                : cache_data[fill_cache_word]);
-
     integer i;
-    always @(posedge clk) begin
-        if (!resetn) begin
-            fill_active <= 0;
-            fill_count  <= 0;
-            for (i = 0; i < CACHE_SIZE; i = i + 1)
-                cache_valid[i] <= 0;
-            hit_count  <= 32'b0;
-            miss_count <= 32'b0;
 
-        end else begin
-            if (hit_count_reset)  hit_count  <= 32'b0;
-            if (miss_count_reset) miss_count <= 32'b0;
+    generate
+        if (LINE_SIZE == 1) begin : gen_single
 
-            if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
+            // Single-word lines: no fill state machine needed
+            assign spimem_valid = cpu_valid && !cache_hit;
+            assign spimem_addr  = cpu_addr;
+            assign cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
+            assign cpu_rdata    = cache_hit ? cache_data[index] : spimem_rdata;
 
-            if (spimem_valid && spimem_ready) begin
-                cache_data[fill_cache_word] <= spimem_rdata;
-
-                if (cur_count == LINE_SIZE - 1) begin
-                    cache_tag[index]   <= cpu_line_addr;
-                    cache_valid[index] <= 1;
-                    fill_active        <= 0;
-                    fill_count         <= 0;
-                    miss_count         <= miss_count + 1;
+            always @(posedge clk) begin
+                if (!resetn) begin
+                    for (i = 0; i < CACHE_SIZE; i = i + 1) cache_valid[i] <= 0;
+                    hit_count <= 0; miss_count <= 0;
                 end else begin
-                    fill_active <= 1;
-                    fill_count  <= cur_count + 1;
+                    if (hit_count_reset)  hit_count  <= 0;
+                    if (miss_count_reset) miss_count <= 0;
+                    if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
+                    if (cpu_valid && !cache_hit && spimem_ready) begin
+                        cache_tag[index]   <= cpu_line_addr;
+                        cache_data[index]  <= spimem_rdata;
+                        cache_valid[index] <= 1;
+                        miss_count <= miss_count + 1;
+                    end
                 end
-            end else if (start_fill) begin
-                fill_active <= 1;
-                fill_count  <= 0;
             end
+
+        end else begin : gen_multi
+
+            // Multi-word lines: fill_count is narrow (LOG_LINE bits) so Yosys sees
+            // a clean INDEX_BITS+LOG_LINE-bit array address and infers BRAM correctly.
+            reg                    fill_active;
+            reg [LOG_LINE-1:0]     fill_count;
+
+            wire [31:0] cpu_offset = cpu_word_addr & (LINE_SIZE - 1);
+            wire start_fill = cpu_valid && !cache_hit && !fill_active;
+
+            // cur_fill: narrow, only LOG_LINE bits
+            wire [LOG_LINE-1:0] cur_fill = fill_active ? fill_count : {LOG_LINE{1'b0}};
+            wire                last_word = (cur_fill == LINE_SIZE[LOG_LINE-1:0] - 1);
+
+            // Compact array addresses: INDEX_BITS+LOG_LINE bits, clean for BRAM inference
+            wire [INDEX_BITS+LOG_LINE-1:0] wr_addr = {index, fill_count};
+            wire [INDEX_BITS+LOG_LINE-1:0] rd_addr = {index, cpu_offset[LOG_LINE-1:0]};
+
+            // SPI address: reconstruct flash word address from line addr + fill position
+            wire [21:0] fill_mem_word = {cpu_line_addr[21-LOG_LINE:0], fill_count};
+            assign spimem_valid = fill_active || start_fill;
+            assign spimem_addr  = {fill_mem_word, 2'b00};
+
+            assign cpu_ready =
+                cpu_valid &&
+                (cache_hit || (spimem_valid && spimem_ready && last_word));
+
+            // Single read from cache_data — avoids double-mux that explodes LC count
+            assign cpu_rdata =
+                (!cache_hit && cpu_offset[LOG_LINE-1:0] == cur_fill)
+                    ? spimem_rdata
+                    : cache_data[rd_addr];
+
+            always @(posedge clk) begin
+                if (!resetn) begin
+                    fill_active <= 0;
+                    fill_count  <= 0;
+                    for (i = 0; i < CACHE_SIZE; i = i + 1) cache_valid[i] <= 0;
+                    hit_count <= 0; miss_count <= 0;
+                end else begin
+                    if (hit_count_reset)  hit_count  <= 0;
+                    if (miss_count_reset) miss_count <= 0;
+                    if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
+
+                    if (spimem_valid && spimem_ready) begin
+                        cache_data[wr_addr] <= spimem_rdata;
+                        if (last_word) begin
+                            cache_tag[index]   <= cpu_line_addr;
+                            cache_valid[index] <= 1;
+                            fill_active <= 0;
+                            fill_count  <= 0;
+                            miss_count  <= miss_count + 1;
+                        end else begin
+                            fill_active <= 1;
+                            fill_count  <= cur_fill + 1;
+                        end
+                    end else if (start_fill) begin
+                        fill_active <= 1;
+                        fill_count  <= 0;
+                    end
+                end
+            end
+
         end
-    end
+    endgenerate
 
 endmodule
 
