@@ -302,7 +302,7 @@ void test_reuse_distance()
 
         F[0]();
 
-        for (int i = 1; i <= d; i++)
+        for (int i = 1; i < d; i++)
             F[i]();
 
         F[0]();
@@ -362,7 +362,7 @@ void test_lru_stack_shape()
 {
     for (int i = 0; i < 1000; i++) {
 
-        F[0](); F[1](); F[2](); F[3()];
+        F[0](); F[1](); F[2](); F[3]();
         F[4](); F[5](); F[6](); F[7]();
 
         F[0]();   // reuse oldest after full fill
@@ -377,7 +377,7 @@ void test_interleaved_sets()
 {
     for (int i = 0; i < 500; i++) {
 
-        F[0](); F[1](); F[2](); F[3()];
+        F[0](); F[1](); F[2](); F[3]();
         F[4](); F[5](); F[6](); F[7]();
 
         F[8](); F[9](); F[10](); F[11]();
@@ -410,7 +410,7 @@ void test_micro_oscillation()
 {
     for (int i = 0; i < 2000; i++) {
 
-        F[0](); F[1](); F[2](); F[3()];
+        F[0](); F[1](); F[2](); F[3]();
         F[4](); F[5](); F[6](); F[7]();
 
         F[8](); F[0]();
