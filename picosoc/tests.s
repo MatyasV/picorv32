@@ -1,4 +1,4 @@
-	.file	"blink.c"
+	.file	"tests.c"
 	.option nopic
 	.text
 	.align	2
@@ -823,13 +823,13 @@ run_workload_timed:
 	sw	zero,-24(s0)
 	call	cache_counters_reset
  #APP
-# 211 "blink.c" 1
+# 211 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-28(s0)
  #APP
-# 212 "blink.c" 1
+# 212 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -838,13 +838,13 @@ run_workload_timed:
 	mv	a5,a0
 	sb	a5,-33(s0)
  #APP
-# 216 "blink.c" 1
+# 216 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-40(s0)
  #APP
-# 217 "blink.c" 1
+# 217 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -889,13 +889,13 @@ run_test:
 	sw	zero,-24(s0)
 	call	cache_counters_reset
  #APP
-# 238 "blink.c" 1
+# 238 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-28(s0)
  #APP
-# 239 "blink.c" 1
+# 239 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -903,13 +903,13 @@ run_test:
 	lw	a5,-52(s0)
 	jalr	a5
  #APP
-# 243 "blink.c" 1
+# 243 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-36(s0)
  #APP
-# 244 "blink.c" 1
+# 244 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -970,18 +970,17 @@ test_single_loop:
 	sw	s0,28(sp)
 	addi	s0,sp,32
 	sw	zero,-20(s0)
+	sw	zero,-24(s0)
 	j	.L59
 .L60:
- #APP
-# 262 "blink.c" 1
-	nop;
-# 0 "" 2
- #NO_APP
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
+	lw	a5,-24(s0)
+	addi	a5,a5,1
+	sw	a5,-24(s0)
 .L59:
-	lw	a4,-20(s0)
+	lw	a4,-24(s0)
 	li	a5,8192
 	addi	a5,a5,1807
 	ble	a4,a5,.L60
@@ -990,6 +989,762 @@ test_single_loop:
 	addi	sp,sp,32
 	jr	ra
 	.size	test_single_loop, .-test_single_loop
+	.align	2
+	.globl	test_transpose_nested
+	.type	test_transpose_nested, @function
+test_transpose_nested:
+	addi	sp,sp,-2032
+	sw	s0,2028(sp)
+	addi	s0,sp,2032
+	li	t1,-77824
+	addi	t1,t1,-176
+	add	sp,sp,t1
+	sw	zero,-28(s0)
+	sw	zero,-20(s0)
+	j	.L62
+.L65:
+	sw	zero,-24(s0)
+	j	.L63
+.L64:
+	li	a5,-40960
+	addi	a4,s0,-16
+	add	a4,a4,a5
+	lw	a3,-24(s0)
+	li	a5,100
+	mul	a3,a3,a5
+	lw	a5,-20(s0)
+	add	a5,a3,a5
+	slli	a5,a5,2
+	add	a5,a4,a5
+	lw	a4,948(a5)
+	li	a5,-81920
+	addi	a3,s0,-16
+	add	a3,a3,a5
+	lw	a2,-20(s0)
+	li	a5,100
+	mul	a2,a2,a5
+	lw	a5,-24(s0)
+	add	a5,a2,a5
+	slli	a5,a5,2
+	add	a5,a3,a5
+	sw	a4,1908(a5)
+	lw	a5,-24(s0)
+	addi	a5,a5,1
+	sw	a5,-24(s0)
+.L63:
+	lw	a4,-24(s0)
+	li	a5,99
+	ble	a4,a5,.L64
+	lw	a5,-20(s0)
+	addi	a5,a5,1
+	sw	a5,-20(s0)
+.L62:
+	lw	a4,-20(s0)
+	li	a5,99
+	ble	a4,a5,.L65
+	nop
+	li	t1,77824
+	addi	t1,t1,176
+	add	sp,sp,t1
+	lw	s0,2028(sp)
+	addi	sp,sp,2032
+	jr	ra
+	.size	test_transpose_nested, .-test_transpose_nested
+	.align	2
+	.globl	fib
+	.type	fib, @function
+fib:
+	addi	sp,sp,-32
+	sw	ra,28(sp)
+	sw	s0,24(sp)
+	sw	s1,20(sp)
+	addi	s0,sp,32
+	sw	a0,-20(s0)
+	lw	a4,-20(s0)
+	li	a5,1
+	bgt	a4,a5,.L67
+	lw	a5,-20(s0)
+	j	.L68
+.L67:
+	lw	a5,-20(s0)
+	addi	a5,a5,-1
+	mv	a0,a5
+	call	fib
+	mv	s1,a0
+	lw	a5,-20(s0)
+	addi	a5,a5,-2
+	mv	a0,a5
+	call	fib
+	mv	a5,a0
+	add	a5,s1,a5
+.L68:
+	mv	a0,a5
+	lw	ra,28(sp)
+	lw	s0,24(sp)
+	lw	s1,20(sp)
+	addi	sp,sp,32
+	jr	ra
+	.size	fib, .-fib
+	.align	2
+	.globl	test_recursive
+	.type	test_recursive, @function
+test_recursive:
+	addi	sp,sp,-16
+	sw	ra,12(sp)
+	sw	s0,8(sp)
+	addi	s0,sp,16
+	li	a0,18
+	call	fib
+	nop
+	lw	ra,12(sp)
+	lw	s0,8(sp)
+	addi	sp,sp,16
+	jr	ra
+	.size	test_recursive, .-test_recursive
+	.align	2
+	.globl	test_large_switch
+	.type	test_large_switch, @function
+test_large_switch:
+	addi	sp,sp,-32
+	sw	s0,28(sp)
+	addi	s0,sp,32
+	sw	zero,-20(s0)
+	sw	zero,-24(s0)
+	j	.L71
+.L175:
+	lw	a4,-20(s0)
+	li	a5,99
+	bgtu	a4,a5,.L72
+	lw	a5,-20(s0)
+	slli	a4,a5,2
+	lui	a5,%hi(.L74)
+	addi	a5,a5,%lo(.L74)
+	add	a5,a4,a5
+	lw	a5,0(a5)
+	jr	a5
+	.section	.rodata
+	.align	2
+	.align	2
+.L74:
+	.word	.L176
+	.word	.L172
+	.word	.L171
+	.word	.L170
+	.word	.L169
+	.word	.L168
+	.word	.L167
+	.word	.L166
+	.word	.L165
+	.word	.L164
+	.word	.L163
+	.word	.L162
+	.word	.L161
+	.word	.L160
+	.word	.L159
+	.word	.L158
+	.word	.L157
+	.word	.L156
+	.word	.L155
+	.word	.L154
+	.word	.L153
+	.word	.L152
+	.word	.L151
+	.word	.L150
+	.word	.L149
+	.word	.L148
+	.word	.L147
+	.word	.L146
+	.word	.L145
+	.word	.L144
+	.word	.L143
+	.word	.L142
+	.word	.L141
+	.word	.L140
+	.word	.L139
+	.word	.L138
+	.word	.L137
+	.word	.L136
+	.word	.L135
+	.word	.L134
+	.word	.L133
+	.word	.L132
+	.word	.L131
+	.word	.L130
+	.word	.L129
+	.word	.L128
+	.word	.L127
+	.word	.L126
+	.word	.L125
+	.word	.L124
+	.word	.L123
+	.word	.L122
+	.word	.L121
+	.word	.L120
+	.word	.L119
+	.word	.L118
+	.word	.L117
+	.word	.L116
+	.word	.L115
+	.word	.L114
+	.word	.L113
+	.word	.L112
+	.word	.L111
+	.word	.L110
+	.word	.L109
+	.word	.L108
+	.word	.L107
+	.word	.L106
+	.word	.L105
+	.word	.L104
+	.word	.L103
+	.word	.L102
+	.word	.L101
+	.word	.L100
+	.word	.L99
+	.word	.L98
+	.word	.L97
+	.word	.L96
+	.word	.L95
+	.word	.L94
+	.word	.L93
+	.word	.L92
+	.word	.L91
+	.word	.L90
+	.word	.L89
+	.word	.L88
+	.word	.L87
+	.word	.L86
+	.word	.L85
+	.word	.L84
+	.word	.L83
+	.word	.L82
+	.word	.L81
+	.word	.L80
+	.word	.L79
+	.word	.L78
+	.word	.L77
+	.word	.L76
+	.word	.L75
+	.word	.L73
+	.text
+.L172:
+	lw	a5,-20(s0)
+	addi	a5,a5,1
+	sw	a5,-20(s0)
+	j	.L72
+.L171:
+	lw	a5,-20(s0)
+	addi	a5,a5,2
+	sw	a5,-20(s0)
+	j	.L72
+.L170:
+	lw	a5,-20(s0)
+	addi	a5,a5,3
+	sw	a5,-20(s0)
+	j	.L72
+.L169:
+	lw	a5,-20(s0)
+	addi	a5,a5,4
+	sw	a5,-20(s0)
+	j	.L72
+.L168:
+	lw	a5,-20(s0)
+	addi	a5,a5,5
+	sw	a5,-20(s0)
+	j	.L72
+.L167:
+	lw	a5,-20(s0)
+	addi	a5,a5,6
+	sw	a5,-20(s0)
+	j	.L72
+.L166:
+	lw	a5,-20(s0)
+	addi	a5,a5,7
+	sw	a5,-20(s0)
+	j	.L72
+.L165:
+	lw	a5,-20(s0)
+	addi	a5,a5,8
+	sw	a5,-20(s0)
+	j	.L72
+.L164:
+	lw	a5,-20(s0)
+	addi	a5,a5,9
+	sw	a5,-20(s0)
+	j	.L72
+.L163:
+	lw	a5,-20(s0)
+	addi	a5,a5,10
+	sw	a5,-20(s0)
+	j	.L72
+.L162:
+	lw	a5,-20(s0)
+	addi	a5,a5,11
+	sw	a5,-20(s0)
+	j	.L72
+.L161:
+	lw	a5,-20(s0)
+	addi	a5,a5,12
+	sw	a5,-20(s0)
+	j	.L72
+.L160:
+	lw	a5,-20(s0)
+	addi	a5,a5,13
+	sw	a5,-20(s0)
+	j	.L72
+.L159:
+	lw	a5,-20(s0)
+	addi	a5,a5,14
+	sw	a5,-20(s0)
+	j	.L72
+.L158:
+	lw	a5,-20(s0)
+	addi	a5,a5,15
+	sw	a5,-20(s0)
+	j	.L72
+.L157:
+	lw	a5,-20(s0)
+	addi	a5,a5,16
+	sw	a5,-20(s0)
+	j	.L72
+.L156:
+	lw	a5,-20(s0)
+	addi	a5,a5,17
+	sw	a5,-20(s0)
+	j	.L72
+.L155:
+	lw	a5,-20(s0)
+	addi	a5,a5,18
+	sw	a5,-20(s0)
+	j	.L72
+.L154:
+	lw	a5,-20(s0)
+	addi	a5,a5,19
+	sw	a5,-20(s0)
+	j	.L72
+.L153:
+	lw	a5,-20(s0)
+	addi	a5,a5,20
+	sw	a5,-20(s0)
+	j	.L72
+.L152:
+	lw	a5,-20(s0)
+	addi	a5,a5,21
+	sw	a5,-20(s0)
+	j	.L72
+.L151:
+	lw	a5,-20(s0)
+	addi	a5,a5,22
+	sw	a5,-20(s0)
+	j	.L72
+.L150:
+	lw	a5,-20(s0)
+	addi	a5,a5,23
+	sw	a5,-20(s0)
+	j	.L72
+.L149:
+	lw	a5,-20(s0)
+	addi	a5,a5,24
+	sw	a5,-20(s0)
+	j	.L72
+.L148:
+	lw	a5,-20(s0)
+	addi	a5,a5,25
+	sw	a5,-20(s0)
+	j	.L72
+.L147:
+	lw	a5,-20(s0)
+	addi	a5,a5,26
+	sw	a5,-20(s0)
+	j	.L72
+.L146:
+	lw	a5,-20(s0)
+	addi	a5,a5,27
+	sw	a5,-20(s0)
+	j	.L72
+.L145:
+	lw	a5,-20(s0)
+	addi	a5,a5,28
+	sw	a5,-20(s0)
+	j	.L72
+.L144:
+	lw	a5,-20(s0)
+	addi	a5,a5,29
+	sw	a5,-20(s0)
+	j	.L72
+.L143:
+	lw	a5,-20(s0)
+	addi	a5,a5,30
+	sw	a5,-20(s0)
+	j	.L72
+.L142:
+	lw	a5,-20(s0)
+	addi	a5,a5,31
+	sw	a5,-20(s0)
+	j	.L72
+.L141:
+	lw	a5,-20(s0)
+	addi	a5,a5,32
+	sw	a5,-20(s0)
+	j	.L72
+.L140:
+	lw	a5,-20(s0)
+	addi	a5,a5,33
+	sw	a5,-20(s0)
+	j	.L72
+.L139:
+	lw	a5,-20(s0)
+	addi	a5,a5,34
+	sw	a5,-20(s0)
+	j	.L72
+.L138:
+	lw	a5,-20(s0)
+	addi	a5,a5,35
+	sw	a5,-20(s0)
+	j	.L72
+.L137:
+	lw	a5,-20(s0)
+	addi	a5,a5,36
+	sw	a5,-20(s0)
+	j	.L72
+.L136:
+	lw	a5,-20(s0)
+	addi	a5,a5,37
+	sw	a5,-20(s0)
+	j	.L72
+.L135:
+	lw	a5,-20(s0)
+	addi	a5,a5,38
+	sw	a5,-20(s0)
+	j	.L72
+.L134:
+	lw	a5,-20(s0)
+	addi	a5,a5,39
+	sw	a5,-20(s0)
+	j	.L72
+.L133:
+	lw	a5,-20(s0)
+	addi	a5,a5,40
+	sw	a5,-20(s0)
+	j	.L72
+.L132:
+	lw	a5,-20(s0)
+	addi	a5,a5,41
+	sw	a5,-20(s0)
+	j	.L72
+.L131:
+	lw	a5,-20(s0)
+	addi	a5,a5,42
+	sw	a5,-20(s0)
+	j	.L72
+.L130:
+	lw	a5,-20(s0)
+	addi	a5,a5,43
+	sw	a5,-20(s0)
+	j	.L72
+.L129:
+	lw	a5,-20(s0)
+	addi	a5,a5,44
+	sw	a5,-20(s0)
+	j	.L72
+.L128:
+	lw	a5,-20(s0)
+	addi	a5,a5,45
+	sw	a5,-20(s0)
+	j	.L72
+.L127:
+	lw	a5,-20(s0)
+	addi	a5,a5,46
+	sw	a5,-20(s0)
+	j	.L72
+.L126:
+	lw	a5,-20(s0)
+	addi	a5,a5,47
+	sw	a5,-20(s0)
+	j	.L72
+.L125:
+	lw	a5,-20(s0)
+	addi	a5,a5,48
+	sw	a5,-20(s0)
+	j	.L72
+.L124:
+	lw	a5,-20(s0)
+	addi	a5,a5,49
+	sw	a5,-20(s0)
+	j	.L72
+.L123:
+	lw	a5,-20(s0)
+	addi	a5,a5,50
+	sw	a5,-20(s0)
+	j	.L72
+.L122:
+	lw	a5,-20(s0)
+	addi	a5,a5,51
+	sw	a5,-20(s0)
+	j	.L72
+.L121:
+	lw	a5,-20(s0)
+	addi	a5,a5,52
+	sw	a5,-20(s0)
+	j	.L72
+.L120:
+	lw	a5,-20(s0)
+	addi	a5,a5,53
+	sw	a5,-20(s0)
+	j	.L72
+.L119:
+	lw	a5,-20(s0)
+	addi	a5,a5,54
+	sw	a5,-20(s0)
+	j	.L72
+.L118:
+	lw	a5,-20(s0)
+	addi	a5,a5,55
+	sw	a5,-20(s0)
+	j	.L72
+.L117:
+	lw	a5,-20(s0)
+	addi	a5,a5,56
+	sw	a5,-20(s0)
+	j	.L72
+.L116:
+	lw	a5,-20(s0)
+	addi	a5,a5,57
+	sw	a5,-20(s0)
+	j	.L72
+.L115:
+	lw	a5,-20(s0)
+	addi	a5,a5,58
+	sw	a5,-20(s0)
+	j	.L72
+.L114:
+	lw	a5,-20(s0)
+	addi	a5,a5,59
+	sw	a5,-20(s0)
+	j	.L72
+.L113:
+	lw	a5,-20(s0)
+	addi	a5,a5,60
+	sw	a5,-20(s0)
+	j	.L72
+.L112:
+	lw	a5,-20(s0)
+	addi	a5,a5,61
+	sw	a5,-20(s0)
+	j	.L72
+.L111:
+	lw	a5,-20(s0)
+	addi	a5,a5,62
+	sw	a5,-20(s0)
+	j	.L72
+.L110:
+	lw	a5,-20(s0)
+	addi	a5,a5,63
+	sw	a5,-20(s0)
+	j	.L72
+.L109:
+	lw	a5,-20(s0)
+	addi	a5,a5,64
+	sw	a5,-20(s0)
+	j	.L72
+.L108:
+	lw	a5,-20(s0)
+	addi	a5,a5,65
+	sw	a5,-20(s0)
+	j	.L72
+.L107:
+	lw	a5,-20(s0)
+	addi	a5,a5,66
+	sw	a5,-20(s0)
+	j	.L72
+.L106:
+	lw	a5,-20(s0)
+	addi	a5,a5,67
+	sw	a5,-20(s0)
+	j	.L72
+.L105:
+	lw	a5,-20(s0)
+	addi	a5,a5,68
+	sw	a5,-20(s0)
+	j	.L72
+.L104:
+	lw	a5,-20(s0)
+	addi	a5,a5,69
+	sw	a5,-20(s0)
+	j	.L72
+.L103:
+	lw	a5,-20(s0)
+	addi	a5,a5,70
+	sw	a5,-20(s0)
+	j	.L72
+.L102:
+	lw	a5,-20(s0)
+	addi	a5,a5,71
+	sw	a5,-20(s0)
+	j	.L72
+.L101:
+	lw	a5,-20(s0)
+	addi	a5,a5,72
+	sw	a5,-20(s0)
+	j	.L72
+.L100:
+	lw	a5,-20(s0)
+	addi	a5,a5,73
+	sw	a5,-20(s0)
+	j	.L72
+.L99:
+	lw	a5,-20(s0)
+	addi	a5,a5,74
+	sw	a5,-20(s0)
+	j	.L72
+.L98:
+	lw	a5,-20(s0)
+	addi	a5,a5,75
+	sw	a5,-20(s0)
+	j	.L72
+.L97:
+	lw	a5,-20(s0)
+	addi	a5,a5,76
+	sw	a5,-20(s0)
+	j	.L72
+.L96:
+	lw	a5,-20(s0)
+	addi	a5,a5,77
+	sw	a5,-20(s0)
+	j	.L72
+.L95:
+	lw	a5,-20(s0)
+	addi	a5,a5,78
+	sw	a5,-20(s0)
+	j	.L72
+.L94:
+	lw	a5,-20(s0)
+	addi	a5,a5,79
+	sw	a5,-20(s0)
+	j	.L72
+.L93:
+	lw	a5,-20(s0)
+	addi	a5,a5,80
+	sw	a5,-20(s0)
+	j	.L72
+.L92:
+	lw	a5,-20(s0)
+	addi	a5,a5,81
+	sw	a5,-20(s0)
+	j	.L72
+.L91:
+	lw	a5,-20(s0)
+	addi	a5,a5,82
+	sw	a5,-20(s0)
+	j	.L72
+.L90:
+	lw	a5,-20(s0)
+	addi	a5,a5,83
+	sw	a5,-20(s0)
+	j	.L72
+.L89:
+	lw	a5,-20(s0)
+	addi	a5,a5,84
+	sw	a5,-20(s0)
+	j	.L72
+.L88:
+	lw	a5,-20(s0)
+	addi	a5,a5,85
+	sw	a5,-20(s0)
+	j	.L72
+.L87:
+	lw	a5,-20(s0)
+	addi	a5,a5,86
+	sw	a5,-20(s0)
+	j	.L72
+.L86:
+	lw	a5,-20(s0)
+	addi	a5,a5,87
+	sw	a5,-20(s0)
+	j	.L72
+.L85:
+	lw	a5,-20(s0)
+	addi	a5,a5,88
+	sw	a5,-20(s0)
+	j	.L72
+.L84:
+	lw	a5,-20(s0)
+	addi	a5,a5,89
+	sw	a5,-20(s0)
+	j	.L72
+.L83:
+	lw	a5,-20(s0)
+	addi	a5,a5,90
+	sw	a5,-20(s0)
+	j	.L72
+.L82:
+	lw	a5,-20(s0)
+	addi	a5,a5,91
+	sw	a5,-20(s0)
+	j	.L72
+.L81:
+	lw	a5,-20(s0)
+	addi	a5,a5,92
+	sw	a5,-20(s0)
+	j	.L72
+.L80:
+	lw	a5,-20(s0)
+	addi	a5,a5,93
+	sw	a5,-20(s0)
+	j	.L72
+.L79:
+	lw	a5,-20(s0)
+	addi	a5,a5,94
+	sw	a5,-20(s0)
+	j	.L72
+.L78:
+	lw	a5,-20(s0)
+	addi	a5,a5,95
+	sw	a5,-20(s0)
+	j	.L72
+.L77:
+	lw	a5,-20(s0)
+	addi	a5,a5,96
+	sw	a5,-20(s0)
+	j	.L72
+.L76:
+	lw	a5,-20(s0)
+	addi	a5,a5,97
+	sw	a5,-20(s0)
+	j	.L72
+.L75:
+	lw	a5,-20(s0)
+	addi	a5,a5,98
+	sw	a5,-20(s0)
+	j	.L72
+.L73:
+	lw	a5,-20(s0)
+	addi	a5,a5,99
+	sw	a5,-20(s0)
+	j	.L72
+.L176:
+	nop
+.L72:
+	lw	a4,-20(s0)
+	li	a5,99
+	bleu	a4,a5,.L174
+	lw	a5,-20(s0)
+	addi	a5,a5,-100
+	sw	a5,-20(s0)
+.L174:
+	lw	a5,-24(s0)
+	addi	a5,a5,1
+	sw	a5,-24(s0)
+.L71:
+	lw	a4,-24(s0)
+	li	a5,8192
+	addi	a5,a5,1807
+	bleu	a4,a5,.L175
+	nop
+	lw	s0,28(sp)
+	addi	sp,sp,32
+	jr	ra
+	.size	test_large_switch, .-test_large_switch
 	.align	2
 	.globl	test_bubble_sort
 	.type	test_bubble_sort, @function
@@ -1018,6 +1773,15 @@ test_bubble_sort:
 	.align	2
 .LC15:
 	.string	"test_bubble_sort"
+	.align	2
+.LC16:
+	.string	"test_transpose_nested"
+	.align	2
+.LC17:
+	.string	"test_recursive"
+	.align	2
+.LC18:
+	.string	"test_large_switch"
 	.text
 	.align	2
 	.globl	main
@@ -1047,9 +1811,24 @@ main:
 	lui	a5,%hi(test_bubble_sort)
 	addi	a0,a5,%lo(test_bubble_sort)
 	call	run_test
+	lui	a5,%hi(.LC16)
+	addi	a1,a5,%lo(.LC16)
+	lui	a5,%hi(test_transpose_nested)
+	addi	a0,a5,%lo(test_transpose_nested)
+	call	run_test
+	lui	a5,%hi(.LC17)
+	addi	a1,a5,%lo(.LC17)
+	lui	a5,%hi(test_recursive)
+	addi	a0,a5,%lo(test_recursive)
+	call	run_test
+	lui	a5,%hi(.LC18)
+	addi	a1,a5,%lo(.LC18)
+	lui	a5,%hi(test_large_switch)
+	addi	a0,a5,%lo(test_large_switch)
+	call	run_test
 	li	a5,2
 	sb	a5,-17(s0)
-.L63:
+.L179:
 	li	a5,50331648
 	addi	s1,a5,1
 	call	run_workload
@@ -1061,7 +1840,7 @@ main:
 	lbu	a5,-17(s0)
 	xori	a5,a5,2
 	sb	a5,-17(s0)
-	j	.L63
+	j	.L179
 	.size	main, .-main
 	.section	.rodata
 	.align	2

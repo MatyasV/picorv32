@@ -30,7 +30,7 @@
 `endif
 
 `ifndef SPIMEM_CACHE
-`define SPIMEM_CACHE spimem_cache_direct_mapped
+`define SPIMEM_CACHE spimem_cache_forward
 `endif
 
 // this macro can be used to check if the verilog files in your
