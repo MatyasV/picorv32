@@ -29,6 +29,10 @@
 `define PICOSOC_MEM picosoc_mem
 `endif
 
+`ifndef SPIMEM_CACHE
+`define SPIMEM_CACHE spimem_cache_direct_mapped
+`endif
+
 // this macro can be used to check if the verilog files in your
 // design are read in the correct order.
 `define PICOSOC_V
@@ -177,9 +181,10 @@ module picosoc (
 		.irq         (irq        )
 	);
 
-	spimem_cache_direct_mapped spimem_cache (
+	`SPIMEM_CACHE spimem_cache (
 		.clk           (clk),
 		.resetn        (resetn),
+		.mem_instr     (mem_instr),
 
 		.cpu_valid     (mem_valid && !mem_wstrb && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
 		.cpu_ready     (spimem_cache_ready),
