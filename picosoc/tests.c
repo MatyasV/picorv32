@@ -286,7 +286,7 @@ void test_large_switch() {
     uint32_t j = 0;
     for(uint32_t i = 0; i < 10000; i++) {
         switch (j) {
-            case (0): j += 0; break;
+            case (0): j += 1; break;
             case (1): j += 1; break;
             case (2): j += 2; break;
             case (3): j += 3; break;
@@ -394,7 +394,6 @@ void test_large_switch() {
 void test_bubble_sort() {
     run_workload();
 }
-
 
 void main()
 {
