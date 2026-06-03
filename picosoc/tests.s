@@ -400,29 +400,17 @@ print_str:
 	.globl	div
 	.type	div, @function
 div:
-	addi	sp,sp,-48
-	sw	s0,44(sp)
-	addi	s0,sp,48
-	sw	a0,-36(s0)
-	sw	a1,-40(s0)
-	sw	zero,-20(s0)
-	j	.L27
-.L28:
-	lw	a4,-36(s0)
-	lw	a5,-40(s0)
-	sub	a5,a4,a5
-	sw	a5,-36(s0)
-	lw	a5,-20(s0)
-	addi	a5,a5,1
-	sw	a5,-20(s0)
-.L27:
-	lw	a4,-36(s0)
-	lw	a5,-40(s0)
-	bgeu	a4,a5,.L28
-	lw	a5,-20(s0)
+	addi	sp,sp,-32
+	sw	s0,28(sp)
+	addi	s0,sp,32
+	sw	a0,-20(s0)
+	sw	a1,-24(s0)
+	lw	a4,-20(s0)
+	lw	a5,-24(s0)
+	divu	a5,a4,a5
 	mv	a0,a5
-	lw	s0,44(sp)
-	addi	sp,sp,48
+	lw	s0,28(sp)
+	addi	sp,sp,32
 	jr	ra
 	.size	div, .-div
 	.align	2
@@ -434,17 +422,9 @@ mod:
 	addi	s0,sp,32
 	sw	a0,-20(s0)
 	sw	a1,-24(s0)
-	j	.L31
-.L32:
 	lw	a4,-20(s0)
 	lw	a5,-24(s0)
-	sub	a5,a4,a5
-	sw	a5,-20(s0)
-.L31:
-	lw	a4,-20(s0)
-	lw	a5,-24(s0)
-	bgeu	a4,a5,.L32
-	lw	a5,-20(s0)
+	remu	a5,a4,a5
 	mv	a0,a5
 	lw	s0,28(sp)
 	addi	sp,sp,32
@@ -503,12 +483,12 @@ print_stats:
 	add	a5,a4,a5
 	sw	a5,-20(s0)
 	lw	a5,-20(s0)
-	bnez	a5,.L35
+	bnez	a5,.L31
 	lui	a5,%hi(.LC1)
 	addi	a0,a5,%lo(.LC1)
 	call	print_str
-	j	.L37
-.L35:
+	j	.L33
+.L31:
 	lui	a5,%hi(.LC2)
 	addi	a0,a5,%lo(.LC2)
 	call	print_str
@@ -598,7 +578,7 @@ print_stats:
 	lui	a5,%hi(.LC11)
 	addi	a0,a5,%lo(.LC11)
 	call	print_str
-.L37:
+.L33:
 	nop
 	lw	ra,60(sp)
 	lw	s0,56(sp)
@@ -726,11 +706,11 @@ run_workload:
 	mv	a0,a4
 	call	memcpy
 	sw	zero,-20(s0)
-	j	.L39
-.L43:
+	j	.L35
+.L39:
 	sw	zero,-24(s0)
-	j	.L40
-.L42:
+	j	.L36
+.L38:
 	lw	a5,-24(s0)
 	addi	a4,s0,-16
 	add	a5,a4,a5
@@ -740,7 +720,7 @@ run_workload:
 	addi	a3,s0,-16
 	add	a5,a3,a5
 	lbu	a5,-112(a5)
-	bleu	a4,a5,.L41
+	bleu	a4,a5,.L37
 	lw	a5,-24(s0)
 	addi	a4,s0,-16
 	add	a5,a4,a5
@@ -762,23 +742,23 @@ run_workload:
 	addi	a3,s0,-16
 	add	a5,a3,a5
 	sb	a4,-112(a5)
-.L41:
+.L37:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L40:
+.L36:
 	li	a4,99
 	lw	a5,-20(s0)
 	sub	a5,a4,a5
 	lw	a4,-24(s0)
-	blt	a4,a5,.L42
+	blt	a4,a5,.L38
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-.L39:
+.L35:
 	lw	a4,-20(s0)
 	li	a5,98
-	ble	a4,a5,.L43
+	ble	a4,a5,.L39
 	lbu	a5,-29(s0)
 	mv	a0,a5
 	lw	ra,124(sp)
@@ -803,13 +783,13 @@ run_workload_timed:
 	sw	zero,-24(s0)
 	call	cache_counters_reset
  #APP
-# 203 "tests.c" 1
+# 205 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-28(s0)
  #APP
-# 204 "tests.c" 1
+# 206 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -818,13 +798,13 @@ run_workload_timed:
 	mv	a5,a0
 	sb	a5,-33(s0)
  #APP
-# 208 "tests.c" 1
+# 210 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-40(s0)
  #APP
-# 209 "tests.c" 1
+# 211 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -871,13 +851,13 @@ run_test:
 	jalr	a5
 	call	cache_counters_reset
  #APP
-# 231 "tests.c" 1
+# 233 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-28(s0)
  #APP
-# 232 "tests.c" 1
+# 234 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -885,13 +865,13 @@ run_test:
 	lw	a5,-52(s0)
 	jalr	a5
  #APP
-# 236 "tests.c" 1
+# 238 "tests.c" 1
 	rdcycle a5
 # 0 "" 2
  #NO_APP
 	sw	a5,-36(s0)
  #APP
-# 237 "tests.c" 1
+# 239 "tests.c" 1
 	rdinstret a5
 # 0 "" 2
  #NO_APP
@@ -929,8 +909,8 @@ test_tiny_loop:
 	addi	s0,sp,32
 	sw	zero,-20(s0)
 	sw	zero,-24(s0)
-	j	.L49
-.L50:
+	j	.L45
+.L46:
 	lw	a4,-20(s0)
 	lw	a5,-24(s0)
 	add	a5,a4,a5
@@ -938,11 +918,11 @@ test_tiny_loop:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L49:
+.L45:
 	lw	a4,-24(s0)
 	li	a5,98304
 	addi	a5,a5,1695
-	bleu	a4,a5,.L50
+	bleu	a4,a5,.L46
 	nop
 	lw	s0,28(sp)
 	addi	sp,sp,32
@@ -1149,8 +1129,8 @@ test_medium_loop:
 	li	a5,1
 	sw	a5,-24(s0)
 	sw	zero,-20(s0)
-	j	.L53
-.L54:
+	j	.L49
+.L50:
 	addi	a5,s0,-24
 	lw	a1,-20(s0)
 	mv	a0,a5
@@ -1158,10 +1138,10 @@ test_medium_loop:
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-.L53:
+.L49:
 	lw	a4,-20(s0)
 	li	a5,1999
-	bleu	a4,a5,.L54
+	bleu	a4,a5,.L50
 	nop
 	lw	ra,28(sp)
 	lw	s0,24(sp)
@@ -2199,8 +2179,8 @@ test_large_loop:
 	addi	a5,a5,-273
 	sw	a5,-20(s0)
 	sw	zero,-24(s0)
-	j	.L88
-.L89:
+	j	.L84
+.L85:
 	lw	a1,-24(s0)
 	lw	a0,-20(s0)
 	call	block_0
@@ -2268,10 +2248,10 @@ test_large_loop:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L88:
+.L84:
 	lw	a4,-24(s0)
 	li	a5,499
-	bleu	a4,a5,.L89
+	bleu	a4,a5,.L85
 	nop
 	lw	ra,28(sp)
 	lw	s0,24(sp)
@@ -2288,86 +2268,86 @@ branch_tree:
 	sw	a0,-20(s0)
 	sw	a1,-24(s0)
 	lw	a5,-24(s0)
-	bnez	a5,.L91
+	bnez	a5,.L87
 	lw	a5,-20(s0)
-	j	.L92
-.L91:
+	j	.L88
+.L87:
 	lw	a5,-20(s0)
 	andi	a5,a5,1
-	beqz	a5,.L93
+	beqz	a5,.L89
 	lw	a4,-20(s0)
 	mv	a5,a4
 	slli	a5,a5,1
 	add	a5,a5,a4
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-	j	.L94
-.L93:
+	j	.L90
+.L89:
 	lw	a5,-20(s0)
 	srli	a5,a5,1
 	sw	a5,-20(s0)
-.L94:
+.L90:
 	lw	a5,-20(s0)
 	andi	a5,a5,2
-	bnez	a5,.L103
+	bnez	a5,.L99
 	lw	a4,-20(s0)
 	li	a5,57344
 	addi	a5,a5,-339
 	xor	a5,a4,a5
 	sw	a5,-20(s0)
-	j	.L97
-.L103:
+	j	.L93
+.L99:
 	nop
-.L96:
+.L92:
 	lw	a4,-20(s0)
 	li	a5,49152
 	addi	a5,a5,-273
 	add	a5,a4,a5
 	sw	a5,-20(s0)
-.L97:
+.L93:
 	lw	a5,-20(s0)
 	andi	a5,a5,4
-	beqz	a5,.L98
+	beqz	a5,.L94
 	lw	a5,-20(s0)
 	slli	a4,a5,5
 	srli	a5,a5,27
 	or	a5,a4,a5
 	sw	a5,-20(s0)
-.L98:
+.L94:
 	lw	a5,-20(s0)
 	andi	a5,a5,8
-	beqz	a5,.L99
+	beqz	a5,.L95
 	lw	a4,-20(s0)
 	li	a5,-4096
 	addi	a5,a5,-564
 	add	a5,a4,a5
 	sw	a5,-20(s0)
-.L99:
+.L95:
 	lw	a5,-20(s0)
 	andi	a5,a5,16
-	beqz	a5,.L100
+	beqz	a5,.L96
 	lw	a4,-20(s0)
 	li	a5,45056
 	addi	a5,a5,-1075
 	xor	a5,a4,a5
 	sw	a5,-20(s0)
-.L100:
+.L96:
 	lw	a5,-20(s0)
 	andi	a5,a5,32
-	beqz	a5,.L101
+	beqz	a5,.L97
 	lw	a4,-20(s0)
 	li	a5,20480
 	addi	a5,a5,1656
 	add	a5,a4,a5
 	sw	a5,-20(s0)
-.L101:
+.L97:
 	lw	a5,-24(s0)
 	addi	a5,a5,-1
 	mv	a1,a5
 	lw	a0,-20(s0)
 	call	branch_tree
 	mv	a5,a0
-.L92:
+.L88:
 	mv	a0,a5
 	lw	ra,28(sp)
 	lw	s0,24(sp)
@@ -2385,8 +2365,8 @@ test_irregular_branch:
 	addi	a5,a5,-1384
 	sw	a5,-20(s0)
 	sw	zero,-24(s0)
-	j	.L105
-.L106:
+	j	.L101
+.L102:
 	lw	a4,-20(s0)
 	lw	a5,-24(s0)
 	add	a5,a4,a5
@@ -2397,11 +2377,11 @@ test_irregular_branch:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L105:
+.L101:
 	lw	a4,-24(s0)
 	li	a5,4096
 	addi	a5,a5,903
-	bleu	a4,a5,.L106
+	bleu	a4,a5,.L102
 	nop
 	lw	ra,28(sp)
 	lw	s0,24(sp)
@@ -2484,8 +2464,8 @@ caller:
 	sw	a0,-36(s0)
 	sw	a1,-40(s0)
 	sw	zero,-20(s0)
-	j	.L116
-.L117:
+	j	.L112
+.L113:
 	lw	a0,-36(s0)
 	call	callee_a
 	sw	a0,-36(s0)
@@ -2501,10 +2481,10 @@ caller:
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-.L116:
+.L112:
 	lw	a4,-20(s0)
 	lw	a5,-40(s0)
-	bltu	a4,a5,.L117
+	bltu	a4,a5,.L113
 	lw	a5,-36(s0)
 	mv	a0,a5
 	lw	ra,44(sp)
@@ -2523,8 +2503,8 @@ test_nested_call:
 	addi	a5,a5,-272
 	sw	a5,-20(s0)
 	sw	zero,-24(s0)
-	j	.L120
-.L121:
+	j	.L116
+.L117:
 	li	a1,40
 	lw	a0,-20(s0)
 	call	caller
@@ -2532,10 +2512,10 @@ test_nested_call:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L120:
+.L116:
 	lw	a4,-24(s0)
 	li	a5,499
-	bleu	a4,a5,.L121
+	bleu	a4,a5,.L117
 	nop
 	lw	ra,28(sp)
 	lw	s0,24(sp)
@@ -2549,7 +2529,7 @@ test_cold_sweep_16:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2557,7 +2537,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2565,7 +2545,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2573,7 +2553,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2581,7 +2561,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2589,7 +2569,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2597,7 +2577,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2605,7 +2585,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2613,7 +2593,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2621,7 +2601,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2629,7 +2609,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2637,7 +2617,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2645,7 +2625,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2653,7 +2633,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2661,7 +2641,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2669,7 +2649,7 @@ test_cold_sweep_16:
 	1:
 	
 # 0 "" 2
-# 376 "tests.c" 1
+# 378 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2690,7 +2670,7 @@ test_cold_sweep_128:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2698,7 +2678,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2706,7 +2686,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2714,7 +2694,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2722,7 +2702,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2730,7 +2710,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2738,7 +2718,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2746,7 +2726,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2754,7 +2734,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2762,7 +2742,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2770,7 +2750,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2778,7 +2758,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2786,7 +2766,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2794,7 +2774,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2802,7 +2782,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2810,7 +2790,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2818,7 +2798,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2826,7 +2806,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2834,7 +2814,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2842,7 +2822,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2850,7 +2830,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2858,7 +2838,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2866,7 +2846,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2874,7 +2854,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2882,7 +2862,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2890,7 +2870,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2898,7 +2878,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2906,7 +2886,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2914,7 +2894,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2922,7 +2902,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2930,7 +2910,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2938,7 +2918,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2946,7 +2926,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2954,7 +2934,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2962,7 +2942,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2970,7 +2950,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2978,7 +2958,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2986,7 +2966,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -2994,7 +2974,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3002,7 +2982,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3010,7 +2990,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3018,7 +2998,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3026,7 +3006,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3034,7 +3014,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3042,7 +3022,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3050,7 +3030,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3058,7 +3038,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3066,7 +3046,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3074,7 +3054,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3082,7 +3062,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3090,7 +3070,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3098,7 +3078,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3106,7 +3086,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3114,7 +3094,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3122,7 +3102,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3130,7 +3110,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3138,7 +3118,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3146,7 +3126,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3154,7 +3134,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3162,7 +3142,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3170,7 +3150,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3178,7 +3158,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3186,7 +3166,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3194,7 +3174,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3202,7 +3182,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3210,7 +3190,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3218,7 +3198,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3226,7 +3206,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3234,7 +3214,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3242,7 +3222,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3250,7 +3230,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3258,7 +3238,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3266,7 +3246,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3274,7 +3254,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3282,7 +3262,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3290,7 +3270,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3298,7 +3278,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3306,7 +3286,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3314,7 +3294,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3322,7 +3302,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3330,7 +3310,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3338,7 +3318,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3346,7 +3326,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3354,7 +3334,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3362,7 +3342,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3370,7 +3350,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3378,7 +3358,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3386,7 +3366,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3394,7 +3374,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3402,7 +3382,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3410,7 +3390,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3418,7 +3398,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3426,7 +3406,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3434,7 +3414,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3442,7 +3422,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3450,7 +3430,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3458,7 +3438,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3466,7 +3446,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3474,7 +3454,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3482,7 +3462,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3490,7 +3470,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3498,7 +3478,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3506,7 +3486,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3514,7 +3494,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3522,7 +3502,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3530,7 +3510,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3538,7 +3518,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3546,7 +3526,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3554,7 +3534,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3562,7 +3542,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3570,7 +3550,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3578,7 +3558,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3586,7 +3566,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3594,7 +3574,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3602,7 +3582,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3610,7 +3590,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3618,7 +3598,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3626,7 +3606,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3634,7 +3614,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3642,7 +3622,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3650,7 +3630,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3658,7 +3638,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3666,7 +3646,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3674,7 +3654,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3682,7 +3662,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3690,7 +3670,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3698,7 +3678,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3706,7 +3686,7 @@ test_cold_sweep_128:
 	1:
 	
 # 0 "" 2
-# 381 "tests.c" 1
+# 383 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3727,7 +3707,7 @@ test_cold_sweep_512:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3735,7 +3715,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3743,7 +3723,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3751,7 +3731,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3759,7 +3739,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3767,7 +3747,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3775,7 +3755,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3783,7 +3763,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3791,7 +3771,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3799,7 +3779,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3807,7 +3787,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3815,7 +3795,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3823,7 +3803,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3831,7 +3811,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3839,7 +3819,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3847,7 +3827,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3855,7 +3835,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3863,7 +3843,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3871,7 +3851,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3879,7 +3859,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3887,7 +3867,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3895,7 +3875,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3903,7 +3883,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3911,7 +3891,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3919,7 +3899,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3927,7 +3907,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3935,7 +3915,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3943,7 +3923,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3951,7 +3931,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3959,7 +3939,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3967,7 +3947,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3975,7 +3955,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3983,7 +3963,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3991,7 +3971,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -3999,7 +3979,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4007,7 +3987,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4015,7 +3995,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4023,7 +4003,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4031,7 +4011,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4039,7 +4019,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4047,7 +4027,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4055,7 +4035,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4063,7 +4043,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4071,7 +4051,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4079,7 +4059,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4087,7 +4067,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4095,7 +4075,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4103,7 +4083,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4111,7 +4091,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4119,7 +4099,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4127,7 +4107,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4135,7 +4115,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4143,7 +4123,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4151,7 +4131,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4159,7 +4139,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4167,7 +4147,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4175,7 +4155,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4183,7 +4163,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4191,7 +4171,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4199,7 +4179,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4207,7 +4187,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4215,7 +4195,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4223,7 +4203,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4231,7 +4211,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4239,7 +4219,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4247,7 +4227,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4255,7 +4235,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4263,7 +4243,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4271,7 +4251,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4279,7 +4259,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4287,7 +4267,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4295,7 +4275,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4303,7 +4283,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4311,7 +4291,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4319,7 +4299,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4327,7 +4307,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4335,7 +4315,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4343,7 +4323,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4351,7 +4331,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4359,7 +4339,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4367,7 +4347,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4375,7 +4355,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4383,7 +4363,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4391,7 +4371,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4399,7 +4379,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4407,7 +4387,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4415,7 +4395,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4423,7 +4403,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4431,7 +4411,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4439,7 +4419,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4447,7 +4427,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4455,7 +4435,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4463,7 +4443,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4471,7 +4451,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4479,7 +4459,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4487,7 +4467,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4495,7 +4475,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4503,7 +4483,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4511,7 +4491,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4519,7 +4499,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4527,7 +4507,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4535,7 +4515,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4543,7 +4523,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4551,7 +4531,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4559,7 +4539,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4567,7 +4547,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4575,7 +4555,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4583,7 +4563,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4591,7 +4571,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4599,7 +4579,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4607,7 +4587,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4615,7 +4595,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4623,7 +4603,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4631,7 +4611,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4639,7 +4619,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4647,7 +4627,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4655,7 +4635,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4663,7 +4643,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4671,7 +4651,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4679,7 +4659,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4687,7 +4667,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4695,7 +4675,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4703,7 +4683,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4711,7 +4691,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4719,7 +4699,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4727,7 +4707,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4735,7 +4715,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4743,7 +4723,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4751,7 +4731,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4759,7 +4739,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4767,7 +4747,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4775,7 +4755,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4783,7 +4763,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4791,7 +4771,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4799,7 +4779,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4807,7 +4787,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4815,7 +4795,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4823,7 +4803,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4831,7 +4811,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4839,7 +4819,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4847,7 +4827,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4855,7 +4835,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4863,7 +4843,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4871,7 +4851,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4879,7 +4859,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4887,7 +4867,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4895,7 +4875,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4903,7 +4883,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4911,7 +4891,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4919,7 +4899,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4927,7 +4907,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4935,7 +4915,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4943,7 +4923,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4951,7 +4931,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4959,7 +4939,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4967,7 +4947,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4975,7 +4955,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4983,7 +4963,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4991,7 +4971,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -4999,7 +4979,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5007,7 +4987,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5015,7 +4995,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5023,7 +5003,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5031,7 +5011,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5039,7 +5019,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5047,7 +5027,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5055,7 +5035,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5063,7 +5043,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5071,7 +5051,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5079,7 +5059,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5087,7 +5067,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5095,7 +5075,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5103,7 +5083,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5111,7 +5091,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5119,7 +5099,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5127,7 +5107,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5135,7 +5115,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5143,7 +5123,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5151,7 +5131,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5159,7 +5139,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5167,7 +5147,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5175,7 +5155,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5183,7 +5163,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5191,7 +5171,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5199,7 +5179,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5207,7 +5187,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5215,7 +5195,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5223,7 +5203,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5231,7 +5211,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5239,7 +5219,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5247,7 +5227,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5255,7 +5235,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5263,7 +5243,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5271,7 +5251,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5279,7 +5259,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5287,7 +5267,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5295,7 +5275,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5303,7 +5283,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5311,7 +5291,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5319,7 +5299,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5327,7 +5307,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5335,7 +5315,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5343,7 +5323,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5351,7 +5331,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5359,7 +5339,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5367,7 +5347,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5375,7 +5355,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5383,7 +5363,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5391,7 +5371,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5399,7 +5379,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5407,7 +5387,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5415,7 +5395,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5423,7 +5403,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5431,7 +5411,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5439,7 +5419,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5447,7 +5427,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5455,7 +5435,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5463,7 +5443,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5471,7 +5451,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5479,7 +5459,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5487,7 +5467,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5495,7 +5475,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5503,7 +5483,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5511,7 +5491,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5519,7 +5499,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5527,7 +5507,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5535,7 +5515,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5543,7 +5523,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5551,7 +5531,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5559,7 +5539,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5567,7 +5547,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5575,7 +5555,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5583,7 +5563,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5591,7 +5571,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5599,7 +5579,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5607,7 +5587,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5615,7 +5595,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5623,7 +5603,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5631,7 +5611,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5639,7 +5619,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5647,7 +5627,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5655,7 +5635,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5663,7 +5643,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5671,7 +5651,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5679,7 +5659,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5687,7 +5667,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5695,7 +5675,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5703,7 +5683,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5711,7 +5691,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5719,7 +5699,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5727,7 +5707,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5735,7 +5715,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5743,7 +5723,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5751,7 +5731,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5759,7 +5739,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5767,7 +5747,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5775,7 +5755,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5783,7 +5763,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5791,7 +5771,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5799,7 +5779,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5807,7 +5787,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5815,7 +5795,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5823,7 +5803,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5831,7 +5811,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5839,7 +5819,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5847,7 +5827,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5855,7 +5835,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5863,7 +5843,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5871,7 +5851,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5879,7 +5859,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5887,7 +5867,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5895,7 +5875,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5903,7 +5883,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5911,7 +5891,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5919,7 +5899,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5927,7 +5907,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5935,7 +5915,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5943,7 +5923,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5951,7 +5931,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5959,7 +5939,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5967,7 +5947,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5975,7 +5955,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5983,7 +5963,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5991,7 +5971,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -5999,7 +5979,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6007,7 +5987,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6015,7 +5995,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6023,7 +6003,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6031,7 +6011,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6039,7 +6019,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6047,7 +6027,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6055,7 +6035,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6063,7 +6043,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6071,7 +6051,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6079,7 +6059,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6087,7 +6067,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6095,7 +6075,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6103,7 +6083,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6111,7 +6091,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6119,7 +6099,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6127,7 +6107,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6135,7 +6115,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6143,7 +6123,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6151,7 +6131,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6159,7 +6139,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6167,7 +6147,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6175,7 +6155,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6183,7 +6163,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6191,7 +6171,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6199,7 +6179,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6207,7 +6187,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6215,7 +6195,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6223,7 +6203,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6231,7 +6211,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6239,7 +6219,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6247,7 +6227,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6255,7 +6235,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6263,7 +6243,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6271,7 +6251,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6279,7 +6259,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6287,7 +6267,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6295,7 +6275,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6303,7 +6283,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6311,7 +6291,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6319,7 +6299,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6327,7 +6307,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6335,7 +6315,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6343,7 +6323,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6351,7 +6331,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6359,7 +6339,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6367,7 +6347,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6375,7 +6355,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6383,7 +6363,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6391,7 +6371,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6399,7 +6379,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6407,7 +6387,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6415,7 +6395,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6423,7 +6403,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6431,7 +6411,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6439,7 +6419,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6447,7 +6427,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6455,7 +6435,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6463,7 +6443,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6471,7 +6451,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6479,7 +6459,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6487,7 +6467,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6495,7 +6475,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6503,7 +6483,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6511,7 +6491,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6519,7 +6499,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6527,7 +6507,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6535,7 +6515,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6543,7 +6523,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6551,7 +6531,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6559,7 +6539,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6567,7 +6547,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6575,7 +6555,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6583,7 +6563,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6591,7 +6571,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6599,7 +6579,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6607,7 +6587,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6615,7 +6595,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6623,7 +6603,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6631,7 +6611,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6639,7 +6619,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6647,7 +6627,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6655,7 +6635,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6663,7 +6643,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6671,7 +6651,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6679,7 +6659,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6687,7 +6667,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6695,7 +6675,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6703,7 +6683,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6711,7 +6691,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6719,7 +6699,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6727,7 +6707,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6735,7 +6715,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6743,7 +6723,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6751,7 +6731,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6759,7 +6739,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6767,7 +6747,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6775,7 +6755,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6783,7 +6763,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6791,7 +6771,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6799,7 +6779,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6807,7 +6787,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6815,7 +6795,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6823,7 +6803,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6831,7 +6811,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6839,7 +6819,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6847,7 +6827,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6855,7 +6835,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6863,7 +6843,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6871,7 +6851,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6879,7 +6859,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6887,7 +6867,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6895,7 +6875,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6903,7 +6883,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6911,7 +6891,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6919,7 +6899,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6927,7 +6907,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6935,7 +6915,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6943,7 +6923,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6951,7 +6931,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6959,7 +6939,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6967,7 +6947,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6975,7 +6955,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6983,7 +6963,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6991,7 +6971,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -6999,7 +6979,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7007,7 +6987,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7015,7 +6995,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7023,7 +7003,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7031,7 +7011,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7039,7 +7019,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7047,7 +7027,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7055,7 +7035,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7063,7 +7043,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7071,7 +7051,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7079,7 +7059,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7087,7 +7067,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7095,7 +7075,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7103,7 +7083,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7111,7 +7091,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7119,7 +7099,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7127,7 +7107,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7135,7 +7115,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7143,7 +7123,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7151,7 +7131,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7159,7 +7139,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7167,7 +7147,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7175,7 +7155,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7183,7 +7163,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7191,7 +7171,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7199,7 +7179,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7207,7 +7187,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7215,7 +7195,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7223,7 +7203,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7231,7 +7211,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7239,7 +7219,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7247,7 +7227,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7255,7 +7235,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7263,7 +7243,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7271,7 +7251,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7279,7 +7259,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7287,7 +7267,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7295,7 +7275,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7303,7 +7283,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7311,7 +7291,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7319,7 +7299,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7327,7 +7307,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7335,7 +7315,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7343,7 +7323,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7351,7 +7331,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7359,7 +7339,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7367,7 +7347,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7375,7 +7355,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7383,7 +7363,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7391,7 +7371,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7399,7 +7379,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7407,7 +7387,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7415,7 +7395,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7423,7 +7403,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7431,7 +7411,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7439,7 +7419,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7447,7 +7427,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7455,7 +7435,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7463,7 +7443,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7471,7 +7451,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7479,7 +7459,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7487,7 +7467,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7495,7 +7475,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7503,7 +7483,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7511,7 +7491,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7519,7 +7499,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7527,7 +7507,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7535,7 +7515,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7543,7 +7523,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7551,7 +7531,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7559,7 +7539,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7567,7 +7547,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7575,7 +7555,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7583,7 +7563,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7591,7 +7571,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7599,7 +7579,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7607,7 +7587,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7615,7 +7595,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7623,7 +7603,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7631,7 +7611,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7639,7 +7619,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7647,7 +7627,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7655,7 +7635,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7663,7 +7643,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7671,7 +7651,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7679,7 +7659,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7687,7 +7667,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7695,7 +7675,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7703,7 +7683,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7711,7 +7691,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7719,7 +7699,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7727,7 +7707,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7735,7 +7715,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7743,7 +7723,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7751,7 +7731,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7759,7 +7739,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7767,7 +7747,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7775,7 +7755,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7783,7 +7763,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7791,7 +7771,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7799,7 +7779,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7807,7 +7787,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7815,7 +7795,7 @@ test_cold_sweep_512:
 	1:
 	
 # 0 "" 2
-# 386 "tests.c" 1
+# 388 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7836,7 +7816,7 @@ test_cold_sweep_1024:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7844,7 +7824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7852,7 +7832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7860,7 +7840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7868,7 +7848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7876,7 +7856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7884,7 +7864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7892,7 +7872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7900,7 +7880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7908,7 +7888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7916,7 +7896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7924,7 +7904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7932,7 +7912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7940,7 +7920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7948,7 +7928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7956,7 +7936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7964,7 +7944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7972,7 +7952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7980,7 +7960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7988,7 +7968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -7996,7 +7976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8004,7 +7984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8012,7 +7992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8020,7 +8000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8028,7 +8008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8036,7 +8016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8044,7 +8024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8052,7 +8032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8060,7 +8040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8068,7 +8048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8076,7 +8056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8084,7 +8064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8092,7 +8072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8100,7 +8080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8108,7 +8088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8116,7 +8096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8124,7 +8104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8132,7 +8112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8140,7 +8120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8148,7 +8128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8156,7 +8136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8164,7 +8144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8172,7 +8152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8180,7 +8160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8188,7 +8168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8196,7 +8176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8204,7 +8184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8212,7 +8192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8220,7 +8200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8228,7 +8208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8236,7 +8216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8244,7 +8224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8252,7 +8232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8260,7 +8240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8268,7 +8248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8276,7 +8256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8284,7 +8264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8292,7 +8272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8300,7 +8280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8308,7 +8288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8316,7 +8296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8324,7 +8304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8332,7 +8312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8340,7 +8320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8348,7 +8328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8356,7 +8336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8364,7 +8344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8372,7 +8352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8380,7 +8360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8388,7 +8368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8396,7 +8376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8404,7 +8384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8412,7 +8392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8420,7 +8400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8428,7 +8408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8436,7 +8416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8444,7 +8424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8452,7 +8432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8460,7 +8440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8468,7 +8448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8476,7 +8456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8484,7 +8464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8492,7 +8472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8500,7 +8480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8508,7 +8488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8516,7 +8496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8524,7 +8504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8532,7 +8512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8540,7 +8520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8548,7 +8528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8556,7 +8536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8564,7 +8544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8572,7 +8552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8580,7 +8560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8588,7 +8568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8596,7 +8576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8604,7 +8584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8612,7 +8592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8620,7 +8600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8628,7 +8608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8636,7 +8616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8644,7 +8624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8652,7 +8632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8660,7 +8640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8668,7 +8648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8676,7 +8656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8684,7 +8664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8692,7 +8672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8700,7 +8680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8708,7 +8688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8716,7 +8696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8724,7 +8704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8732,7 +8712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8740,7 +8720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8748,7 +8728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8756,7 +8736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8764,7 +8744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8772,7 +8752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8780,7 +8760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8788,7 +8768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8796,7 +8776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8804,7 +8784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8812,7 +8792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8820,7 +8800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8828,7 +8808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8836,7 +8816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8844,7 +8824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8852,7 +8832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8860,7 +8840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8868,7 +8848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8876,7 +8856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8884,7 +8864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8892,7 +8872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8900,7 +8880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8908,7 +8888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8916,7 +8896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8924,7 +8904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8932,7 +8912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8940,7 +8920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8948,7 +8928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8956,7 +8936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8964,7 +8944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8972,7 +8952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8980,7 +8960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8988,7 +8968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -8996,7 +8976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9004,7 +8984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9012,7 +8992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9020,7 +9000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9028,7 +9008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9036,7 +9016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9044,7 +9024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9052,7 +9032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9060,7 +9040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9068,7 +9048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9076,7 +9056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9084,7 +9064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9092,7 +9072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9100,7 +9080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9108,7 +9088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9116,7 +9096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9124,7 +9104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9132,7 +9112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9140,7 +9120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9148,7 +9128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9156,7 +9136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9164,7 +9144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9172,7 +9152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9180,7 +9160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9188,7 +9168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9196,7 +9176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9204,7 +9184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9212,7 +9192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9220,7 +9200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9228,7 +9208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9236,7 +9216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9244,7 +9224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9252,7 +9232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9260,7 +9240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9268,7 +9248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9276,7 +9256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9284,7 +9264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9292,7 +9272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9300,7 +9280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9308,7 +9288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9316,7 +9296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9324,7 +9304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9332,7 +9312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9340,7 +9320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9348,7 +9328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9356,7 +9336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9364,7 +9344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9372,7 +9352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9380,7 +9360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9388,7 +9368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9396,7 +9376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9404,7 +9384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9412,7 +9392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9420,7 +9400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9428,7 +9408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9436,7 +9416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9444,7 +9424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9452,7 +9432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9460,7 +9440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9468,7 +9448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9476,7 +9456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9484,7 +9464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9492,7 +9472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9500,7 +9480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9508,7 +9488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9516,7 +9496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9524,7 +9504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9532,7 +9512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9540,7 +9520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9548,7 +9528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9556,7 +9536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9564,7 +9544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9572,7 +9552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9580,7 +9560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9588,7 +9568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9596,7 +9576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9604,7 +9584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9612,7 +9592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9620,7 +9600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9628,7 +9608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9636,7 +9616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9644,7 +9624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9652,7 +9632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9660,7 +9640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9668,7 +9648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9676,7 +9656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9684,7 +9664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9692,7 +9672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9700,7 +9680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9708,7 +9688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9716,7 +9696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9724,7 +9704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9732,7 +9712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9740,7 +9720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9748,7 +9728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9756,7 +9736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9764,7 +9744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9772,7 +9752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9780,7 +9760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9788,7 +9768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9796,7 +9776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9804,7 +9784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9812,7 +9792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9820,7 +9800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9828,7 +9808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9836,7 +9816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9844,7 +9824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9852,7 +9832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9860,7 +9840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9868,7 +9848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9876,7 +9856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9884,7 +9864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9892,7 +9872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9900,7 +9880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9908,7 +9888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9916,7 +9896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9924,7 +9904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9932,7 +9912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9940,7 +9920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9948,7 +9928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9956,7 +9936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9964,7 +9944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9972,7 +9952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9980,7 +9960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9988,7 +9968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -9996,7 +9976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10004,7 +9984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10012,7 +9992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10020,7 +10000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10028,7 +10008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10036,7 +10016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10044,7 +10024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10052,7 +10032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10060,7 +10040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10068,7 +10048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10076,7 +10056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10084,7 +10064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10092,7 +10072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10100,7 +10080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10108,7 +10088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10116,7 +10096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10124,7 +10104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10132,7 +10112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10140,7 +10120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10148,7 +10128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10156,7 +10136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10164,7 +10144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10172,7 +10152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10180,7 +10160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10188,7 +10168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10196,7 +10176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10204,7 +10184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10212,7 +10192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10220,7 +10200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10228,7 +10208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10236,7 +10216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10244,7 +10224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10252,7 +10232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10260,7 +10240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10268,7 +10248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10276,7 +10256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10284,7 +10264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10292,7 +10272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10300,7 +10280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10308,7 +10288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10316,7 +10296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10324,7 +10304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10332,7 +10312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10340,7 +10320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10348,7 +10328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10356,7 +10336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10364,7 +10344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10372,7 +10352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10380,7 +10360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10388,7 +10368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10396,7 +10376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10404,7 +10384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10412,7 +10392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10420,7 +10400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10428,7 +10408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10436,7 +10416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10444,7 +10424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10452,7 +10432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10460,7 +10440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10468,7 +10448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10476,7 +10456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10484,7 +10464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10492,7 +10472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10500,7 +10480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10508,7 +10488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10516,7 +10496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10524,7 +10504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10532,7 +10512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10540,7 +10520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10548,7 +10528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10556,7 +10536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10564,7 +10544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10572,7 +10552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10580,7 +10560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10588,7 +10568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10596,7 +10576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10604,7 +10584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10612,7 +10592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10620,7 +10600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10628,7 +10608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10636,7 +10616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10644,7 +10624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10652,7 +10632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10660,7 +10640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10668,7 +10648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10676,7 +10656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10684,7 +10664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10692,7 +10672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10700,7 +10680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10708,7 +10688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10716,7 +10696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10724,7 +10704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10732,7 +10712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10740,7 +10720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10748,7 +10728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10756,7 +10736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10764,7 +10744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10772,7 +10752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10780,7 +10760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10788,7 +10768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10796,7 +10776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10804,7 +10784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10812,7 +10792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10820,7 +10800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10828,7 +10808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10836,7 +10816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10844,7 +10824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10852,7 +10832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10860,7 +10840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10868,7 +10848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10876,7 +10856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10884,7 +10864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10892,7 +10872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10900,7 +10880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10908,7 +10888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10916,7 +10896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10924,7 +10904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10932,7 +10912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10940,7 +10920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10948,7 +10928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10956,7 +10936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10964,7 +10944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10972,7 +10952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10980,7 +10960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10988,7 +10968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -10996,7 +10976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11004,7 +10984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11012,7 +10992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11020,7 +11000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11028,7 +11008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11036,7 +11016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11044,7 +11024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11052,7 +11032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11060,7 +11040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11068,7 +11048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11076,7 +11056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11084,7 +11064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11092,7 +11072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11100,7 +11080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11108,7 +11088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11116,7 +11096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11124,7 +11104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11132,7 +11112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11140,7 +11120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11148,7 +11128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11156,7 +11136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11164,7 +11144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11172,7 +11152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11180,7 +11160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11188,7 +11168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11196,7 +11176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11204,7 +11184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11212,7 +11192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11220,7 +11200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11228,7 +11208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11236,7 +11216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11244,7 +11224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11252,7 +11232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11260,7 +11240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11268,7 +11248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11276,7 +11256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11284,7 +11264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11292,7 +11272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11300,7 +11280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11308,7 +11288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11316,7 +11296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11324,7 +11304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11332,7 +11312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11340,7 +11320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11348,7 +11328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11356,7 +11336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11364,7 +11344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11372,7 +11352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11380,7 +11360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11388,7 +11368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11396,7 +11376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11404,7 +11384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11412,7 +11392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11420,7 +11400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11428,7 +11408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11436,7 +11416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11444,7 +11424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11452,7 +11432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11460,7 +11440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11468,7 +11448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11476,7 +11456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11484,7 +11464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11492,7 +11472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11500,7 +11480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11508,7 +11488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11516,7 +11496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11524,7 +11504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11532,7 +11512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11540,7 +11520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11548,7 +11528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11556,7 +11536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11564,7 +11544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11572,7 +11552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11580,7 +11560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11588,7 +11568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11596,7 +11576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11604,7 +11584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11612,7 +11592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11620,7 +11600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11628,7 +11608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11636,7 +11616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11644,7 +11624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11652,7 +11632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11660,7 +11640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11668,7 +11648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11676,7 +11656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11684,7 +11664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11692,7 +11672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11700,7 +11680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11708,7 +11688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11716,7 +11696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11724,7 +11704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11732,7 +11712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11740,7 +11720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11748,7 +11728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11756,7 +11736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11764,7 +11744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11772,7 +11752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11780,7 +11760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11788,7 +11768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11796,7 +11776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11804,7 +11784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11812,7 +11792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11820,7 +11800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11828,7 +11808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11836,7 +11816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11844,7 +11824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11852,7 +11832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11860,7 +11840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11868,7 +11848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11876,7 +11856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11884,7 +11864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11892,7 +11872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11900,7 +11880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11908,7 +11888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11916,7 +11896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11924,7 +11904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11932,7 +11912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11940,7 +11920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11948,7 +11928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11956,7 +11936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11964,7 +11944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11972,7 +11952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11980,7 +11960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11988,7 +11968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -11996,7 +11976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12004,7 +11984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12012,7 +11992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12020,7 +12000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12028,7 +12008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12036,7 +12016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12044,7 +12024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12052,7 +12032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12060,7 +12040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12068,7 +12048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12076,7 +12056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12084,7 +12064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12092,7 +12072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12100,7 +12080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12108,7 +12088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12116,7 +12096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12124,7 +12104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12132,7 +12112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12140,7 +12120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12148,7 +12128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12156,7 +12136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12164,7 +12144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12172,7 +12152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12180,7 +12160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12188,7 +12168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12196,7 +12176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12204,7 +12184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12212,7 +12192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12220,7 +12200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12228,7 +12208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12236,7 +12216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12244,7 +12224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12252,7 +12232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12260,7 +12240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12268,7 +12248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12276,7 +12256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12284,7 +12264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12292,7 +12272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12300,7 +12280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12308,7 +12288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12316,7 +12296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12324,7 +12304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12332,7 +12312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12340,7 +12320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12348,7 +12328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12356,7 +12336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12364,7 +12344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12372,7 +12352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12380,7 +12360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12388,7 +12368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12396,7 +12376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12404,7 +12384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12412,7 +12392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12420,7 +12400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12428,7 +12408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12436,7 +12416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12444,7 +12424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12452,7 +12432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12460,7 +12440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12468,7 +12448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12476,7 +12456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12484,7 +12464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12492,7 +12472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12500,7 +12480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12508,7 +12488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12516,7 +12496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12524,7 +12504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12532,7 +12512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12540,7 +12520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12548,7 +12528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12556,7 +12536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12564,7 +12544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12572,7 +12552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12580,7 +12560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12588,7 +12568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12596,7 +12576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12604,7 +12584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12612,7 +12592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12620,7 +12600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12628,7 +12608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12636,7 +12616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12644,7 +12624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12652,7 +12632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12660,7 +12640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12668,7 +12648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12676,7 +12656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12684,7 +12664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12692,7 +12672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12700,7 +12680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12708,7 +12688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12716,7 +12696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12724,7 +12704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12732,7 +12712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12740,7 +12720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12748,7 +12728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12756,7 +12736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12764,7 +12744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12772,7 +12752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12780,7 +12760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12788,7 +12768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12796,7 +12776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12804,7 +12784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12812,7 +12792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12820,7 +12800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12828,7 +12808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12836,7 +12816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12844,7 +12824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12852,7 +12832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12860,7 +12840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12868,7 +12848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12876,7 +12856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12884,7 +12864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12892,7 +12872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12900,7 +12880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12908,7 +12888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12916,7 +12896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12924,7 +12904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12932,7 +12912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12940,7 +12920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12948,7 +12928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12956,7 +12936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12964,7 +12944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12972,7 +12952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12980,7 +12960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12988,7 +12968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -12996,7 +12976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13004,7 +12984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13012,7 +12992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13020,7 +13000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13028,7 +13008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13036,7 +13016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13044,7 +13024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13052,7 +13032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13060,7 +13040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13068,7 +13048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13076,7 +13056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13084,7 +13064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13092,7 +13072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13100,7 +13080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13108,7 +13088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13116,7 +13096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13124,7 +13104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13132,7 +13112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13140,7 +13120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13148,7 +13128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13156,7 +13136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13164,7 +13144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13172,7 +13152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13180,7 +13160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13188,7 +13168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13196,7 +13176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13204,7 +13184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13212,7 +13192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13220,7 +13200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13228,7 +13208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13236,7 +13216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13244,7 +13224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13252,7 +13232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13260,7 +13240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13268,7 +13248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13276,7 +13256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13284,7 +13264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13292,7 +13272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13300,7 +13280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13308,7 +13288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13316,7 +13296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13324,7 +13304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13332,7 +13312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13340,7 +13320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13348,7 +13328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13356,7 +13336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13364,7 +13344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13372,7 +13352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13380,7 +13360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13388,7 +13368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13396,7 +13376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13404,7 +13384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13412,7 +13392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13420,7 +13400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13428,7 +13408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13436,7 +13416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13444,7 +13424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13452,7 +13432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13460,7 +13440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13468,7 +13448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13476,7 +13456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13484,7 +13464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13492,7 +13472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13500,7 +13480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13508,7 +13488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13516,7 +13496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13524,7 +13504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13532,7 +13512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13540,7 +13520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13548,7 +13528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13556,7 +13536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13564,7 +13544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13572,7 +13552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13580,7 +13560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13588,7 +13568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13596,7 +13576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13604,7 +13584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13612,7 +13592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13620,7 +13600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13628,7 +13608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13636,7 +13616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13644,7 +13624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13652,7 +13632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13660,7 +13640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13668,7 +13648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13676,7 +13656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13684,7 +13664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13692,7 +13672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13700,7 +13680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13708,7 +13688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13716,7 +13696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13724,7 +13704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13732,7 +13712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13740,7 +13720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13748,7 +13728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13756,7 +13736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13764,7 +13744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13772,7 +13752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13780,7 +13760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13788,7 +13768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13796,7 +13776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13804,7 +13784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13812,7 +13792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13820,7 +13800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13828,7 +13808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13836,7 +13816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13844,7 +13824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13852,7 +13832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13860,7 +13840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13868,7 +13848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13876,7 +13856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13884,7 +13864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13892,7 +13872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13900,7 +13880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13908,7 +13888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13916,7 +13896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13924,7 +13904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13932,7 +13912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13940,7 +13920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13948,7 +13928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13956,7 +13936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13964,7 +13944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13972,7 +13952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13980,7 +13960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13988,7 +13968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -13996,7 +13976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14004,7 +13984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14012,7 +13992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14020,7 +14000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14028,7 +14008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14036,7 +14016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14044,7 +14024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14052,7 +14032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14060,7 +14040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14068,7 +14048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14076,7 +14056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14084,7 +14064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14092,7 +14072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14100,7 +14080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14108,7 +14088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14116,7 +14096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14124,7 +14104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14132,7 +14112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14140,7 +14120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14148,7 +14128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14156,7 +14136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14164,7 +14144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14172,7 +14152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14180,7 +14160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14188,7 +14168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14196,7 +14176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14204,7 +14184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14212,7 +14192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14220,7 +14200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14228,7 +14208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14236,7 +14216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14244,7 +14224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14252,7 +14232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14260,7 +14240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14268,7 +14248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14276,7 +14256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14284,7 +14264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14292,7 +14272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14300,7 +14280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14308,7 +14288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14316,7 +14296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14324,7 +14304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14332,7 +14312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14340,7 +14320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14348,7 +14328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14356,7 +14336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14364,7 +14344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14372,7 +14352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14380,7 +14360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14388,7 +14368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14396,7 +14376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14404,7 +14384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14412,7 +14392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14420,7 +14400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14428,7 +14408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14436,7 +14416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14444,7 +14424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14452,7 +14432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14460,7 +14440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14468,7 +14448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14476,7 +14456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14484,7 +14464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14492,7 +14472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14500,7 +14480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14508,7 +14488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14516,7 +14496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14524,7 +14504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14532,7 +14512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14540,7 +14520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14548,7 +14528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14556,7 +14536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14564,7 +14544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14572,7 +14552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14580,7 +14560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14588,7 +14568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14596,7 +14576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14604,7 +14584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14612,7 +14592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14620,7 +14600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14628,7 +14608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14636,7 +14616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14644,7 +14624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14652,7 +14632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14660,7 +14640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14668,7 +14648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14676,7 +14656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14684,7 +14664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14692,7 +14672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14700,7 +14680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14708,7 +14688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14716,7 +14696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14724,7 +14704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14732,7 +14712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14740,7 +14720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14748,7 +14728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14756,7 +14736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14764,7 +14744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14772,7 +14752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14780,7 +14760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14788,7 +14768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14796,7 +14776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14804,7 +14784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14812,7 +14792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14820,7 +14800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14828,7 +14808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14836,7 +14816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14844,7 +14824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14852,7 +14832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14860,7 +14840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14868,7 +14848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14876,7 +14856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14884,7 +14864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14892,7 +14872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14900,7 +14880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14908,7 +14888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14916,7 +14896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14924,7 +14904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14932,7 +14912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14940,7 +14920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14948,7 +14928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14956,7 +14936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14964,7 +14944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14972,7 +14952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14980,7 +14960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14988,7 +14968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -14996,7 +14976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15004,7 +14984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15012,7 +14992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15020,7 +15000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15028,7 +15008,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15036,7 +15016,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15044,7 +15024,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15052,7 +15032,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15060,7 +15040,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15068,7 +15048,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15076,7 +15056,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15084,7 +15064,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15092,7 +15072,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15100,7 +15080,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15108,7 +15088,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15116,7 +15096,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15124,7 +15104,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15132,7 +15112,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15140,7 +15120,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15148,7 +15128,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15156,7 +15136,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15164,7 +15144,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15172,7 +15152,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15180,7 +15160,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15188,7 +15168,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15196,7 +15176,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15204,7 +15184,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15212,7 +15192,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15220,7 +15200,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15228,7 +15208,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15236,7 +15216,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15244,7 +15224,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15252,7 +15232,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15260,7 +15240,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15268,7 +15248,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15276,7 +15256,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15284,7 +15264,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15292,7 +15272,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15300,7 +15280,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15308,7 +15288,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15316,7 +15296,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15324,7 +15304,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15332,7 +15312,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15340,7 +15320,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15348,7 +15328,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15356,7 +15336,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15364,7 +15344,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15372,7 +15352,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15380,7 +15360,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15388,7 +15368,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15396,7 +15376,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15404,7 +15384,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15412,7 +15392,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15420,7 +15400,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15428,7 +15408,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15436,7 +15416,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15444,7 +15424,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15452,7 +15432,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15460,7 +15440,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15468,7 +15448,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15476,7 +15456,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15484,7 +15464,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15492,7 +15472,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15500,7 +15480,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15508,7 +15488,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15516,7 +15496,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15524,7 +15504,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15532,7 +15512,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15540,7 +15520,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15548,7 +15528,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15556,7 +15536,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15564,7 +15544,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15572,7 +15552,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15580,7 +15560,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15588,7 +15568,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15596,7 +15576,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15604,7 +15584,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15612,7 +15592,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15620,7 +15600,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15628,7 +15608,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15636,7 +15616,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15644,7 +15624,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15652,7 +15632,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15660,7 +15640,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15668,7 +15648,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15676,7 +15656,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15684,7 +15664,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15692,7 +15672,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15700,7 +15680,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15708,7 +15688,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15716,7 +15696,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15724,7 +15704,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15732,7 +15712,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15740,7 +15720,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15748,7 +15728,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15756,7 +15736,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15764,7 +15744,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15772,7 +15752,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15780,7 +15760,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15788,7 +15768,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15796,7 +15776,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15804,7 +15784,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15812,7 +15792,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15820,7 +15800,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15828,7 +15808,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15836,7 +15816,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15844,7 +15824,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15852,7 +15832,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15860,7 +15840,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15868,7 +15848,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15876,7 +15856,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15884,7 +15864,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15892,7 +15872,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15900,7 +15880,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15908,7 +15888,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15916,7 +15896,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15924,7 +15904,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15932,7 +15912,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15940,7 +15920,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15948,7 +15928,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15956,7 +15936,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15964,7 +15944,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15972,7 +15952,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15980,7 +15960,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15988,7 +15968,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -15996,7 +15976,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16004,7 +15984,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16012,7 +15992,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16020,7 +16000,7 @@ test_cold_sweep_1024:
 	1:
 	
 # 0 "" 2
-# 390 "tests.c" 1
+# 392 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16041,7 +16021,7 @@ test_cold_sweep_2048:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16049,7 +16029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16057,7 +16037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16065,7 +16045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16073,7 +16053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16081,7 +16061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16089,7 +16069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16097,7 +16077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16105,7 +16085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16113,7 +16093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16121,7 +16101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16129,7 +16109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16137,7 +16117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16145,7 +16125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16153,7 +16133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16161,7 +16141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16169,7 +16149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16177,7 +16157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16185,7 +16165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16193,7 +16173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16201,7 +16181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16209,7 +16189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16217,7 +16197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16225,7 +16205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16233,7 +16213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16241,7 +16221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16249,7 +16229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16257,7 +16237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16265,7 +16245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16273,7 +16253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16281,7 +16261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16289,7 +16269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16297,7 +16277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16305,7 +16285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16313,7 +16293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16321,7 +16301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16329,7 +16309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16337,7 +16317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16345,7 +16325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16353,7 +16333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16361,7 +16341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16369,7 +16349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16377,7 +16357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16385,7 +16365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16393,7 +16373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16401,7 +16381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16409,7 +16389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16417,7 +16397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16425,7 +16405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16433,7 +16413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16441,7 +16421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16449,7 +16429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16457,7 +16437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16465,7 +16445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16473,7 +16453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16481,7 +16461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16489,7 +16469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16497,7 +16477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16505,7 +16485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16513,7 +16493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16521,7 +16501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16529,7 +16509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16537,7 +16517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16545,7 +16525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16553,7 +16533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16561,7 +16541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16569,7 +16549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16577,7 +16557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16585,7 +16565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16593,7 +16573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16601,7 +16581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16609,7 +16589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16617,7 +16597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16625,7 +16605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16633,7 +16613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16641,7 +16621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16649,7 +16629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16657,7 +16637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16665,7 +16645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16673,7 +16653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16681,7 +16661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16689,7 +16669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16697,7 +16677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16705,7 +16685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16713,7 +16693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16721,7 +16701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16729,7 +16709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16737,7 +16717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16745,7 +16725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16753,7 +16733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16761,7 +16741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16769,7 +16749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16777,7 +16757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16785,7 +16765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16793,7 +16773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16801,7 +16781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16809,7 +16789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16817,7 +16797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16825,7 +16805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16833,7 +16813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16841,7 +16821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16849,7 +16829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16857,7 +16837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16865,7 +16845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16873,7 +16853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16881,7 +16861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16889,7 +16869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16897,7 +16877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16905,7 +16885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16913,7 +16893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16921,7 +16901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16929,7 +16909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16937,7 +16917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16945,7 +16925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16953,7 +16933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16961,7 +16941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16969,7 +16949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16977,7 +16957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16985,7 +16965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -16993,7 +16973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17001,7 +16981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17009,7 +16989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17017,7 +16997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17025,7 +17005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17033,7 +17013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17041,7 +17021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17049,7 +17029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17057,7 +17037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17065,7 +17045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17073,7 +17053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17081,7 +17061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17089,7 +17069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17097,7 +17077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17105,7 +17085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17113,7 +17093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17121,7 +17101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17129,7 +17109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17137,7 +17117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17145,7 +17125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17153,7 +17133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17161,7 +17141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17169,7 +17149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17177,7 +17157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17185,7 +17165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17193,7 +17173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17201,7 +17181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17209,7 +17189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17217,7 +17197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17225,7 +17205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17233,7 +17213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17241,7 +17221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17249,7 +17229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17257,7 +17237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17265,7 +17245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17273,7 +17253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17281,7 +17261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17289,7 +17269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17297,7 +17277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17305,7 +17285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17313,7 +17293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17321,7 +17301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17329,7 +17309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17337,7 +17317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17345,7 +17325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17353,7 +17333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17361,7 +17341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17369,7 +17349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17377,7 +17357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17385,7 +17365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17393,7 +17373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17401,7 +17381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17409,7 +17389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17417,7 +17397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17425,7 +17405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17433,7 +17413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17441,7 +17421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17449,7 +17429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17457,7 +17437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17465,7 +17445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17473,7 +17453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17481,7 +17461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17489,7 +17469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17497,7 +17477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17505,7 +17485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17513,7 +17493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17521,7 +17501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17529,7 +17509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17537,7 +17517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17545,7 +17525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17553,7 +17533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17561,7 +17541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17569,7 +17549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17577,7 +17557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17585,7 +17565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17593,7 +17573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17601,7 +17581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17609,7 +17589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17617,7 +17597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17625,7 +17605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17633,7 +17613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17641,7 +17621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17649,7 +17629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17657,7 +17637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17665,7 +17645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17673,7 +17653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17681,7 +17661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17689,7 +17669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17697,7 +17677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17705,7 +17685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17713,7 +17693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17721,7 +17701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17729,7 +17709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17737,7 +17717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17745,7 +17725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17753,7 +17733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17761,7 +17741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17769,7 +17749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17777,7 +17757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17785,7 +17765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17793,7 +17773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17801,7 +17781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17809,7 +17789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17817,7 +17797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17825,7 +17805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17833,7 +17813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17841,7 +17821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17849,7 +17829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17857,7 +17837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17865,7 +17845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17873,7 +17853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17881,7 +17861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17889,7 +17869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17897,7 +17877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17905,7 +17885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17913,7 +17893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17921,7 +17901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17929,7 +17909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17937,7 +17917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17945,7 +17925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17953,7 +17933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17961,7 +17941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17969,7 +17949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17977,7 +17957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17985,7 +17965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -17993,7 +17973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18001,7 +17981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18009,7 +17989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18017,7 +17997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18025,7 +18005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18033,7 +18013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18041,7 +18021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18049,7 +18029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18057,7 +18037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18065,7 +18045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18073,7 +18053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18081,7 +18061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18089,7 +18069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18097,7 +18077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18105,7 +18085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18113,7 +18093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18121,7 +18101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18129,7 +18109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18137,7 +18117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18145,7 +18125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18153,7 +18133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18161,7 +18141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18169,7 +18149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18177,7 +18157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18185,7 +18165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18193,7 +18173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18201,7 +18181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18209,7 +18189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18217,7 +18197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18225,7 +18205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18233,7 +18213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18241,7 +18221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18249,7 +18229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18257,7 +18237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18265,7 +18245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18273,7 +18253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18281,7 +18261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18289,7 +18269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18297,7 +18277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18305,7 +18285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18313,7 +18293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18321,7 +18301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18329,7 +18309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18337,7 +18317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18345,7 +18325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18353,7 +18333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18361,7 +18341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18369,7 +18349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18377,7 +18357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18385,7 +18365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18393,7 +18373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18401,7 +18381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18409,7 +18389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18417,7 +18397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18425,7 +18405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18433,7 +18413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18441,7 +18421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18449,7 +18429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18457,7 +18437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18465,7 +18445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18473,7 +18453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18481,7 +18461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18489,7 +18469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18497,7 +18477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18505,7 +18485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18513,7 +18493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18521,7 +18501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18529,7 +18509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18537,7 +18517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18545,7 +18525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18553,7 +18533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18561,7 +18541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18569,7 +18549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18577,7 +18557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18585,7 +18565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18593,7 +18573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18601,7 +18581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18609,7 +18589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18617,7 +18597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18625,7 +18605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18633,7 +18613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18641,7 +18621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18649,7 +18629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18657,7 +18637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18665,7 +18645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18673,7 +18653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18681,7 +18661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18689,7 +18669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18697,7 +18677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18705,7 +18685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18713,7 +18693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18721,7 +18701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18729,7 +18709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18737,7 +18717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18745,7 +18725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18753,7 +18733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18761,7 +18741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18769,7 +18749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18777,7 +18757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18785,7 +18765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18793,7 +18773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18801,7 +18781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18809,7 +18789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18817,7 +18797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18825,7 +18805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18833,7 +18813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18841,7 +18821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18849,7 +18829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18857,7 +18837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18865,7 +18845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18873,7 +18853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18881,7 +18861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18889,7 +18869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18897,7 +18877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18905,7 +18885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18913,7 +18893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18921,7 +18901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18929,7 +18909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18937,7 +18917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18945,7 +18925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18953,7 +18933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18961,7 +18941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18969,7 +18949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18977,7 +18957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18985,7 +18965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -18993,7 +18973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19001,7 +18981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19009,7 +18989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19017,7 +18997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19025,7 +19005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19033,7 +19013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19041,7 +19021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19049,7 +19029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19057,7 +19037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19065,7 +19045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19073,7 +19053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19081,7 +19061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19089,7 +19069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19097,7 +19077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19105,7 +19085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19113,7 +19093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19121,7 +19101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19129,7 +19109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19137,7 +19117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19145,7 +19125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19153,7 +19133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19161,7 +19141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19169,7 +19149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19177,7 +19157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19185,7 +19165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19193,7 +19173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19201,7 +19181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19209,7 +19189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19217,7 +19197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19225,7 +19205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19233,7 +19213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19241,7 +19221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19249,7 +19229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19257,7 +19237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19265,7 +19245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19273,7 +19253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19281,7 +19261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19289,7 +19269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19297,7 +19277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19305,7 +19285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19313,7 +19293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19321,7 +19301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19329,7 +19309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19337,7 +19317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19345,7 +19325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19353,7 +19333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19361,7 +19341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19369,7 +19349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19377,7 +19357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19385,7 +19365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19393,7 +19373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19401,7 +19381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19409,7 +19389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19417,7 +19397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19425,7 +19405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19433,7 +19413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19441,7 +19421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19449,7 +19429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19457,7 +19437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19465,7 +19445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19473,7 +19453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19481,7 +19461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19489,7 +19469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19497,7 +19477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19505,7 +19485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19513,7 +19493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19521,7 +19501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19529,7 +19509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19537,7 +19517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19545,7 +19525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19553,7 +19533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19561,7 +19541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19569,7 +19549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19577,7 +19557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19585,7 +19565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19593,7 +19573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19601,7 +19581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19609,7 +19589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19617,7 +19597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19625,7 +19605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19633,7 +19613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19641,7 +19621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19649,7 +19629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19657,7 +19637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19665,7 +19645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19673,7 +19653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19681,7 +19661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19689,7 +19669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19697,7 +19677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19705,7 +19685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19713,7 +19693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19721,7 +19701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19729,7 +19709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19737,7 +19717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19745,7 +19725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19753,7 +19733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19761,7 +19741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19769,7 +19749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19777,7 +19757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19785,7 +19765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19793,7 +19773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19801,7 +19781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19809,7 +19789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19817,7 +19797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19825,7 +19805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19833,7 +19813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19841,7 +19821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19849,7 +19829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19857,7 +19837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19865,7 +19845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19873,7 +19853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19881,7 +19861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19889,7 +19869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19897,7 +19877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19905,7 +19885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19913,7 +19893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19921,7 +19901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19929,7 +19909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19937,7 +19917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19945,7 +19925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19953,7 +19933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19961,7 +19941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19969,7 +19949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19977,7 +19957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19985,7 +19965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -19993,7 +19973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20001,7 +19981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20009,7 +19989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20017,7 +19997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20025,7 +20005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20033,7 +20013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20041,7 +20021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20049,7 +20029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20057,7 +20037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20065,7 +20045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20073,7 +20053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20081,7 +20061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20089,7 +20069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20097,7 +20077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20105,7 +20085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20113,7 +20093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20121,7 +20101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20129,7 +20109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20137,7 +20117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20145,7 +20125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20153,7 +20133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20161,7 +20141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20169,7 +20149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20177,7 +20157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20185,7 +20165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20193,7 +20173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20201,7 +20181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20209,7 +20189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20217,7 +20197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20225,7 +20205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20233,7 +20213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20241,7 +20221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20249,7 +20229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20257,7 +20237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20265,7 +20245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20273,7 +20253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20281,7 +20261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20289,7 +20269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20297,7 +20277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20305,7 +20285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20313,7 +20293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20321,7 +20301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20329,7 +20309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20337,7 +20317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20345,7 +20325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20353,7 +20333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20361,7 +20341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20369,7 +20349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20377,7 +20357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20385,7 +20365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20393,7 +20373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20401,7 +20381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20409,7 +20389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20417,7 +20397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20425,7 +20405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20433,7 +20413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20441,7 +20421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20449,7 +20429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20457,7 +20437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20465,7 +20445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20473,7 +20453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20481,7 +20461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20489,7 +20469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20497,7 +20477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20505,7 +20485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20513,7 +20493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20521,7 +20501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20529,7 +20509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20537,7 +20517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20545,7 +20525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20553,7 +20533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20561,7 +20541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20569,7 +20549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20577,7 +20557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20585,7 +20565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20593,7 +20573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20601,7 +20581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20609,7 +20589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20617,7 +20597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20625,7 +20605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20633,7 +20613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20641,7 +20621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20649,7 +20629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20657,7 +20637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20665,7 +20645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20673,7 +20653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20681,7 +20661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20689,7 +20669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20697,7 +20677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20705,7 +20685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20713,7 +20693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20721,7 +20701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20729,7 +20709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20737,7 +20717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20745,7 +20725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20753,7 +20733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20761,7 +20741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20769,7 +20749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20777,7 +20757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20785,7 +20765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20793,7 +20773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20801,7 +20781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20809,7 +20789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20817,7 +20797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20825,7 +20805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20833,7 +20813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20841,7 +20821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20849,7 +20829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20857,7 +20837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20865,7 +20845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20873,7 +20853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20881,7 +20861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20889,7 +20869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20897,7 +20877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20905,7 +20885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20913,7 +20893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20921,7 +20901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20929,7 +20909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20937,7 +20917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20945,7 +20925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20953,7 +20933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20961,7 +20941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20969,7 +20949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20977,7 +20957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20985,7 +20965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -20993,7 +20973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21001,7 +20981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21009,7 +20989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21017,7 +20997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21025,7 +21005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21033,7 +21013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21041,7 +21021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21049,7 +21029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21057,7 +21037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21065,7 +21045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21073,7 +21053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21081,7 +21061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21089,7 +21069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21097,7 +21077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21105,7 +21085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21113,7 +21093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21121,7 +21101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21129,7 +21109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21137,7 +21117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21145,7 +21125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21153,7 +21133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21161,7 +21141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21169,7 +21149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21177,7 +21157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21185,7 +21165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21193,7 +21173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21201,7 +21181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21209,7 +21189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21217,7 +21197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21225,7 +21205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21233,7 +21213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21241,7 +21221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21249,7 +21229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21257,7 +21237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21265,7 +21245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21273,7 +21253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21281,7 +21261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21289,7 +21269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21297,7 +21277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21305,7 +21285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21313,7 +21293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21321,7 +21301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21329,7 +21309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21337,7 +21317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21345,7 +21325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21353,7 +21333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21361,7 +21341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21369,7 +21349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21377,7 +21357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21385,7 +21365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21393,7 +21373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21401,7 +21381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21409,7 +21389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21417,7 +21397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21425,7 +21405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21433,7 +21413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21441,7 +21421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21449,7 +21429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21457,7 +21437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21465,7 +21445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21473,7 +21453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21481,7 +21461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21489,7 +21469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21497,7 +21477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21505,7 +21485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21513,7 +21493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21521,7 +21501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21529,7 +21509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21537,7 +21517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21545,7 +21525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21553,7 +21533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21561,7 +21541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21569,7 +21549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21577,7 +21557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21585,7 +21565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21593,7 +21573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21601,7 +21581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21609,7 +21589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21617,7 +21597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21625,7 +21605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21633,7 +21613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21641,7 +21621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21649,7 +21629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21657,7 +21637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21665,7 +21645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21673,7 +21653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21681,7 +21661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21689,7 +21669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21697,7 +21677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21705,7 +21685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21713,7 +21693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21721,7 +21701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21729,7 +21709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21737,7 +21717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21745,7 +21725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21753,7 +21733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21761,7 +21741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21769,7 +21749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21777,7 +21757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21785,7 +21765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21793,7 +21773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21801,7 +21781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21809,7 +21789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21817,7 +21797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21825,7 +21805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21833,7 +21813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21841,7 +21821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21849,7 +21829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21857,7 +21837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21865,7 +21845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21873,7 +21853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21881,7 +21861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21889,7 +21869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21897,7 +21877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21905,7 +21885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21913,7 +21893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21921,7 +21901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21929,7 +21909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21937,7 +21917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21945,7 +21925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21953,7 +21933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21961,7 +21941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21969,7 +21949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21977,7 +21957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21985,7 +21965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -21993,7 +21973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22001,7 +21981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22009,7 +21989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22017,7 +21997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22025,7 +22005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22033,7 +22013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22041,7 +22021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22049,7 +22029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22057,7 +22037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22065,7 +22045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22073,7 +22053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22081,7 +22061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22089,7 +22069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22097,7 +22077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22105,7 +22085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22113,7 +22093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22121,7 +22101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22129,7 +22109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22137,7 +22117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22145,7 +22125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22153,7 +22133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22161,7 +22141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22169,7 +22149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22177,7 +22157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22185,7 +22165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22193,7 +22173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22201,7 +22181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22209,7 +22189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22217,7 +22197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22225,7 +22205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22233,7 +22213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22241,7 +22221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22249,7 +22229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22257,7 +22237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22265,7 +22245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22273,7 +22253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22281,7 +22261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22289,7 +22269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22297,7 +22277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22305,7 +22285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22313,7 +22293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22321,7 +22301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22329,7 +22309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22337,7 +22317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22345,7 +22325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22353,7 +22333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22361,7 +22341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22369,7 +22349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22377,7 +22357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22385,7 +22365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22393,7 +22373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22401,7 +22381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22409,7 +22389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22417,7 +22397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22425,7 +22405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22433,7 +22413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22441,7 +22421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22449,7 +22429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22457,7 +22437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22465,7 +22445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22473,7 +22453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22481,7 +22461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22489,7 +22469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22497,7 +22477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22505,7 +22485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22513,7 +22493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22521,7 +22501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22529,7 +22509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22537,7 +22517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22545,7 +22525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22553,7 +22533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22561,7 +22541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22569,7 +22549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22577,7 +22557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22585,7 +22565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22593,7 +22573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22601,7 +22581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22609,7 +22589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22617,7 +22597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22625,7 +22605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22633,7 +22613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22641,7 +22621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22649,7 +22629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22657,7 +22637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22665,7 +22645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22673,7 +22653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22681,7 +22661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22689,7 +22669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22697,7 +22677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22705,7 +22685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22713,7 +22693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22721,7 +22701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22729,7 +22709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22737,7 +22717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22745,7 +22725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22753,7 +22733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22761,7 +22741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22769,7 +22749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22777,7 +22757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22785,7 +22765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22793,7 +22773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22801,7 +22781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22809,7 +22789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22817,7 +22797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22825,7 +22805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22833,7 +22813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22841,7 +22821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22849,7 +22829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22857,7 +22837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22865,7 +22845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22873,7 +22853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22881,7 +22861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22889,7 +22869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22897,7 +22877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22905,7 +22885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22913,7 +22893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22921,7 +22901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22929,7 +22909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22937,7 +22917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22945,7 +22925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22953,7 +22933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22961,7 +22941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22969,7 +22949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22977,7 +22957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22985,7 +22965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -22993,7 +22973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23001,7 +22981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23009,7 +22989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23017,7 +22997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23025,7 +23005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23033,7 +23013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23041,7 +23021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23049,7 +23029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23057,7 +23037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23065,7 +23045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23073,7 +23053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23081,7 +23061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23089,7 +23069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23097,7 +23077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23105,7 +23085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23113,7 +23093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23121,7 +23101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23129,7 +23109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23137,7 +23117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23145,7 +23125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23153,7 +23133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23161,7 +23141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23169,7 +23149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23177,7 +23157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23185,7 +23165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23193,7 +23173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23201,7 +23181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23209,7 +23189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23217,7 +23197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23225,7 +23205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23233,7 +23213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23241,7 +23221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23249,7 +23229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23257,7 +23237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23265,7 +23245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23273,7 +23253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23281,7 +23261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23289,7 +23269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23297,7 +23277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23305,7 +23285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23313,7 +23293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23321,7 +23301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23329,7 +23309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23337,7 +23317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23345,7 +23325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23353,7 +23333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23361,7 +23341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23369,7 +23349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23377,7 +23357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23385,7 +23365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23393,7 +23373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23401,7 +23381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23409,7 +23389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23417,7 +23397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23425,7 +23405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23433,7 +23413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23441,7 +23421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23449,7 +23429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23457,7 +23437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23465,7 +23445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23473,7 +23453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23481,7 +23461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23489,7 +23469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23497,7 +23477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23505,7 +23485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23513,7 +23493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23521,7 +23501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23529,7 +23509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23537,7 +23517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23545,7 +23525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23553,7 +23533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23561,7 +23541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23569,7 +23549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23577,7 +23557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23585,7 +23565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23593,7 +23573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23601,7 +23581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23609,7 +23589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23617,7 +23597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23625,7 +23605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23633,7 +23613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23641,7 +23621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23649,7 +23629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23657,7 +23637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23665,7 +23645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23673,7 +23653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23681,7 +23661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23689,7 +23669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23697,7 +23677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23705,7 +23685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23713,7 +23693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23721,7 +23701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23729,7 +23709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23737,7 +23717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23745,7 +23725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23753,7 +23733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23761,7 +23741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23769,7 +23749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23777,7 +23757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23785,7 +23765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23793,7 +23773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23801,7 +23781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23809,7 +23789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23817,7 +23797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23825,7 +23805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23833,7 +23813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23841,7 +23821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23849,7 +23829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23857,7 +23837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23865,7 +23845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23873,7 +23853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23881,7 +23861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23889,7 +23869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23897,7 +23877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23905,7 +23885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23913,7 +23893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23921,7 +23901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23929,7 +23909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23937,7 +23917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23945,7 +23925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23953,7 +23933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23961,7 +23941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23969,7 +23949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23977,7 +23957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23985,7 +23965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -23993,7 +23973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24001,7 +23981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24009,7 +23989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24017,7 +23997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24025,7 +24005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24033,7 +24013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24041,7 +24021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24049,7 +24029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24057,7 +24037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24065,7 +24045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24073,7 +24053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24081,7 +24061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24089,7 +24069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24097,7 +24077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24105,7 +24085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24113,7 +24093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24121,7 +24101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24129,7 +24109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24137,7 +24117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24145,7 +24125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24153,7 +24133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24161,7 +24141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24169,7 +24149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24177,7 +24157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24185,7 +24165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24193,7 +24173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24201,7 +24181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24209,7 +24189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24217,7 +24197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24225,7 +24205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24233,7 +24213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24241,7 +24221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24249,7 +24229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24257,7 +24237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24265,7 +24245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24273,7 +24253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24281,7 +24261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24289,7 +24269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24297,7 +24277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24305,7 +24285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24313,7 +24293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24321,7 +24301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24329,7 +24309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24337,7 +24317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24345,7 +24325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24353,7 +24333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24361,7 +24341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24369,7 +24349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24377,7 +24357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24385,7 +24365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24393,7 +24373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24401,7 +24381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24409,7 +24389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24417,7 +24397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24425,7 +24405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24433,7 +24413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24441,7 +24421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24449,7 +24429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24457,7 +24437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24465,7 +24445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24473,7 +24453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24481,7 +24461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24489,7 +24469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24497,7 +24477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24505,7 +24485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24513,7 +24493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24521,7 +24501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24529,7 +24509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24537,7 +24517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24545,7 +24525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24553,7 +24533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24561,7 +24541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24569,7 +24549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24577,7 +24557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24585,7 +24565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24593,7 +24573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24601,7 +24581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24609,7 +24589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24617,7 +24597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24625,7 +24605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24633,7 +24613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24641,7 +24621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24649,7 +24629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24657,7 +24637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24665,7 +24645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24673,7 +24653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24681,7 +24661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24689,7 +24669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24697,7 +24677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24705,7 +24685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24713,7 +24693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24721,7 +24701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24729,7 +24709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24737,7 +24717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24745,7 +24725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24753,7 +24733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24761,7 +24741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24769,7 +24749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24777,7 +24757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24785,7 +24765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24793,7 +24773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24801,7 +24781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24809,7 +24789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24817,7 +24797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24825,7 +24805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24833,7 +24813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24841,7 +24821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24849,7 +24829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24857,7 +24837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24865,7 +24845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24873,7 +24853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24881,7 +24861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24889,7 +24869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24897,7 +24877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24905,7 +24885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24913,7 +24893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24921,7 +24901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24929,7 +24909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24937,7 +24917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24945,7 +24925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24953,7 +24933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24961,7 +24941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24969,7 +24949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24977,7 +24957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24985,7 +24965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -24993,7 +24973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25001,7 +24981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25009,7 +24989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25017,7 +24997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25025,7 +25005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25033,7 +25013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25041,7 +25021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25049,7 +25029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25057,7 +25037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25065,7 +25045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25073,7 +25053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25081,7 +25061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25089,7 +25069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25097,7 +25077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25105,7 +25085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25113,7 +25093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25121,7 +25101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25129,7 +25109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25137,7 +25117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25145,7 +25125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25153,7 +25133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25161,7 +25141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25169,7 +25149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25177,7 +25157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25185,7 +25165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25193,7 +25173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25201,7 +25181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25209,7 +25189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25217,7 +25197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25225,7 +25205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25233,7 +25213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25241,7 +25221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25249,7 +25229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25257,7 +25237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25265,7 +25245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25273,7 +25253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25281,7 +25261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25289,7 +25269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25297,7 +25277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25305,7 +25285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25313,7 +25293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25321,7 +25301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25329,7 +25309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25337,7 +25317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25345,7 +25325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25353,7 +25333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25361,7 +25341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25369,7 +25349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25377,7 +25357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25385,7 +25365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25393,7 +25373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25401,7 +25381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25409,7 +25389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25417,7 +25397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25425,7 +25405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25433,7 +25413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25441,7 +25421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25449,7 +25429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25457,7 +25437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25465,7 +25445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25473,7 +25453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25481,7 +25461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25489,7 +25469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25497,7 +25477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25505,7 +25485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25513,7 +25493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25521,7 +25501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25529,7 +25509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25537,7 +25517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25545,7 +25525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25553,7 +25533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25561,7 +25541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25569,7 +25549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25577,7 +25557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25585,7 +25565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25593,7 +25573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25601,7 +25581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25609,7 +25589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25617,7 +25597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25625,7 +25605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25633,7 +25613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25641,7 +25621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25649,7 +25629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25657,7 +25637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25665,7 +25645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25673,7 +25653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25681,7 +25661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25689,7 +25669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25697,7 +25677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25705,7 +25685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25713,7 +25693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25721,7 +25701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25729,7 +25709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25737,7 +25717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25745,7 +25725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25753,7 +25733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25761,7 +25741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25769,7 +25749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25777,7 +25757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25785,7 +25765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25793,7 +25773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25801,7 +25781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25809,7 +25789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25817,7 +25797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25825,7 +25805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25833,7 +25813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25841,7 +25821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25849,7 +25829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25857,7 +25837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25865,7 +25845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25873,7 +25853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25881,7 +25861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25889,7 +25869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25897,7 +25877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25905,7 +25885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25913,7 +25893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25921,7 +25901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25929,7 +25909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25937,7 +25917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25945,7 +25925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25953,7 +25933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25961,7 +25941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25969,7 +25949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25977,7 +25957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25985,7 +25965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -25993,7 +25973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26001,7 +25981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26009,7 +25989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26017,7 +25997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26025,7 +26005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26033,7 +26013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26041,7 +26021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26049,7 +26029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26057,7 +26037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26065,7 +26045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26073,7 +26053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26081,7 +26061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26089,7 +26069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26097,7 +26077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26105,7 +26085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26113,7 +26093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26121,7 +26101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26129,7 +26109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26137,7 +26117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26145,7 +26125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26153,7 +26133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26161,7 +26141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26169,7 +26149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26177,7 +26157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26185,7 +26165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26193,7 +26173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26201,7 +26181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26209,7 +26189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26217,7 +26197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26225,7 +26205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26233,7 +26213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26241,7 +26221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26249,7 +26229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26257,7 +26237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26265,7 +26245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26273,7 +26253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26281,7 +26261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26289,7 +26269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26297,7 +26277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26305,7 +26285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26313,7 +26293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26321,7 +26301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26329,7 +26309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26337,7 +26317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26345,7 +26325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26353,7 +26333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26361,7 +26341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26369,7 +26349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26377,7 +26357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26385,7 +26365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26393,7 +26373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26401,7 +26381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26409,7 +26389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26417,7 +26397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26425,7 +26405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26433,7 +26413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26441,7 +26421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26449,7 +26429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26457,7 +26437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26465,7 +26445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26473,7 +26453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26481,7 +26461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26489,7 +26469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26497,7 +26477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26505,7 +26485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26513,7 +26493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26521,7 +26501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26529,7 +26509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26537,7 +26517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26545,7 +26525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26553,7 +26533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26561,7 +26541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26569,7 +26549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26577,7 +26557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26585,7 +26565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26593,7 +26573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26601,7 +26581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26609,7 +26589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26617,7 +26597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26625,7 +26605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26633,7 +26613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26641,7 +26621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26649,7 +26629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26657,7 +26637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26665,7 +26645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26673,7 +26653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26681,7 +26661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26689,7 +26669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26697,7 +26677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26705,7 +26685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26713,7 +26693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26721,7 +26701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26729,7 +26709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26737,7 +26717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26745,7 +26725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26753,7 +26733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26761,7 +26741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26769,7 +26749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26777,7 +26757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26785,7 +26765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26793,7 +26773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26801,7 +26781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26809,7 +26789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26817,7 +26797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26825,7 +26805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26833,7 +26813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26841,7 +26821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26849,7 +26829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26857,7 +26837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26865,7 +26845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26873,7 +26853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26881,7 +26861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26889,7 +26869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26897,7 +26877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26905,7 +26885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26913,7 +26893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26921,7 +26901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26929,7 +26909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26937,7 +26917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26945,7 +26925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26953,7 +26933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26961,7 +26941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26969,7 +26949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26977,7 +26957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26985,7 +26965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -26993,7 +26973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27001,7 +26981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27009,7 +26989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27017,7 +26997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27025,7 +27005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27033,7 +27013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27041,7 +27021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27049,7 +27029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27057,7 +27037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27065,7 +27045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27073,7 +27053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27081,7 +27061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27089,7 +27069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27097,7 +27077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27105,7 +27085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27113,7 +27093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27121,7 +27101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27129,7 +27109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27137,7 +27117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27145,7 +27125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27153,7 +27133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27161,7 +27141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27169,7 +27149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27177,7 +27157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27185,7 +27165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27193,7 +27173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27201,7 +27181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27209,7 +27189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27217,7 +27197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27225,7 +27205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27233,7 +27213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27241,7 +27221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27249,7 +27229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27257,7 +27237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27265,7 +27245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27273,7 +27253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27281,7 +27261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27289,7 +27269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27297,7 +27277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27305,7 +27285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27313,7 +27293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27321,7 +27301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27329,7 +27309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27337,7 +27317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27345,7 +27325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27353,7 +27333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27361,7 +27341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27369,7 +27349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27377,7 +27357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27385,7 +27365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27393,7 +27373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27401,7 +27381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27409,7 +27389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27417,7 +27397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27425,7 +27405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27433,7 +27413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27441,7 +27421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27449,7 +27429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27457,7 +27437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27465,7 +27445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27473,7 +27453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27481,7 +27461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27489,7 +27469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27497,7 +27477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27505,7 +27485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27513,7 +27493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27521,7 +27501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27529,7 +27509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27537,7 +27517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27545,7 +27525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27553,7 +27533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27561,7 +27541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27569,7 +27549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27577,7 +27557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27585,7 +27565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27593,7 +27573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27601,7 +27581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27609,7 +27589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27617,7 +27597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27625,7 +27605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27633,7 +27613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27641,7 +27621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27649,7 +27629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27657,7 +27637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27665,7 +27645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27673,7 +27653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27681,7 +27661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27689,7 +27669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27697,7 +27677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27705,7 +27685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27713,7 +27693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27721,7 +27701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27729,7 +27709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27737,7 +27717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27745,7 +27725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27753,7 +27733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27761,7 +27741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27769,7 +27749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27777,7 +27757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27785,7 +27765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27793,7 +27773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27801,7 +27781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27809,7 +27789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27817,7 +27797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27825,7 +27805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27833,7 +27813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27841,7 +27821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27849,7 +27829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27857,7 +27837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27865,7 +27845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27873,7 +27853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27881,7 +27861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27889,7 +27869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27897,7 +27877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27905,7 +27885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27913,7 +27893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27921,7 +27901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27929,7 +27909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27937,7 +27917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27945,7 +27925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27953,7 +27933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27961,7 +27941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27969,7 +27949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27977,7 +27957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27985,7 +27965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -27993,7 +27973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28001,7 +27981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28009,7 +27989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28017,7 +27997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28025,7 +28005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28033,7 +28013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28041,7 +28021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28049,7 +28029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28057,7 +28037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28065,7 +28045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28073,7 +28053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28081,7 +28061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28089,7 +28069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28097,7 +28077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28105,7 +28085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28113,7 +28093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28121,7 +28101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28129,7 +28109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28137,7 +28117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28145,7 +28125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28153,7 +28133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28161,7 +28141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28169,7 +28149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28177,7 +28157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28185,7 +28165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28193,7 +28173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28201,7 +28181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28209,7 +28189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28217,7 +28197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28225,7 +28205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28233,7 +28213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28241,7 +28221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28249,7 +28229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28257,7 +28237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28265,7 +28245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28273,7 +28253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28281,7 +28261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28289,7 +28269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28297,7 +28277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28305,7 +28285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28313,7 +28293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28321,7 +28301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28329,7 +28309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28337,7 +28317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28345,7 +28325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28353,7 +28333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28361,7 +28341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28369,7 +28349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28377,7 +28357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28385,7 +28365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28393,7 +28373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28401,7 +28381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28409,7 +28389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28417,7 +28397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28425,7 +28405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28433,7 +28413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28441,7 +28421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28449,7 +28429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28457,7 +28437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28465,7 +28445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28473,7 +28453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28481,7 +28461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28489,7 +28469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28497,7 +28477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28505,7 +28485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28513,7 +28493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28521,7 +28501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28529,7 +28509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28537,7 +28517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28545,7 +28525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28553,7 +28533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28561,7 +28541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28569,7 +28549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28577,7 +28557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28585,7 +28565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28593,7 +28573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28601,7 +28581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28609,7 +28589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28617,7 +28597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28625,7 +28605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28633,7 +28613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28641,7 +28621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28649,7 +28629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28657,7 +28637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28665,7 +28645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28673,7 +28653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28681,7 +28661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28689,7 +28669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28697,7 +28677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28705,7 +28685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28713,7 +28693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28721,7 +28701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28729,7 +28709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28737,7 +28717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28745,7 +28725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28753,7 +28733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28761,7 +28741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28769,7 +28749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28777,7 +28757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28785,7 +28765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28793,7 +28773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28801,7 +28781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28809,7 +28789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28817,7 +28797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28825,7 +28805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28833,7 +28813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28841,7 +28821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28849,7 +28829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28857,7 +28837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28865,7 +28845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28873,7 +28853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28881,7 +28861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28889,7 +28869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28897,7 +28877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28905,7 +28885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28913,7 +28893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28921,7 +28901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28929,7 +28909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28937,7 +28917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28945,7 +28925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28953,7 +28933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28961,7 +28941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28969,7 +28949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28977,7 +28957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28985,7 +28965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -28993,7 +28973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29001,7 +28981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29009,7 +28989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29017,7 +28997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29025,7 +29005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29033,7 +29013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29041,7 +29021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29049,7 +29029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29057,7 +29037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29065,7 +29045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29073,7 +29053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29081,7 +29061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29089,7 +29069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29097,7 +29077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29105,7 +29085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29113,7 +29093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29121,7 +29101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29129,7 +29109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29137,7 +29117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29145,7 +29125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29153,7 +29133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29161,7 +29141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29169,7 +29149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29177,7 +29157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29185,7 +29165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29193,7 +29173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29201,7 +29181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29209,7 +29189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29217,7 +29197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29225,7 +29205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29233,7 +29213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29241,7 +29221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29249,7 +29229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29257,7 +29237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29265,7 +29245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29273,7 +29253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29281,7 +29261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29289,7 +29269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29297,7 +29277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29305,7 +29285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29313,7 +29293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29321,7 +29301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29329,7 +29309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29337,7 +29317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29345,7 +29325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29353,7 +29333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29361,7 +29341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29369,7 +29349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29377,7 +29357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29385,7 +29365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29393,7 +29373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29401,7 +29381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29409,7 +29389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29417,7 +29397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29425,7 +29405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29433,7 +29413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29441,7 +29421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29449,7 +29429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29457,7 +29437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29465,7 +29445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29473,7 +29453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29481,7 +29461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29489,7 +29469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29497,7 +29477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29505,7 +29485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29513,7 +29493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29521,7 +29501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29529,7 +29509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29537,7 +29517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29545,7 +29525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29553,7 +29533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29561,7 +29541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29569,7 +29549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29577,7 +29557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29585,7 +29565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29593,7 +29573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29601,7 +29581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29609,7 +29589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29617,7 +29597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29625,7 +29605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29633,7 +29613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29641,7 +29621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29649,7 +29629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29657,7 +29637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29665,7 +29645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29673,7 +29653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29681,7 +29661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29689,7 +29669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29697,7 +29677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29705,7 +29685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29713,7 +29693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29721,7 +29701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29729,7 +29709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29737,7 +29717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29745,7 +29725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29753,7 +29733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29761,7 +29741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29769,7 +29749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29777,7 +29757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29785,7 +29765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29793,7 +29773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29801,7 +29781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29809,7 +29789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29817,7 +29797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29825,7 +29805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29833,7 +29813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29841,7 +29821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29849,7 +29829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29857,7 +29837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29865,7 +29845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29873,7 +29853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29881,7 +29861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29889,7 +29869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29897,7 +29877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29905,7 +29885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29913,7 +29893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29921,7 +29901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29929,7 +29909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29937,7 +29917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29945,7 +29925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29953,7 +29933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29961,7 +29941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29969,7 +29949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29977,7 +29957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29985,7 +29965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -29993,7 +29973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30001,7 +29981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30009,7 +29989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30017,7 +29997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30025,7 +30005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30033,7 +30013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30041,7 +30021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30049,7 +30029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30057,7 +30037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30065,7 +30045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30073,7 +30053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30081,7 +30061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30089,7 +30069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30097,7 +30077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30105,7 +30085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30113,7 +30093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30121,7 +30101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30129,7 +30109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30137,7 +30117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30145,7 +30125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30153,7 +30133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30161,7 +30141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30169,7 +30149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30177,7 +30157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30185,7 +30165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30193,7 +30173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30201,7 +30181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30209,7 +30189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30217,7 +30197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30225,7 +30205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30233,7 +30213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30241,7 +30221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30249,7 +30229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30257,7 +30237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30265,7 +30245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30273,7 +30253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30281,7 +30261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30289,7 +30269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30297,7 +30277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30305,7 +30285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30313,7 +30293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30321,7 +30301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30329,7 +30309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30337,7 +30317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30345,7 +30325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30353,7 +30333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30361,7 +30341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30369,7 +30349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30377,7 +30357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30385,7 +30365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30393,7 +30373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30401,7 +30381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30409,7 +30389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30417,7 +30397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30425,7 +30405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30433,7 +30413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30441,7 +30421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30449,7 +30429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30457,7 +30437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30465,7 +30445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30473,7 +30453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30481,7 +30461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30489,7 +30469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30497,7 +30477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30505,7 +30485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30513,7 +30493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30521,7 +30501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30529,7 +30509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30537,7 +30517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30545,7 +30525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30553,7 +30533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30561,7 +30541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30569,7 +30549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30577,7 +30557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30585,7 +30565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30593,7 +30573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30601,7 +30581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30609,7 +30589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30617,7 +30597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30625,7 +30605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30633,7 +30613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30641,7 +30621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30649,7 +30629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30657,7 +30637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30665,7 +30645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30673,7 +30653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30681,7 +30661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30689,7 +30669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30697,7 +30677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30705,7 +30685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30713,7 +30693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30721,7 +30701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30729,7 +30709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30737,7 +30717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30745,7 +30725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30753,7 +30733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30761,7 +30741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30769,7 +30749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30777,7 +30757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30785,7 +30765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30793,7 +30773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30801,7 +30781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30809,7 +30789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30817,7 +30797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30825,7 +30805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30833,7 +30813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30841,7 +30821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30849,7 +30829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30857,7 +30837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30865,7 +30845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30873,7 +30853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30881,7 +30861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30889,7 +30869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30897,7 +30877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30905,7 +30885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30913,7 +30893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30921,7 +30901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30929,7 +30909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30937,7 +30917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30945,7 +30925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30953,7 +30933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30961,7 +30941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30969,7 +30949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30977,7 +30957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30985,7 +30965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -30993,7 +30973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31001,7 +30981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31009,7 +30989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31017,7 +30997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31025,7 +31005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31033,7 +31013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31041,7 +31021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31049,7 +31029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31057,7 +31037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31065,7 +31045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31073,7 +31053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31081,7 +31061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31089,7 +31069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31097,7 +31077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31105,7 +31085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31113,7 +31093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31121,7 +31101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31129,7 +31109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31137,7 +31117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31145,7 +31125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31153,7 +31133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31161,7 +31141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31169,7 +31149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31177,7 +31157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31185,7 +31165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31193,7 +31173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31201,7 +31181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31209,7 +31189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31217,7 +31197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31225,7 +31205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31233,7 +31213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31241,7 +31221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31249,7 +31229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31257,7 +31237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31265,7 +31245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31273,7 +31253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31281,7 +31261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31289,7 +31269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31297,7 +31277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31305,7 +31285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31313,7 +31293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31321,7 +31301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31329,7 +31309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31337,7 +31317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31345,7 +31325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31353,7 +31333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31361,7 +31341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31369,7 +31349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31377,7 +31357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31385,7 +31365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31393,7 +31373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31401,7 +31381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31409,7 +31389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31417,7 +31397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31425,7 +31405,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31433,7 +31413,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31441,7 +31421,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31449,7 +31429,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31457,7 +31437,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31465,7 +31445,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31473,7 +31453,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31481,7 +31461,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31489,7 +31469,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31497,7 +31477,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31505,7 +31485,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31513,7 +31493,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31521,7 +31501,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31529,7 +31509,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31537,7 +31517,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31545,7 +31525,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31553,7 +31533,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31561,7 +31541,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31569,7 +31549,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31577,7 +31557,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31585,7 +31565,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31593,7 +31573,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31601,7 +31581,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31609,7 +31589,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31617,7 +31597,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31625,7 +31605,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31633,7 +31613,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31641,7 +31621,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31649,7 +31629,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31657,7 +31637,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31665,7 +31645,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31673,7 +31653,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31681,7 +31661,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31689,7 +31669,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31697,7 +31677,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31705,7 +31685,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31713,7 +31693,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31721,7 +31701,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31729,7 +31709,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31737,7 +31717,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31745,7 +31725,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31753,7 +31733,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31761,7 +31741,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31769,7 +31749,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31777,7 +31757,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31785,7 +31765,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31793,7 +31773,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31801,7 +31781,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31809,7 +31789,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31817,7 +31797,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31825,7 +31805,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31833,7 +31813,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31841,7 +31821,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31849,7 +31829,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31857,7 +31837,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31865,7 +31845,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31873,7 +31853,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31881,7 +31861,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31889,7 +31869,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31897,7 +31877,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31905,7 +31885,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31913,7 +31893,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31921,7 +31901,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31929,7 +31909,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31937,7 +31917,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31945,7 +31925,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31953,7 +31933,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31961,7 +31941,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31969,7 +31949,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31977,7 +31957,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31985,7 +31965,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -31993,7 +31973,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32001,7 +31981,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32009,7 +31989,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32017,7 +31997,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32025,7 +32005,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32033,7 +32013,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32041,7 +32021,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32049,7 +32029,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32057,7 +32037,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32065,7 +32045,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32073,7 +32053,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32081,7 +32061,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32089,7 +32069,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32097,7 +32077,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32105,7 +32085,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32113,7 +32093,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32121,7 +32101,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32129,7 +32109,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32137,7 +32117,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32145,7 +32125,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32153,7 +32133,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32161,7 +32141,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32169,7 +32149,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32177,7 +32157,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32185,7 +32165,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32193,7 +32173,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32201,7 +32181,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32209,7 +32189,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32217,7 +32197,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32225,7 +32205,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32233,7 +32213,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32241,7 +32221,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32249,7 +32229,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32257,7 +32237,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32265,7 +32245,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32273,7 +32253,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32281,7 +32261,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32289,7 +32269,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32297,7 +32277,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32305,7 +32285,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32313,7 +32293,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32321,7 +32301,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32329,7 +32309,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32337,7 +32317,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32345,7 +32325,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32353,7 +32333,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32361,7 +32341,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32369,7 +32349,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32377,7 +32357,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32385,7 +32365,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32393,7 +32373,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32401,7 +32381,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32409,7 +32389,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32417,7 +32397,7 @@ test_cold_sweep_2048:
 	1:
 	
 # 0 "" 2
-# 394 "tests.c" 1
+# 396 "tests.c" 1
 	j 1f
 	.rept 0
 	nop
@@ -32438,7 +32418,7 @@ test_cold_sweep_16_padding:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32446,7 +32426,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32454,7 +32434,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32462,7 +32442,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32470,7 +32450,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32478,7 +32458,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32486,7 +32466,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32494,7 +32474,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32502,7 +32482,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32510,7 +32490,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32518,7 +32498,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32526,7 +32506,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32534,7 +32514,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32542,7 +32522,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32550,7 +32530,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32558,7 +32538,7 @@ test_cold_sweep_16_padding:
 	1:
 	
 # 0 "" 2
-# 399 "tests.c" 1
+# 401 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32579,7 +32559,7 @@ test_cold_sweep_64_padding:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32587,7 +32567,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32595,7 +32575,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32603,7 +32583,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32611,7 +32591,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32619,7 +32599,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32627,7 +32607,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32635,7 +32615,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32643,7 +32623,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32651,7 +32631,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32659,7 +32639,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32667,7 +32647,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32675,7 +32655,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32683,7 +32663,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32691,7 +32671,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32699,7 +32679,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32707,7 +32687,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32715,7 +32695,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32723,7 +32703,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32731,7 +32711,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32739,7 +32719,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32747,7 +32727,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32755,7 +32735,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32763,7 +32743,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32771,7 +32751,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32779,7 +32759,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32787,7 +32767,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32795,7 +32775,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32803,7 +32783,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32811,7 +32791,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32819,7 +32799,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32827,7 +32807,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32835,7 +32815,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32843,7 +32823,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32851,7 +32831,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32859,7 +32839,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32867,7 +32847,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32875,7 +32855,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32883,7 +32863,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32891,7 +32871,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32899,7 +32879,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32907,7 +32887,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32915,7 +32895,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32923,7 +32903,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32931,7 +32911,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32939,7 +32919,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32947,7 +32927,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32955,7 +32935,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32963,7 +32943,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32971,7 +32951,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32979,7 +32959,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32987,7 +32967,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -32995,7 +32975,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33003,7 +32983,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33011,7 +32991,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33019,7 +32999,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33027,7 +33007,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33035,7 +33015,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33043,7 +33023,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33051,7 +33031,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33059,7 +33039,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33067,7 +33047,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33075,7 +33055,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33083,7 +33063,7 @@ test_cold_sweep_64_padding:
 	1:
 	
 # 0 "" 2
-# 404 "tests.c" 1
+# 406 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33104,7 +33084,7 @@ test_cold_sweep_128_padding:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33112,7 +33092,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33120,7 +33100,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33128,7 +33108,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33136,7 +33116,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33144,7 +33124,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33152,7 +33132,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33160,7 +33140,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33168,7 +33148,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33176,7 +33156,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33184,7 +33164,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33192,7 +33172,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33200,7 +33180,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33208,7 +33188,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33216,7 +33196,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33224,7 +33204,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33232,7 +33212,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33240,7 +33220,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33248,7 +33228,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33256,7 +33236,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33264,7 +33244,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33272,7 +33252,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33280,7 +33260,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33288,7 +33268,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33296,7 +33276,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33304,7 +33284,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33312,7 +33292,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33320,7 +33300,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33328,7 +33308,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33336,7 +33316,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33344,7 +33324,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33352,7 +33332,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33360,7 +33340,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33368,7 +33348,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33376,7 +33356,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33384,7 +33364,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33392,7 +33372,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33400,7 +33380,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33408,7 +33388,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33416,7 +33396,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33424,7 +33404,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33432,7 +33412,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33440,7 +33420,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33448,7 +33428,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33456,7 +33436,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33464,7 +33444,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33472,7 +33452,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33480,7 +33460,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33488,7 +33468,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33496,7 +33476,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33504,7 +33484,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33512,7 +33492,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33520,7 +33500,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33528,7 +33508,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33536,7 +33516,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33544,7 +33524,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33552,7 +33532,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33560,7 +33540,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33568,7 +33548,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33576,7 +33556,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33584,7 +33564,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33592,7 +33572,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33600,7 +33580,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33608,7 +33588,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33616,7 +33596,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33624,7 +33604,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33632,7 +33612,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33640,7 +33620,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33648,7 +33628,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33656,7 +33636,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33664,7 +33644,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33672,7 +33652,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33680,7 +33660,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33688,7 +33668,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33696,7 +33676,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33704,7 +33684,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33712,7 +33692,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33720,7 +33700,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33728,7 +33708,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33736,7 +33716,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33744,7 +33724,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33752,7 +33732,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33760,7 +33740,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33768,7 +33748,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33776,7 +33756,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33784,7 +33764,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33792,7 +33772,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33800,7 +33780,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33808,7 +33788,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33816,7 +33796,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33824,7 +33804,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33832,7 +33812,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33840,7 +33820,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33848,7 +33828,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33856,7 +33836,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33864,7 +33844,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33872,7 +33852,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33880,7 +33860,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33888,7 +33868,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33896,7 +33876,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33904,7 +33884,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33912,7 +33892,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33920,7 +33900,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33928,7 +33908,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33936,7 +33916,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33944,7 +33924,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33952,7 +33932,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33960,7 +33940,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33968,7 +33948,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33976,7 +33956,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33984,7 +33964,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -33992,7 +33972,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34000,7 +33980,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34008,7 +33988,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34016,7 +33996,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34024,7 +34004,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34032,7 +34012,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34040,7 +34020,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34048,7 +34028,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34056,7 +34036,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34064,7 +34044,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34072,7 +34052,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34080,7 +34060,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34088,7 +34068,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34096,7 +34076,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34104,7 +34084,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34112,7 +34092,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34120,7 +34100,7 @@ test_cold_sweep_128_padding:
 	1:
 	
 # 0 "" 2
-# 409 "tests.c" 1
+# 411 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34141,7 +34121,7 @@ test_cold_sweep_256_padding:
 	sw	s0,12(sp)
 	addi	s0,sp,16
  #APP
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34149,7 +34129,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34157,7 +34137,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34165,7 +34145,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34173,7 +34153,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34181,7 +34161,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34189,7 +34169,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34197,7 +34177,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34205,7 +34185,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34213,7 +34193,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34221,7 +34201,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34229,7 +34209,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34237,7 +34217,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34245,7 +34225,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34253,7 +34233,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34261,7 +34241,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34269,7 +34249,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34277,7 +34257,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34285,7 +34265,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34293,7 +34273,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34301,7 +34281,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34309,7 +34289,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34317,7 +34297,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34325,7 +34305,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34333,7 +34313,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34341,7 +34321,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34349,7 +34329,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34357,7 +34337,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34365,7 +34345,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34373,7 +34353,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34381,7 +34361,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34389,7 +34369,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34397,7 +34377,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34405,7 +34385,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34413,7 +34393,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34421,7 +34401,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34429,7 +34409,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34437,7 +34417,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34445,7 +34425,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34453,7 +34433,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34461,7 +34441,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34469,7 +34449,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34477,7 +34457,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34485,7 +34465,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34493,7 +34473,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34501,7 +34481,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34509,7 +34489,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34517,7 +34497,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34525,7 +34505,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34533,7 +34513,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34541,7 +34521,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34549,7 +34529,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34557,7 +34537,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34565,7 +34545,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34573,7 +34553,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34581,7 +34561,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34589,7 +34569,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34597,7 +34577,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34605,7 +34585,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34613,7 +34593,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34621,7 +34601,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34629,7 +34609,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34637,7 +34617,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34645,7 +34625,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34653,7 +34633,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34661,7 +34641,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34669,7 +34649,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34677,7 +34657,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34685,7 +34665,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34693,7 +34673,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34701,7 +34681,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34709,7 +34689,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34717,7 +34697,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34725,7 +34705,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34733,7 +34713,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34741,7 +34721,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34749,7 +34729,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34757,7 +34737,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34765,7 +34745,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34773,7 +34753,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34781,7 +34761,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34789,7 +34769,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34797,7 +34777,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34805,7 +34785,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34813,7 +34793,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34821,7 +34801,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34829,7 +34809,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34837,7 +34817,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34845,7 +34825,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34853,7 +34833,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34861,7 +34841,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34869,7 +34849,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34877,7 +34857,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34885,7 +34865,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34893,7 +34873,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34901,7 +34881,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34909,7 +34889,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34917,7 +34897,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34925,7 +34905,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34933,7 +34913,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34941,7 +34921,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34949,7 +34929,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34957,7 +34937,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34965,7 +34945,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34973,7 +34953,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34981,7 +34961,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34989,7 +34969,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -34997,7 +34977,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35005,7 +34985,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35013,7 +34993,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35021,7 +35001,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35029,7 +35009,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35037,7 +35017,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35045,7 +35025,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35053,7 +35033,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35061,7 +35041,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35069,7 +35049,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35077,7 +35057,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35085,7 +35065,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35093,7 +35073,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35101,7 +35081,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35109,7 +35089,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35117,7 +35097,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35125,7 +35105,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35133,7 +35113,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35141,7 +35121,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35149,7 +35129,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35157,7 +35137,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35165,7 +35145,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35173,7 +35153,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35181,7 +35161,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35189,7 +35169,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35197,7 +35177,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35205,7 +35185,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35213,7 +35193,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35221,7 +35201,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35229,7 +35209,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35237,7 +35217,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35245,7 +35225,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35253,7 +35233,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35261,7 +35241,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35269,7 +35249,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35277,7 +35257,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35285,7 +35265,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35293,7 +35273,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35301,7 +35281,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35309,7 +35289,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35317,7 +35297,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35325,7 +35305,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35333,7 +35313,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35341,7 +35321,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35349,7 +35329,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35357,7 +35337,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35365,7 +35345,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35373,7 +35353,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35381,7 +35361,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35389,7 +35369,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35397,7 +35377,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35405,7 +35385,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35413,7 +35393,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35421,7 +35401,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35429,7 +35409,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35437,7 +35417,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35445,7 +35425,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35453,7 +35433,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35461,7 +35441,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35469,7 +35449,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35477,7 +35457,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35485,7 +35465,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35493,7 +35473,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35501,7 +35481,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35509,7 +35489,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35517,7 +35497,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35525,7 +35505,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35533,7 +35513,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35541,7 +35521,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35549,7 +35529,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35557,7 +35537,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35565,7 +35545,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35573,7 +35553,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35581,7 +35561,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35589,7 +35569,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35597,7 +35577,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35605,7 +35585,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35613,7 +35593,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35621,7 +35601,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35629,7 +35609,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35637,7 +35617,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35645,7 +35625,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35653,7 +35633,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35661,7 +35641,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35669,7 +35649,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35677,7 +35657,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35685,7 +35665,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35693,7 +35673,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35701,7 +35681,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35709,7 +35689,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35717,7 +35697,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35725,7 +35705,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35733,7 +35713,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35741,7 +35721,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35749,7 +35729,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35757,7 +35737,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35765,7 +35745,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35773,7 +35753,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35781,7 +35761,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35789,7 +35769,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35797,7 +35777,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35805,7 +35785,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35813,7 +35793,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35821,7 +35801,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35829,7 +35809,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35837,7 +35817,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35845,7 +35825,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35853,7 +35833,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35861,7 +35841,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35869,7 +35849,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35877,7 +35857,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35885,7 +35865,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35893,7 +35873,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35901,7 +35881,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35909,7 +35889,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35917,7 +35897,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35925,7 +35905,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35933,7 +35913,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35941,7 +35921,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35949,7 +35929,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35957,7 +35937,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35965,7 +35945,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35973,7 +35953,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35981,7 +35961,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35989,7 +35969,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -35997,7 +35977,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36005,7 +35985,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36013,7 +35993,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36021,7 +36001,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36029,7 +36009,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36037,7 +36017,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36045,7 +36025,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36053,7 +36033,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36061,7 +36041,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36069,7 +36049,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36077,7 +36057,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36085,7 +36065,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36093,7 +36073,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36101,7 +36081,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36109,7 +36089,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36117,7 +36097,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36125,7 +36105,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36133,7 +36113,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36141,7 +36121,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36149,7 +36129,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36157,7 +36137,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36165,7 +36145,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36173,7 +36153,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36181,7 +36161,7 @@ test_cold_sweep_256_padding:
 	1:
 	
 # 0 "" 2
-# 415 "tests.c" 1
+# 417 "tests.c" 1
 	j 1f
 	.rept 15
 	nop
@@ -36211,11 +36191,11 @@ test_bubble_sort:
 	mv	a0,a4
 	call	memcpy
 	sw	zero,-20(s0)
-	j	.L132
-.L136:
+	j	.L128
+.L132:
 	sw	zero,-24(s0)
-	j	.L133
-.L135:
+	j	.L129
+.L131:
 	lw	a5,-24(s0)
 	addi	a4,s0,-16
 	add	a5,a4,a5
@@ -36225,7 +36205,7 @@ test_bubble_sort:
 	addi	a3,s0,-16
 	add	a5,a3,a5
 	lbu	a5,-112(a5)
-	bleu	a4,a5,.L134
+	bleu	a4,a5,.L130
 	lw	a5,-24(s0)
 	addi	a4,s0,-16
 	add	a5,a4,a5
@@ -36247,23 +36227,23 @@ test_bubble_sort:
 	addi	a3,s0,-16
 	add	a5,a3,a5
 	sb	a4,-112(a5)
-.L134:
+.L130:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L133:
+.L129:
 	li	a4,99
 	lw	a5,-20(s0)
 	sub	a5,a4,a5
 	lw	a4,-24(s0)
-	blt	a4,a5,.L135
+	blt	a4,a5,.L131
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
-.L132:
+.L128:
 	lw	a4,-20(s0)
 	li	a5,98
-	ble	a4,a5,.L136
+	ble	a4,a5,.L132
 	nop
 	lw	ra,124(sp)
 	lw	s0,120(sp)
@@ -36271,8 +36251,8 @@ test_bubble_sort:
 	jr	ra
 	.size	test_bubble_sort, .-test_bubble_sort
 	.align	2
-	.type	quick_sort.1289, @function
-quick_sort.1289:
+	.type	quick_sort.1282, @function
+quick_sort.1282:
 	addi	sp,sp,-64
 	sw	ra,60(sp)
 	sw	s0,56(sp)
@@ -36284,7 +36264,7 @@ quick_sort.1289:
 	sw	t2,-60(s0)
 	lw	a4,-52(s0)
 	lw	a5,-56(s0)
-	bge	a4,a5,.L142
+	bge	a4,a5,.L138
 	lw	a5,-56(s0)
 	add	a5,s1,a5
 	lbu	a5,0(a5)
@@ -36294,14 +36274,14 @@ quick_sort.1289:
 	sw	a5,-20(s0)
 	lw	a5,-52(s0)
 	sw	a5,-24(s0)
-	j	.L139
-.L141:
+	j	.L135
+.L137:
 	lw	a5,-24(s0)
 	add	a5,s1,a5
 	lbu	a5,0(a5)
 	mv	a4,a5
 	lw	a5,-28(s0)
-	ble	a5,a4,.L140
+	ble	a5,a4,.L136
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	sw	a5,-20(s0)
@@ -36319,14 +36299,14 @@ quick_sort.1289:
 	add	a5,s1,a5
 	lbu	a4,-29(s0)
 	sb	a4,0(a5)
-.L140:
+.L136:
 	lw	a5,-24(s0)
 	addi	a5,a5,1
 	sw	a5,-24(s0)
-.L139:
+.L135:
 	lw	a4,-24(s0)
 	lw	a5,-56(s0)
-	blt	a4,a5,.L141
+	blt	a4,a5,.L137
 	lw	a5,-20(s0)
 	addi	a5,a5,1
 	add	a5,s1,a5
@@ -36351,21 +36331,21 @@ quick_sort.1289:
 	mv	t2,s1
 	mv	a1,a5
 	lw	a0,-52(s0)
-	call	quick_sort.1289
+	call	quick_sort.1282
 	lw	a5,-36(s0)
 	addi	a5,a5,1
 	mv	t2,s1
 	lw	a1,-56(s0)
 	mv	a0,a5
-	call	quick_sort.1289
-.L142:
+	call	quick_sort.1282
+.L138:
 	nop
 	lw	ra,60(sp)
 	lw	s0,56(sp)
 	lw	s1,52(sp)
 	addi	sp,sp,64
 	jr	ra
-	.size	quick_sort.1289, .-quick_sort.1289
+	.size	quick_sort.1282, .-quick_sort.1282
 	.align	2
 	.globl	test_quick_sort
 	.type	test_quick_sort, @function
@@ -36388,7 +36368,7 @@ test_quick_sort:
 	mv	t2,a5
 	li	a1,99
 	li	a0,0
-	call	quick_sort.1289
+	call	quick_sort.1282
 	nop
 	lw	ra,220(sp)
 	lw	s0,216(sp)
@@ -36543,7 +36523,7 @@ main:
 	call	run_test
 	li	a5,2
 	sb	a5,-17(s0)
-.L145:
+.L141:
 	li	a5,50331648
 	addi	s1,a5,1
 	call	run_workload
@@ -36555,7 +36535,7 @@ main:
 	lbu	a5,-17(s0)
 	xori	a5,a5,2
 	sb	a5,-17(s0)
-	j	.L145
+	j	.L141
 	.size	main, .-main
 	.section	.rodata
 	.align	2
