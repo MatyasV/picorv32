@@ -123,14 +123,16 @@ void print_str(const char *s) {
 }
 
 uint32_t div(uint32_t n, uint32_t d) {
-    uint32_t q = 0;
-    while (n >= d) { n -= d; q++; }
-    return q;
+    return n / d;
+    // uint32_t q = 0;
+    // while (n >= d) { n -= d; q++; }
+    // return q;
 }
 
 uint32_t mod(uint32_t n, uint32_t d) {
-    while (n >= d) n -= d;
-    return n;
+    return n % d;
+    // while (n >= d) n -= d;
+    // return n;
 }
 
 void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misses, const char *test_name) {
