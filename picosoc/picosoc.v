@@ -164,10 +164,13 @@ module picosoc (
 		.BARREL_SHIFTER(BARREL_SHIFTER),
 		.COMPRESSED_ISA(ENABLE_COMPRESSED),
 		.ENABLE_COUNTERS(ENABLE_COUNTERS),
+		.ENABLE_COUNTERS64(0),       // 32-bit RDCYCLE/RDINSTRET is plenty (~286s @15MHz); drops upper-32b counter FFs+carry
 		.ENABLE_MUL(ENABLE_MUL),
 		.ENABLE_DIV(ENABLE_DIV),
 		.ENABLE_FAST_MUL(ENABLE_FAST_MUL),
-		.ENABLE_IRQ(1),
+		.CATCH_MISALIGN(0),          // benchmark code is well-formed; remove misalign-trap logic
+		.CATCH_ILLINSN(0),           // no illegal-instruction trap needed; frees LCs
+		.ENABLE_IRQ(0),              // IRQ inputs tied to 0 and firmware uses no interrupts/timer
 		.ENABLE_IRQ_QREGS(ENABLE_IRQ_QREGS)
 	) cpu (
 		.clk         (clk        ),
@@ -342,18 +345,24 @@ module spimem_cache_direct_mapped #(
     output reg [31:0] hit_count,
     output reg [31:0] miss_count
 );
+    localparam integer ADDR_BITS   = 22;                          // cpu_addr[23:2] word address width
     localparam integer INDEX_BITS  = $clog2(CACHE_SIZE);
     localparam integer LOG_LINE    = (LINE_SIZE > 1) ? $clog2(LINE_SIZE) : 0;
     localparam integer CACHE_WORDS = CACHE_SIZE * LINE_SIZE;
+    // Tag = line-address bits above the index. Storing only these (not the full
+    // 32-bit line address) keeps cache_tag narrow so it fits one EBR and never
+    // risks spilling 32-bit registers into LCs.
+    localparam integer TAG_BITS    = ADDR_BITS - LOG_LINE - INDEX_BITS;
 
-    reg [31:0] cache_tag   [0:CACHE_SIZE-1];
+    reg [TAG_BITS-1:0] cache_tag   [0:CACHE_SIZE-1];
     reg [31:0] cache_data  [0:CACHE_WORDS-1];
     reg        cache_valid [0:CACHE_SIZE-1];
 
     wire [31:0] cpu_word_addr = cpu_addr[23:2];
     wire [31:0] cpu_line_addr = cpu_word_addr >> LOG_LINE;
     wire [INDEX_BITS-1:0] index = cpu_line_addr[INDEX_BITS-1:0];
-    wire cache_hit = cache_valid[index] && (cache_tag[index] == cpu_line_addr);
+    wire [TAG_BITS-1:0]   cpu_tag = cpu_line_addr[INDEX_BITS +: TAG_BITS];
+    wire cache_hit = cache_valid[index] && (cache_tag[index] == cpu_tag);
 
     integer i;
 
@@ -375,7 +384,7 @@ module spimem_cache_direct_mapped #(
                     if (miss_count_reset) miss_count <= 0;
                     if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
                     if (cpu_valid && !cache_hit && spimem_ready) begin
-                        cache_tag[index]   <= cpu_line_addr;
+                        cache_tag[index]   <= cpu_tag;
                         cache_data[index]  <= spimem_rdata;
                         cache_valid[index] <= 1;
                         miss_count <= miss_count + 1;
@@ -430,7 +439,7 @@ module spimem_cache_direct_mapped #(
                     if (spimem_valid && spimem_ready) begin
                         cache_data[wr_addr] <= spimem_rdata;
                         if (last_word) begin
-                            cache_tag[index]   <= cpu_line_addr;
+                            cache_tag[index]   <= cpu_tag;
                             cache_valid[index] <= 1;
                             fill_active <= 0;
                             fill_count  <= 0;

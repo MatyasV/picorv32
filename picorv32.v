@@ -2417,7 +2417,123 @@ endmodule
  * picorv32_pcpi_div
  ***************************************************************/
 
+
 module picorv32_pcpi_div (
+	input clk, resetn,
+ 
+	input             pcpi_valid,
+	input      [31:0] pcpi_insn,
+	input      [31:0] pcpi_rs1,
+	input      [31:0] pcpi_rs2,
+	output reg        pcpi_wr,
+	output reg [31:0] pcpi_rd,
+	output reg        pcpi_wait,
+	output reg        pcpi_ready
+);
+	// --- Instruction decode ------------------------------------------------
+	// 4 one-hot regs → 1 two-bit type + 1 valid flag
+	// 2'b00=div  2'b01=divu  2'b10=rem  2'b11=remu
+	reg [1:0] instr_type;
+	reg       instr_valid;
+ 
+	wire instr_any_div_rem = instr_valid;
+	wire is_signed         = ~instr_type[0];          // div / rem are signed
+	wire is_rem            =  instr_type[1];           // rem / remu
+ 
+	reg  pcpi_wait_q;
+	wire start = pcpi_wait && !pcpi_wait_q;
+ 
+	always @(posedge clk) begin
+		instr_valid <= 0;
+ 
+		if (resetn && pcpi_valid && !pcpi_ready
+		           && pcpi_insn[6:0]   == 7'b0110011
+		           && pcpi_insn[31:25] == 7'b0000001) begin
+			case (pcpi_insn[14:12])
+				3'b100: begin instr_type <= 2'b00; instr_valid <= 1; end // div
+				3'b101: begin instr_type <= 2'b01; instr_valid <= 1; end // divu
+				3'b110: begin instr_type <= 2'b10; instr_valid <= 1; end // rem
+				3'b111: begin instr_type <= 2'b11; instr_valid <= 1; end // remu
+			endcase
+		end
+ 
+		pcpi_wait   <= instr_any_div_rem && resetn;
+		pcpi_wait_q <= pcpi_wait         && resetn;
+	end
+ 
+	// --- Datapath ----------------------------------------------------------
+	reg [31:0] dividend;
+	reg [31:0] divisor;          // 32-bit (was 63-bit)
+	reg [31:0] quotient;
+	reg [5:0]  bit_idx;          // 6-bit counter (was 32-bit one-hot mask)
+	reg        outsign;
+ 
+	// "running" derived from bit_idx; 6'h3f is the idle sentinel
+	wire running = (bit_idx != 6'h3f);
+ 
+	// Reconstruct aligned divisor for current bit position
+	wire [62:0] div_shifted = {31'b0, divisor} << bit_idx;
+ 
+	// Whether the shifted divisor fits into the current remainder
+	wire        div_fits    = (div_shifted[62:32] == 31'b0)   // upper bits must be 0
+	                        && (div_shifted[31:0] <= dividend);
+ 
+	always @(posedge clk) begin
+		pcpi_ready <= 0;
+		pcpi_wr    <= 0;
+		pcpi_rd    <= 'bx;
+ 
+		if (!resetn) begin
+			bit_idx <= 6'h3f;
+ 
+		end else if (start) begin
+			dividend <= (is_signed && pcpi_rs1[31]) ? -pcpi_rs1 : pcpi_rs1;
+			divisor  <= (is_signed && pcpi_rs2[31]) ? -pcpi_rs2 : pcpi_rs2;
+			outsign  <= ( !is_rem && is_signed && (pcpi_rs1[31] != pcpi_rs2[31]) && |pcpi_rs2)
+			          || (  is_rem && is_signed &&  pcpi_rs1[31]);
+			quotient <= 0;
+			bit_idx  <= 31;
+ 
+		end else if (running) begin
+			// Normal iteration step (covers bit 31 down to bit 0)
+			if (div_fits) begin
+				dividend <= dividend - div_shifted[31:0];
+				quotient <= quotient | (32'b1 << bit_idx);
+			end
+ 
+			if (bit_idx == 0) begin
+				// This was the last bit — emit result on the same cycle
+				bit_idx    <= 6'h3f;
+				pcpi_ready <= 1;
+				pcpi_wr    <= 1;
+`ifdef RISCV_FORMAL_ALTOPS
+				case (instr_type)
+					2'b00: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h7f8529ec;
+					2'b01: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h10e8fd70;
+					2'b10: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h8da68fa5;
+					2'b11: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h3138d0e1;
+				endcase
+`else
+				// Note: dividend/quotient below reflect the *updated* values from
+				// the combinational div_fits check above (same-cycle write-then-read
+				// is safe because pcpi_rd is registered and reads the next-state).
+				if (!is_rem)
+					pcpi_rd <= outsign
+					         ? -(quotient | (div_fits ? 1 : 0))
+					         :  (quotient | (div_fits ? 1 : 0));
+				else
+					pcpi_rd <= outsign
+					         ? -(div_fits ? dividend - div_shifted[31:0] : dividend)
+					         :  (div_fits ? dividend - div_shifted[31:0] : dividend);
+`endif
+			end else begin
+				bit_idx <= bit_idx - 1;
+			end
+		end
+	end
+endmodule
+
+module picorv32_pcpi_div1 (
 	input clk, resetn,
 
 	input             pcpi_valid,
