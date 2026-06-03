@@ -121,46 +121,37 @@ void print_str(const char *s) {
     while (*s) reg_uart_data = *s++;
 }
 
+uint32_t div(uint32_t n, uint32_t d) {
+    uint32_t q = 0;
+    while (n >= d) { n -= d; q++; }
+    return q;
+}
+
+uint32_t mod(uint32_t n, uint32_t d) {
+    while (n >= d) n -= d;
+    return n;
+}
+
 void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misses, const char *test_name) {
     // Print results over UART
     uint32_t total = hits + misses;
     if (total == 0) {
         print_str("N/A\r\n");
     } else {
-        // whole percent: accumulate misses*100 via addition, then subtract total repeatedly
-        uint32_t acc = 0;
-        for (uint32_t j = 0; j < 100; j++) acc += misses;
-        uint32_t whole_pct = 0;
-        while (acc >= total) { acc -= total; whole_pct++; }
-        // acc is now the remainder; frac: floor(acc*100/total)
-        uint32_t acc2 = 0;
-        for (uint32_t j = 0; j < 100; j++) acc2 += acc;
-        uint32_t frac_pct = 0;
-        while (acc2 >= total) { acc2 -= total; frac_pct++; }
-
-        uint32_t cpi_times_10 = 0, tmp = 0;
-        for(uint32_t i = 0; i < 10; i++) tmp += cycles;
-        while (tmp >= instns) { tmp -= instns; cpi_times_10++; }
-
-        uint32_t cpi_whole = 0, cpi_frac = 0;
-        while (cpi_times_10 >= 10) { cpi_times_10 -= 10; cpi_whole++; }
-        cpi_frac = cpi_times_10;
-
         print_str("Results for "); print_str(test_name);
         print_str("\r\nrdcycle:   ");  print_dec(cycles);
         print_str("\r\nrdinstret: ");  print_dec(instns);
         print_str("\r\nCPI:       ");
-        print_dec(cpi_whole);
-        reg_uart_data = '.';
-        print_dec(cpi_frac);
+        print_dec(div(cycles, instns));
+        print_str(".");
+        print_dec(mod(div(cycles * 10, instns), 10));
         print_str("\r\nHits:      ");  print_dec(hits);
         print_str("\r\nMisses:    ");  print_dec(misses);
         print_str("\r\nTotal:     ");  print_dec(total);
         print_str("\r\nMiss rate: ");
-
-        print_dec(whole_pct);
+        print_dec(div(misses * 100, total));
         reg_uart_data = '.';
-        if (frac_pct < 10) reg_uart_data = '0';
+        uint32_t frac_pct = mod(div(misses * 1000, total), 10);
         print_dec(frac_pct);
         print_str("%\r\n\r\n");
     }
@@ -230,7 +221,8 @@ void run_test(void test(void), const char *test_name) {
     uint32_t cycles_begin, cycles_end;
 	uint32_t instns_begin, instns_end;
     uint32_t hits = 0, misses = 0;
-    
+    test(); // warm up cache
+
 #ifdef PERF_H
     cache_counters_reset();
 #endif
@@ -251,187 +243,273 @@ void run_test(void test(void), const char *test_name) {
     print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses, test_name);
 }
 
-
-#define N_FUNCS 16
-#define ITERS   300
-
-__attribute__((noinline)) void f0(){ asm volatile(""); }
-__attribute__((noinline)) void f1(){ asm volatile(""); }
-__attribute__((noinline)) void f2(){ asm volatile(""); }
-__attribute__((noinline)) void f3(){ asm volatile(""); }
-__attribute__((noinline)) void f4(){ asm volatile(""); }
-__attribute__((noinline)) void f5(){ asm volatile(""); }
-__attribute__((noinline)) void f6(){ asm volatile(""); }
-__attribute__((noinline)) void f7(){ asm volatile(""); }
-__attribute__((noinline)) void f8(){ asm volatile(""); }
-__attribute__((noinline)) void f9(){ asm volatile(""); }
-__attribute__((noinline)) void f10(){ asm volatile(""); }
-__attribute__((noinline)) void f11(){ asm volatile(""); }
-__attribute__((noinline)) void f12(){ asm volatile(""); }
-__attribute__((noinline)) void f13(){ asm volatile(""); }
-__attribute__((noinline)) void f14(){ asm volatile(""); }
-__attribute__((noinline)) void f15(){ asm volatile(""); }
-
-static void (*F[N_FUNCS])() = {
-    f0,f1,f2,f3,f4,f5,f6,f7,
-    f8,f9,f10,f11,f12,f13,f14,f15
-};
-
-volatile uint32_t sink = 0;
-
-/* =========================================================
- * 1. Working set knee (capacity estimate)
- * ========================================================= */
-void test_working_set_knee()
+ 
+static void test_tiny_loop(void)
 {
-    for (int size = 1; size <= 16; size++) {
-        for (int i = 0; i < ITERS; i++) {
-            for (int j = 0; j < size; j++) {
-                F[j]();
+    uint32_t acc = 0;
+    for (uint32_t i = 0; i < 100000; i++) {
+        acc += i;
+    }
+}
+ 
+static void medium_body(uint32_t *acc, uint32_t i)
+{
+    /* ~64 instructions of padding via repeated cheap ops */
+    uint32_t a = *acc;
+    a += i;       a ^= (i << 1);  a += (i >> 1);  a ^= (i * 3);
+    a += i;       a ^= (i << 2);  a += (i >> 2);  a ^= (i * 5);
+    a += i;       a ^= (i << 3);  a += (i >> 3);  a ^= (i * 7);
+    a += i;       a ^= (i << 4);  a += (i >> 4);  a ^= (i * 9);
+    a += i;       a ^= (i << 5);  a += (i >> 5);  a ^= (i * 11);
+    a += i;       a ^= (i << 6);  a += (i >> 6);  a ^= (i * 13);
+    a += i;       a ^= (i << 7);  a += (i >> 7);  a ^= (i * 15);
+    a += i;       a ^= (i << 8);  a += (i >> 8);  a ^= (i * 17);
+    *acc = a;
+}
+ 
+static void test_medium_loop(void)
+{
+    uint32_t acc = 1;
+    for (uint32_t i = 0; i < 2000; i++) {
+        medium_body(&acc, i);
+    }
+}
+ 
+#define DEFINE_BLOCK(N)                                         \
+static uint32_t block_##N(uint32_t x, uint32_t i) {            \
+    x ^= (i * (N+1));  x += (i >> (N & 7));                    \
+    x ^= (i * (N+3));  x += (i >> ((N+1) & 7));               \
+    x ^= (i * (N+5));  x += (i >> ((N+2) & 7));               \
+    x ^= (i * (N+7));  x += (i >> ((N+3) & 7));               \
+    return x; }
+ 
+DEFINE_BLOCK(0)  DEFINE_BLOCK(1)  DEFINE_BLOCK(2)  DEFINE_BLOCK(3)
+DEFINE_BLOCK(4)  DEFINE_BLOCK(5)  DEFINE_BLOCK(6)  DEFINE_BLOCK(7)
+DEFINE_BLOCK(8)  DEFINE_BLOCK(9)  DEFINE_BLOCK(10) DEFINE_BLOCK(11)
+DEFINE_BLOCK(12) DEFINE_BLOCK(13) DEFINE_BLOCK(14) DEFINE_BLOCK(15)
+ 
+static void test_large_loop(void)
+{
+    uint32_t x = 0xDEADBEEF;
+    for (uint32_t i = 0; i < 500; i++) {
+        x = block_0(x,i);  x = block_1(x,i);  x = block_2(x,i);  x = block_3(x,i);
+        x = block_4(x,i);  x = block_5(x,i);  x = block_6(x,i);  x = block_7(x,i);
+        x = block_8(x,i);  x = block_9(x,i);  x = block_10(x,i); x = block_11(x,i);
+        x = block_12(x,i); x = block_13(x,i); x = block_14(x,i); x = block_15(x,i);
+    }
+}
+
+static uint32_t branch_tree(uint32_t x, uint32_t depth)
+{
+    if (depth == 0) return x;
+    if (x & 1)      x = x * 3 + 1;
+    else            x = x >> 1;
+    if (x & 2)      goto label_a;
+    x ^= 0xDEAD;
+    goto label_b;
+label_a:
+    x += 0xBEEF;
+label_b:
+    if (x & 4)      x = (x << 5) | (x >> 27);
+    if (x & 8)      x -= 0x1234;
+    if (x & 16)     x ^= 0xABCD;
+    if (x & 32)     x += 0x5678;
+    return branch_tree(x, depth - 1);
+}
+ 
+static void test_irregular_branch(void)
+{
+    uint32_t x = 0xFEDCBA98u;
+    for (uint32_t i = 0; i < 5000; i++) {
+        x = branch_tree(x + i, 8);
+    }
+}
+ 
+static uint32_t callee_a(uint32_t x){ return x ^ 0xA1B2C3D4u; }
+static uint32_t callee_b(uint32_t x){ return x + 0x11223344u; }
+static uint32_t callee_c(uint32_t x){ return (x >> 7) | (x << 25); }
+static uint32_t callee_d(uint32_t x){ return x * 0x08040201u; }
+ 
+static uint32_t caller(uint32_t x, uint32_t n)
+{
+    for (uint32_t i = 0; i < n; i++) {
+        x = callee_a(x);
+        x = callee_b(x);
+        x = callee_c(x);
+        x = callee_d(x);
+    }
+    return x;
+}
+ 
+static void test_nested_call(void)
+{
+    uint32_t x = 0x9ABCDEF0u;
+    for (uint32_t i = 0; i < 500; i++) {
+        x = caller(x, 40);
+    }
+}
+
+#define INSTRUCTION(padding) __asm__ volatile ( \
+    "j 1f\n\t"                               \
+    ".rept " #padding "\n\t"                 \
+    "nop\n\t"                                \
+    ".endr\n\t"                              \
+    "1:\n\t"                                 \
+    : : :                                    \
+);
+
+#define REP2(x) x x
+#define REP4(x) REP2(x) REP2(x)
+#define REP8(x) REP4(x) REP4(x)
+#define REP16(x) REP8(x) REP8(x)
+#define REP32(x) REP16(x) REP16(x)
+#define REP64(x) REP32(x) REP32(x)
+#define REP128(x) REP64(x) REP64(x)
+#define REP256(x) REP128(x) REP128(x)
+#define REP512(x) REP256(x) REP256(x)
+#define REP1024(x) REP512(x) REP512(x)
+#define REP2048(x) REP1024(x) REP1024(x)
+
+static void test_cold_sweep_16(void)
+{
+    REP16(INSTRUCTION(0))
+}
+
+static void test_cold_sweep_128(void)
+{
+    REP128(INSTRUCTION(0))
+}
+
+static void test_cold_sweep_512(void)
+{
+    REP512(INSTRUCTION(0))
+}
+static void test_cold_sweep_1024(void)
+{
+    REP1024(INSTRUCTION(0))
+}
+static void test_cold_sweep_2048(void)
+{
+    REP2048(INSTRUCTION(0))
+}
+
+static void test_cold_sweep_16_padding(void)
+{
+    REP16(INSTRUCTION(15))
+}
+
+static void test_cold_sweep_64_padding(void)
+{
+    REP64(INSTRUCTION(15))
+}
+
+static void test_cold_sweep_128_padding(void)
+{
+    REP128(INSTRUCTION(15))
+}
+
+
+static void test_cold_sweep_256_padding(void)
+{
+    REP256(INSTRUCTION(15))
+}
+
+
+
+static void test_bubble_sort(void)
+{
+    unsigned char numbers[ARRAY_SIZE] = {
+        142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
+         12, 165,  74, 201,  33, 150,  88, 245,  19, 111,
+        182,  63, 137,  95, 222,   4, 158,  81, 209,  47,
+        126,  71, 194,  28, 147, 252,  91,  16, 115, 170,
+         58, 239,  83, 132,   2, 205,  67, 149, 226,  38,
+        104, 188,  51, 161,  94, 242,  11, 123,  79, 217,
+        134,  45, 173,  89, 250,  23, 155,  61, 199, 108,
+         31, 140, 212,  76,   7, 185,  53, 167, 234,  92,
+        121,  14, 203,  69, 152,  41, 228,  85, 114, 191,
+         26, 179,  60, 247,  97, 136,   5, 221,  73, 162
+    };
+
+    int i, j, temp;
+    // Outer loop tracks the number of passes
+    for (i = 0; i < ARRAY_SIZE - 1; i++) {
+        // Inner loop performs the adjacent comparisons
+        // The last i elements are already in place
+        for (j = 0; j < ARRAY_SIZE - i - 1; j++) {
+            if (numbers[j] > numbers[j + 1]) {
+                // Swap numbers
+                temp = numbers[j];
+                numbers[j] = numbers[j + 1];
+                numbers[j + 1] = temp;
             }
         }
     }
 }
 
-/* =========================================================
- * 2. Reuse distance curve (temporal locality sensitivity)
- * ========================================================= */
-void test_reuse_distance()
-{
-    for (int d = 1; d <= 16; d++) {
+void test_quick_sort() {
+    unsigned char numbers[ARRAY_SIZE] = {
+        142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
+         12, 165,  74, 201,  33, 150,  88, 245,  19, 111,
+        182,  63, 137,  95, 222,   4, 158,  81, 209,  47,
+        126,  71, 194,  28, 147, 252,  91,  16, 115, 170,
+         58, 239,  83, 132,   2, 205,  67, 149, 226,  38,
+        104, 188,  51, 161,  94, 242,  11, 123,  79, 217,
+        134,  45, 173,  89, 250,  23, 155,  61, 199, 108,
+         31, 140, 212,  76,   7, 185,  53, 167, 234,  92,
+        121,  14, 203,  69, 152,  41, 228,  85, 114, 191,
+         26, 179,  60, 247,  97, 136,   5, 221,  73, 162
+    };
 
-        F[0]();
+    // Quick sort implementation
+    void quick_sort(int low, int high) {
+        if (low < high) {
+            int pivot = numbers[high];
+            int i = low -1;
+            for (int j = low; j < high; j++) {
+                if (numbers[j] < pivot) {
+                    i++;
+                    // Swap numbers[i] and numbers[j]
+                    unsigned char temp = numbers[i];
+                    numbers[i] = numbers[j];
+                    numbers[j] = temp;
+                }
+            }
+            // Swap numbers[i +1] and numbers[high]
+            unsigned char temp = numbers[i +1];
+            numbers[i +1] = numbers[high];
+            numbers[high] = temp;
 
-        for (int i = 1; i < d; i++)
-            F[i]();
-
-        F[0]();
+            int pi = i +1;
+            quick_sort(low , pi -1);
+            quick_sort(pi +1 , high);
+        }
     }
-}
 
-/* =========================================================
- * 3. Thrashing survival (hot line under pressure)
- * ========================================================= */
-void test_thrashing_survival()
-{
-    for (int i = 0; i < ITERS; i++) {
-
-        for (int k = 0; k < 50; k++)
-            F[0]();
-
-        for (int j = 1; j < 9; j++)
-            F[j]();
-
-        F[0]();
-    }
-}
-
-/* =========================================================
- * 4. Variance / randomness probe
- * ========================================================= */
-void test_variance()
-{
-    for (int i = 0; i < ITERS * 50; i++) {
-
-        F[0](); F[1](); F[2](); F[3]();
-        F[4](); F[5](); F[6](); F[7]();
-
-        F[8]();
-        F[0]();
-
-        sink += i;
-    }
-}
-
-/* =========================================================
- * 5. Conflict collapse (direct-mapped sensitivity)
- * ========================================================= */
-void test_conflict_collapse()
-{
-    for (int i = 0; i < 1000; i++) {
-        F[0](); F[8];
-        F[0](); F[8];
-        F[0](); F[8];
-    }
-}
-
-/* =========================================================
- * 6. LRU stack behavior test (stack property)
- * ========================================================= */
-void test_lru_stack_shape()
-{
-    for (int i = 0; i < 1000; i++) {
-
-        F[0](); F[1](); F[2](); F[3]();
-        F[4](); F[5](); F[6](); F[7]();
-
-        F[0]();   // reuse oldest after full fill
-        F[1]();   // second reuse
-    }
-}
-
-/* =========================================================
- * 7. Interleaved working sets
- * ========================================================= */
-void test_interleaved_sets()
-{
-    for (int i = 0; i < 500; i++) {
-
-        F[0](); F[1](); F[2](); F[3]();
-        F[4](); F[5](); F[6](); F[7]();
-
-        F[8](); F[9](); F[10](); F[11]();
-        F[12](); F[13](); F[14](); F[15]();
-
-        F[0](); F[4](); F[8](); F[12]();
-    }
-}
-
-/* =========================================================
- * 8. Burst locality (clustered reuse)
- * ========================================================= */
-void test_burst_locality()
-{
-    for (int i = 0; i < 1000; i++) {
-
-        for (int k = 0; k < 20; k++) F[0]();
-        for (int k = 0; k < 20; k++) F[1]();
-        for (int k = 0; k < 20; k++) F[2]();
-        for (int k = 0; k < 20; k++) F[3]();
-
-        F[4](); F[5](); F[6](); F[7]();
-    }
-}
-
-/* =========================================================
- * 9. Micro-oscillation (replacement churn stress)
- * ========================================================= */
-void test_micro_oscillation()
-{
-    for (int i = 0; i < 2000; i++) {
-
-        F[0](); F[1](); F[2](); F[3]();
-        F[4](); F[5](); F[6](); F[7]();
-
-        F[8](); F[0]();
-        F[9](); F[1]();
-        F[10](); F[2]();
-    }
+    quick_sort(0 , ARRAY_SIZE -1);
 }
 
 void main()
 {
     setup_picosoc();
     print_str("Start of benchmarks\r\n\r\n");
-    RUN_TEST(test_working_set_knee);
-    RUN_TEST(test_reuse_distance);
-    RUN_TEST(test_thrashing_survival);
-    RUN_TEST(test_variance);
-    RUN_TEST(test_conflict_collapse);
-    RUN_TEST(test_lru_stack_shape);
-    RUN_TEST(test_interleaved_sets);
-    RUN_TEST(test_burst_locality);
-    RUN_TEST(test_micro_oscillation);
+    RUN_TEST(test_bubble_sort);
+    RUN_TEST(test_quick_sort);
+    RUN_TEST(test_tiny_loop);
+    RUN_TEST(test_medium_loop);
+    RUN_TEST(test_large_loop);
+    RUN_TEST(test_nested_call);
+    RUN_TEST(test_irregular_branch);
+    RUN_TEST(test_cold_sweep_16);
+    RUN_TEST(test_cold_sweep_128);
+    RUN_TEST(test_cold_sweep_512);
+    RUN_TEST(test_cold_sweep_1024);
+    RUN_TEST(test_cold_sweep_2048);
+    RUN_TEST(test_cold_sweep_16_padding);
+    RUN_TEST(test_cold_sweep_64_padding);
+    RUN_TEST(test_cold_sweep_128_padding);
+    RUN_TEST(test_cold_sweep_256_padding);
+    
     unsigned char leds_value = 0x02;
     while (1) {
         reg_7seg = run_workload(); // display

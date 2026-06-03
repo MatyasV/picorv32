@@ -72,7 +72,7 @@ icebreaker_syn.v: icebreaker.json
 	yosys -p 'read_json icebreaker.json; write_verilog icebreaker_syn.v'
 
 icebreaker.asc: icebreaker.pcf icebreaker.json
-	nextpnr-ice40 -ql icebreaker.nplog --freq 13 --up5k --package sg48 --asc icebreaker.asc --pcf icebreaker.pcf --json icebreaker.json
+	nextpnr-ice40 -ql icebreaker2.log --freq 13 --up5k --package sg48 --asc icebreaker.asc --pcf icebreaker.pcf --json icebreaker.json
 
 icebreaker.bin: icebreaker.asc
 	icetime -d up5k -c 12 -mtr icebreaker.rpt icebreaker.asc

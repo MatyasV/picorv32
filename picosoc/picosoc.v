@@ -76,7 +76,7 @@ module picosoc (
 	parameter [0:0] BARREL_SHIFTER = 1;
 	parameter [0:0] ENABLE_MUL = 1;
 	parameter [0:0] ENABLE_DIV = 1;
-	parameter [0:0] ENABLE_FAST_MUL = 0;
+	parameter [0:0] ENABLE_FAST_MUL = 1;
 	parameter [0:0] ENABLE_COMPRESSED = 0;
 	parameter [0:0] ENABLE_COUNTERS = 1;
 	parameter [0:0] ENABLE_IRQ_QREGS = 0;
@@ -321,7 +321,7 @@ endmodule
 
 module spimem_cache_direct_mapped #(
     parameter integer CACHE_SIZE = 128,
-    parameter integer LINE_SIZE  = 2
+    parameter integer LINE_SIZE  = 8
 ) (
     input clk,
     input resetn,
