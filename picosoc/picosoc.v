@@ -323,8 +323,8 @@ endmodule
 
 
 module spimem_cache_direct_mapped #(
-    parameter integer CACHE_SIZE = 128,
-    parameter integer LINE_SIZE  = 16
+    parameter integer CACHE_SIZE = 256,
+    parameter integer LINE_SIZE  = 8
 ) (
     input clk,
     input resetn,
