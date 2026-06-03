@@ -24,7 +24,7 @@
 `define PICOSOC_MEM ice40up5k_spram
 
 module icebreaker (
-	input clk,
+	input clk_12mhz,
 
 	output ser_tx,
 	input ser_rx,
@@ -48,6 +48,30 @@ module icebreaker (
 	inout  flash_io3
 );
 	parameter integer MEM_WORDS = 32768;
+
+	wire clk_fast; // 30 MHz
+	wire pll_locked;
+
+	SB_PLL40_PAD  #(
+		.FEEDBACK_PATH("SIMPLE"),
+		.DIVR(4'b0000),
+		.DIVF(7'b1001111),
+		.DIVQ(3'b101),
+		.FILTER_RANGE(3'b001),
+	) pll (
+		.PACKAGEPIN(clk_12mhz),       // Now safely accepts your Pin 35 clock input
+		.PLLOUTCORE(clk_fast),   // Output clock is now pulled from Port A
+		.RESETB(1'b1),
+		.LOCK(pll_locked),
+		.BYPASS(1'b0)
+	);
+	reg clk_15mhz = 0;
+
+	always @(posedge clk_fast) begin
+		clk_15mhz <= ~clk_15mhz;
+	end
+
+	wire clk = clk_15mhz;
 
 	reg [5:0] reset_cnt = 0;
 	wire resetn = &reset_cnt;

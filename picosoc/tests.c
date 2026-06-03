@@ -92,7 +92,8 @@ void *memcpy(void *aa, const void *bb, long n) {
 #endif
 
 void setup_picosoc(void){
-	reg_uart_clkdiv = 104; // ~115200 baud @ 12 MHz
+	// reg_uart_clkdiv = 104; // ~115200 baud @ 12 MHz
+	reg_uart_clkdiv = 130; // ~115200 baud @ 15 MHz
 	reg_leds = 0x00;
 	set_flash_qspi_flag();
 	set_flash_mode_quad();
