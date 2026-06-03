@@ -354,17 +354,22 @@ module spimem_cache_direct_mapped #(
     // risks spilling 32-bit registers into LCs.
     localparam integer TAG_BITS    = ADDR_BITS - LOG_LINE - INDEX_BITS;
 
-    reg [TAG_BITS-1:0] cache_tag   [0:CACHE_SIZE-1];
-    reg [31:0] cache_data  [0:CACHE_WORDS-1];
-    reg        cache_valid [0:CACHE_SIZE-1];
+    // The valid bit lives in the MSB of each tag word so it sits in the same
+    // EBR as the tag itself -- no fabric flip-flops and no CACHE_SIZE:1 read
+    // mux. EBRs power up to 0 at configuration (all lines start invalid); the
+    // initial block mirrors that for simulation.
+    reg [TAG_BITS:0] cache_tag   [0:CACHE_SIZE-1];   // {valid, tag}
+    reg [31:0]       cache_data  [0:CACHE_WORDS-1];
+
+    integer init_i;
+    initial for (init_i = 0; init_i < CACHE_SIZE; init_i = init_i + 1)
+        cache_tag[init_i] = 0;
 
     wire [31:0] cpu_word_addr = cpu_addr[23:2];
     wire [31:0] cpu_line_addr = cpu_word_addr >> LOG_LINE;
     wire [INDEX_BITS-1:0] index = cpu_line_addr[INDEX_BITS-1:0];
     wire [TAG_BITS-1:0]   cpu_tag = cpu_line_addr[INDEX_BITS +: TAG_BITS];
-    wire cache_hit = cache_valid[index] && (cache_tag[index] == cpu_tag);
-
-    integer i;
+    wire cache_hit = cache_tag[index][TAG_BITS] && (cache_tag[index][TAG_BITS-1:0] == cpu_tag);
 
     generate
         if (LINE_SIZE == 1) begin : gen_single
@@ -377,16 +382,14 @@ module spimem_cache_direct_mapped #(
 
             always @(posedge clk) begin
                 if (!resetn) begin
-                    for (i = 0; i < CACHE_SIZE; i = i + 1) cache_valid[i] <= 0;
                     hit_count <= 0; miss_count <= 0;
                 end else begin
                     if (hit_count_reset)  hit_count  <= 0;
                     if (miss_count_reset) miss_count <= 0;
                     if (cpu_valid && cache_hit) hit_count <= hit_count + 1;
                     if (cpu_valid && !cache_hit && spimem_ready) begin
-                        cache_tag[index]   <= cpu_tag;
+                        cache_tag[index]   <= {1'b1, cpu_tag};   // valid | tag
                         cache_data[index]  <= spimem_rdata;
-                        cache_valid[index] <= 1;
                         miss_count <= miss_count + 1;
                     end
                 end
@@ -429,7 +432,6 @@ module spimem_cache_direct_mapped #(
                 if (!resetn) begin
                     fill_active <= 0;
                     fill_count  <= 0;
-                    for (i = 0; i < CACHE_SIZE; i = i + 1) cache_valid[i] <= 0;
                     hit_count <= 0; miss_count <= 0;
                 end else begin
                     if (hit_count_reset)  hit_count  <= 0;
@@ -439,8 +441,7 @@ module spimem_cache_direct_mapped #(
                     if (spimem_valid && spimem_ready) begin
                         cache_data[wr_addr] <= spimem_rdata;
                         if (last_word) begin
-                            cache_tag[index]   <= cpu_tag;
-                            cache_valid[index] <= 1;
+                            cache_tag[index]   <= {1'b1, cpu_tag};   // valid | tag
                             fill_active <= 0;
                             fill_count  <= 0;
                             miss_count  <= miss_count + 1;
