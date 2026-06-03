@@ -164,10 +164,13 @@ module picosoc (
 		.BARREL_SHIFTER(BARREL_SHIFTER),
 		.COMPRESSED_ISA(ENABLE_COMPRESSED),
 		.ENABLE_COUNTERS(ENABLE_COUNTERS),
+		.ENABLE_COUNTERS64(0),       // 32-bit RDCYCLE/RDINSTRET is plenty (~286s @15MHz); drops upper-32b counter FFs+carry
 		.ENABLE_MUL(ENABLE_MUL),
 		.ENABLE_DIV(ENABLE_DIV),
 		.ENABLE_FAST_MUL(ENABLE_FAST_MUL),
-		.ENABLE_IRQ(1),
+		.CATCH_MISALIGN(0),          // benchmark code is well-formed; remove misalign-trap logic
+		.CATCH_ILLINSN(0),           // no illegal-instruction trap needed; frees LCs
+		.ENABLE_IRQ(0),              // IRQ inputs tied to 0 and firmware uses no interrupts/timer
 		.ENABLE_IRQ_QREGS(ENABLE_IRQ_QREGS)
 	) cpu (
 		.clk         (clk        ),
