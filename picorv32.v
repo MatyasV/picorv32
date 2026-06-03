@@ -2429,11 +2429,24 @@ module picorv32_pcpi_div (
 	output reg        pcpi_wait,
 	output reg        pcpi_ready
 );
+
+	function [5:0] msb_pos;
+		input [31:0] x;
+		integer i;
+		begin
+			msb_pos = 0;
+
+			for (i = 31; i >= 0; i = i - 1)
+				if (x[i])
+					msb_pos = i;
+		end
+	endfunction
+
 	reg instr_div, instr_divu, instr_rem, instr_remu;
 	wire instr_any_div_rem = |{instr_div, instr_divu, instr_rem, instr_remu};
 
 	reg pcpi_wait_q;
-	wire start = pcpi_wait && !pcpi_wait_q;
+	wire start = pcpi_wait && !pcpi_wait_q; // Start becomes true only for the first cycle
 
 	always @(posedge clk) begin
 		instr_div <= 0;
@@ -2471,12 +2484,36 @@ module picorv32_pcpi_div (
 		end else
 		if (start) begin
 			running <= 1;
+
+			// absolute values for signed ops
+			// Essentially takes two's complement if neccesary (for both divisor and dividend)
 			dividend <= (instr_div || instr_rem) && pcpi_rs1[31] ? -pcpi_rs1 : pcpi_rs1;
-			divisor <= ((instr_div || instr_rem) && pcpi_rs2[31] ? -pcpi_rs2 : pcpi_rs2) << 31;
-			outsign <= (instr_div && (pcpi_rs1[31] != pcpi_rs2[31]) && |pcpi_rs2) || (instr_rem && pcpi_rs1[31]);
-			quotient <= 0;
-			quotient_msk <= 1 << 31;
-		end else
+			reg [31:0] divisor_abs;
+			divisor_abs = (instr_div || instr_rem) && pcpi_rs2[31] ? -pcpi_rs2 : pcpi_rs2;
+
+			// handle divide-by-zero early
+			if (divisor_abs == 0) begin
+				running <= 0;
+				pcpi_ready <= 1;
+				pcpi_wr <= 1;
+				pcpi_rd <= 32'hffffffff;
+			end else begin
+				integer shift;
+
+				// Use the msb function defined earlier
+				shift = msb_pos(pcpi_rs1) - msb_pos(divisor_abs);
+
+				if (shift < 0) shift = 0;
+
+				divisor <= divisor_abs << shift;
+				quotient_msk <= 32'b1 << shift;
+
+				quotient <= 0;
+
+				outsign <= (instr_div && (pcpi_rs1[31] != pcpi_rs2[31])) ||
+						(instr_rem && pcpi_rs1[31]);
+			end
+		end
 		if (!quotient_msk && running) begin
 			running <= 0;
 			pcpi_ready <= 1;
