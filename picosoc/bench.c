@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #if defined(__has_include)
 #  if __has_include("perf.h")
+    // Defines REG_CACHE_HIT_COUNT, REG_CACHE_MISS_COUNT, and cache_counters_reset()
 #    include "perf.h"
 #  endif
 #endif
@@ -110,8 +111,8 @@ void print_dec(uint32_t v) {
     int printing = 0;
     for (int i = 0; i < 10; i++) {
         uint32_t p = powers[i];
-        int d = 0;
-        while (v >= p) { v -= p; d++; }
+        int d = v / p;
+        v %= p;
         if (d || printing || i == 9) {
             reg_uart_data = '0' + d;
             printing = 1;
@@ -124,44 +125,36 @@ void print_str(const char *s) {
     while (*s) reg_uart_data = *s++;
 }
 
-uint32_t div(uint32_t n, uint32_t d) {
-    return n / d;
-}
-
-uint32_t mod(uint32_t n, uint32_t d) {
-    return n % d;
-}
 
 void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misses, const char *test_name) {
     // Print results over UART
+    print_str("Results for "); print_str(test_name);
+    print_str("\r\nrdcycle:   ");  print_dec(cycles);
+    print_str("\r\nrdinstret: ");  print_dec(instns);
+    print_str("\r\nCPI:       ");
+    print_dec(cycles/instns);
+    print_str(".");
+    print_dec((cycles * 10)/instns % 10);
     uint32_t total = hits + misses;
-    if (total == 0) {
-        print_str("N/A\r\n");
-    } else {
-        print_str("Results for "); print_str(test_name);
-        print_str("\r\nrdcycle:   ");  print_dec(cycles);
-        print_str("\r\nrdinstret: ");  print_dec(instns);
-        print_str("\r\nCPI:       ");
-        print_dec(div(cycles, instns));
-        print_str(".");
-        print_dec(mod(div(cycles * 10, instns), 10));
+    if (total != 0) {
         print_str("\r\nHits:      ");  print_dec(hits);
         print_str("\r\nMisses:    ");  print_dec(misses);
         print_str("\r\nTotal:     ");  print_dec(total);
         print_str("\r\nMiss rate: ");
-        print_dec(div(misses * 100, total));
+        print_dec(misses * 100 / total);
         reg_uart_data = '.';
-        uint32_t frac_pct = mod(div(misses * 1000, total), 10);
+        uint32_t frac_pct = (misses * 1000 / total) % 10;
         print_dec(frac_pct);
-        print_str("%\r\n\r\n");
+        reg_uart_data = '%';
     }
+    print_str("\r\n\r\n");
 }
 
 // Simulate complex control flow with many branches,
 // resulting in non consecutive instruction fetches
 #define JUMP __asm__ volatile ( \
     "j 1f\n\t"                               \
-    ".rept 16\n\t"                           \
+    ".rept 19\n\t"                           \
     "nop\n\t"                                \
     ".endr\n\t"                              \
     "1:\n\t"                                 \
@@ -181,21 +174,31 @@ void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misse
 #define REP2048(x) REP1024(x) REP1024(x)
 
 uint32_t simulate_consecutive_instruction_fetches() {
-    uint32_t x = 0;
-    REP32(x+=100;)
-    REP4(x/=3;)
-    REP512(x+=7;)
-    REP128(x+=17;)
+    uint32_t x = 7, y = 3;
+    x /= y;
+    REP64(
+        x *= y;
+        x <<= 16;
+    )
+    REP256(
+        x += y;
+    )
+    REP64(
+        y -= x;
+        x ^= y;
+    )
     return x;
 }
 
 // Simulate a long workload with many non-consecutive instruction fetches,
 // to test the instruction cache's ability to handle this pattern.
+// This pattern occurs when you have a large switch statement or 
+// large if-elseif-else statements.
 static void simulate_non_consecutive_instruction_fetches() {
+    REP256(JUMP)
     REP128(JUMP)
     REP64(JUMP)
     REP32(JUMP)
-    REP16(JUMP)
 }
 
 unsigned char run_workload() {
