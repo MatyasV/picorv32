@@ -49,13 +49,13 @@ module icebreaker (
 );
 	parameter integer MEM_WORDS = 32768;
 
-	wire clk_fast; // 30 MHz
+	wire clk_fast; // 18.375 MHz
 	wire pll_locked;
 
 	SB_PLL40_PAD  #(
 		.FEEDBACK_PATH("SIMPLE"),
 		.DIVR(4'b0000),
-		.DIVF(7'b1001111),
+		.DIVF(7'b0110000),
 		.DIVQ(3'b101),
 		.FILTER_RANGE(3'b001),
 	) pll (
@@ -65,13 +65,8 @@ module icebreaker (
 		.LOCK(pll_locked),
 		.BYPASS(1'b0)
 	);
-	reg clk_15mhz = 0;
 
-	always @(posedge clk_fast) begin
-		clk_15mhz <= ~clk_15mhz;
-	end
-
-	wire clk = clk_15mhz;
+	wire clk = clk_fast;
 
 	reg [5:0] reset_cnt = 0;
 	wire resetn = &reset_cnt;
