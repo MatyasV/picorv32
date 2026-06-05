@@ -2461,22 +2461,29 @@ module picorv32_pcpi_div (
 		pcpi_wait_q <= pcpi_wait         && resetn;
 	end
  
-	// --- Datapath ----------------------------------------------------------
-	reg [31:0] dividend;
-	reg [31:0] divisor;          // 32-bit (was 63-bit)
-	reg [31:0] quotient;
-	reg [5:0]  bit_idx;          // 6-bit counter (was 32-bit one-hot mask)
+	// --- Datapath: fixed-shift restoring divider --------------------------
+	// No barrel shifter. The divisor stays put; the remainder is shifted
+	// left one bit per cycle (free wiring) and the quotient is shifted into
+	// the LSBs of the same register the dividend is shifted out of.
+	reg [31:0] dividquot;   // dividend shifts out MSB; quotient shifts into LSB
+	reg [31:0] remainder;
+	reg [31:0] divisor;
+	reg [5:0]  bit_idx;     // iterations remaining; 0 == idle
 	reg        outsign;
  
-	// "running" derived from bit_idx; 6'h3f is the idle sentinel
-	wire running = (bit_idx != 6'h3f);
+	wire running = (bit_idx != 0);
  
-	// Reconstruct aligned divisor for current bit position
-	wire [62:0] div_shifted = {31'b0, divisor} << bit_idx;
+	// remainder<<1 with the next dividend bit shifted in (33 bits)
+	wire [32:0] rem_shifted = {remainder, dividquot[31]};
  
-	// Whether the shifted divisor fits into the current remainder
-	wire        div_fits    = (div_shifted[62:32] == 31'b0)   // upper bits must be 0
-	                        && (div_shifted[31:0] <= dividend);
+	// One 34-bit subtract does both the compare and the subtraction:
+	// bit[33] is the borrow, so !borrow means rem_shifted >= divisor.
+	wire [33:0] rem_diff = {1'b0, rem_shifted} - {2'b0, divisor};
+	wire        div_fits = !rem_diff[33];
+	wire [31:0] rem_next = div_fits ? rem_diff[31:0] : rem_shifted[31:0];
+
+	// Next-state quotient: shift in the new quotient bit at the LSB
+	wire [31:0] quot_next = {dividquot[30:0], div_fits};
  
 	always @(posedge clk) begin
 		pcpi_ready <= 0;
@@ -2484,26 +2491,24 @@ module picorv32_pcpi_div (
 		pcpi_rd    <= 'bx;
  
 		if (!resetn) begin
-			bit_idx <= 6'h3f;
+			bit_idx <= 0;
  
 		end else if (start) begin
-			dividend <= (is_signed && pcpi_rs1[31]) ? -pcpi_rs1 : pcpi_rs1;
-			divisor  <= (is_signed && pcpi_rs2[31]) ? -pcpi_rs2 : pcpi_rs2;
-			outsign  <= ( !is_rem && is_signed && (pcpi_rs1[31] != pcpi_rs2[31]) && |pcpi_rs2)
-			          || (  is_rem && is_signed &&  pcpi_rs1[31]);
-			quotient <= 0;
-			bit_idx  <= 31;
+			dividquot <= (is_signed && pcpi_rs1[31]) ? -pcpi_rs1 : pcpi_rs1;
+			divisor   <= (is_signed && pcpi_rs2[31]) ? -pcpi_rs2 : pcpi_rs2;
+			outsign   <= ( !is_rem && is_signed && (pcpi_rs1[31] != pcpi_rs2[31]) && |pcpi_rs2)
+			           || (  is_rem && is_signed &&  pcpi_rs1[31]);
+			remainder <= 0;
+			bit_idx   <= 32;
  
 		end else if (running) begin
-			// Normal iteration step (covers bit 31 down to bit 0)
-			if (div_fits) begin
-				dividend <= dividend - div_shifted[31:0];
-				quotient <= quotient | (32'b1 << bit_idx);
-			end
+			// One restoring-division step per cycle.
+			remainder <= rem_next;
+			dividquot <= quot_next;
+			bit_idx   <= bit_idx - 1;
  
-			if (bit_idx == 0) begin
-				// This was the last bit — emit result on the same cycle
-				bit_idx    <= 6'h3f;
+			if (bit_idx == 1) begin
+				// Last iteration: result is the next-state value, emit now.
 				pcpi_ready <= 1;
 				pcpi_wr    <= 1;
 `ifdef RISCV_FORMAL_ALTOPS
@@ -2514,20 +2519,13 @@ module picorv32_pcpi_div (
 					2'b11: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h3138d0e1;
 				endcase
 `else
-				// Note: dividend/quotient below reflect the *updated* values from
-				// the combinational div_fits check above (same-cycle write-then-read
-				// is safe because pcpi_rd is registered and reads the next-state).
+				// quot_next / rem_next are the final next-state values; pcpi_rd
+				// is registered so reading next-state here is safe.
 				if (!is_rem)
-					pcpi_rd <= outsign
-					         ? -(quotient | (div_fits ? 1 : 0))
-					         :  (quotient | (div_fits ? 1 : 0));
+					pcpi_rd <= outsign ? -quot_next : quot_next;
 				else
-					pcpi_rd <= outsign
-					         ? -(div_fits ? dividend - div_shifted[31:0] : dividend)
-					         :  (div_fits ? dividend - div_shifted[31:0] : dividend);
+					pcpi_rd <= outsign ? -rem_next : rem_next;
 `endif
-			end else begin
-				bit_idx <= bit_idx - 1;
 			end
 		end
 	end
