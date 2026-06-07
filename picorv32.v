@@ -2417,7 +2417,7 @@ endmodule
  * picorv32_pcpi_div
  ***************************************************************/
 
-
+// Modified version of the division module
 module picorv32_pcpi_div (
 	input clk, resetn,
  
@@ -2531,7 +2531,8 @@ module picorv32_pcpi_div (
 	end
 endmodule
 
-module picorv32_pcpi_div1 (
+// Original version of the division module, for reference.
+module picorv32_pcpi_div_old (
 	input clk, resetn,
 
 	input             pcpi_valid,

@@ -92,8 +92,9 @@ void *memcpy(void *aa, const void *bb, long n) {
 #endif
 
 void setup_picosoc(void){
-	// reg_uart_clkdiv = 104; // ~115200 baud @ 12 MHz
-	reg_uart_clkdiv = 130; // ~115200 baud @ 15 MHz
+	reg_uart_clkdiv = 104; // ~115200 baud @ 12 MHz
+    // reg_uart_clkdiv = 160; // ~115200 baud @ 18.375 MHz
+
 	reg_leds = 0x00;
 	set_flash_qspi_flag();
 	set_flash_mode_quad();
@@ -101,7 +102,7 @@ void setup_picosoc(void){
 
 // Print a 32-bit number over UART as decimal (no divide/modulo needed)
 void print_dec(uint32_t v) {
-    static const uint32_t powers[] = {
+    const uint32_t powers[] = {
         1000000000, 100000000, 10000000, 1000000,
         100000, 10000, 1000, 100, 10, 1
     };
@@ -123,16 +124,16 @@ void print_str(const char *s) {
 }
 
 uint32_t div(uint32_t n, uint32_t d) {
-    return n / d;
-    // uint32_t q = 0;
-    // while (n >= d) { n -= d; q++; }
-    // return q;
+    // return n / d;
+    uint32_t q = 0;
+    while (n >= d) { n -= d; q++; }
+    return q;
 }
 
 uint32_t mod(uint32_t n, uint32_t d) {
-    return n % d;
-    // while (n >= d) n -= d;
-    // return n;
+    // return n % d;
+    while (n >= d) n -= d;
+    return n;
 }
 
 void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misses, const char *test_name) {
@@ -158,66 +159,6 @@ void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misse
         print_dec(frac_pct);
         print_str("%\r\n\r\n");
     }
-}
-
-#define ARRAY_SIZE 100
-unsigned char run_workload() {
-    unsigned char numbers[ARRAY_SIZE] = {
-        142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
-         12, 165,  74, 201,  33, 150,  88, 245,  19, 111,
-        182,  63, 137,  95, 222,   4, 158,  81, 209,  47,
-        126,  71, 194,  28, 147, 252,  91,  16, 115, 170,
-         58, 239,  83, 132,   2, 205,  67, 149, 226,  38,
-        104, 188,  51, 161,  94, 242,  11, 123,  79, 217,
-        134,  45, 173,  89, 250,  23, 155,  61, 199, 108,
-         31, 140, 212,  76,   7, 185,  53, 167, 234,  92,
-        121,  14, 203,  69, 152,  41, 228,  85, 114, 191,
-         26, 179,  60, 247,  97, 136,   5, 221,  73, 162
-    };
-
-    int i, j, temp;
-    // Outer loop tracks the number of passes
-    for (i = 0; i < ARRAY_SIZE - 1; i++) {
-        // Inner loop performs the adjacent comparisons
-        // The last i elements are already in place
-        for (j = 0; j < ARRAY_SIZE - i - 1; j++) {
-            if (numbers[j] > numbers[j + 1]) {
-                // Swap numbers
-                temp = numbers[j];
-                numbers[j] = numbers[j + 1];
-                numbers[j + 1] = temp;
-            }
-        }
-    }
-
-    return numbers[ARRAY_SIZE - 1]; // 0xFC = 252
-}
-
-unsigned char run_workload_timed() {
-    uint32_t cycles_begin, cycles_end;
-	uint32_t instns_begin, instns_end;
-    uint32_t hits = 0, misses = 0;
-    
-#ifdef PERF_H
-    cache_counters_reset();
-#endif
-
-	__asm__ volatile ("rdcycle %0" : "=r"(cycles_begin));
-	__asm__ volatile ("rdinstret %0" : "=r"(instns_begin));
-
-    unsigned char x = run_workload();
-
-	__asm__ volatile ("rdcycle %0" : "=r"(cycles_end));
-	__asm__ volatile ("rdinstret %0" : "=r"(instns_end));
-
-#ifdef PERF_H
-    hits   = REG_CACHE_HIT_COUNT;
-    misses = REG_CACHE_MISS_COUNT;
-#endif
-
-    print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses, "run_workload");
-
-    return x;
 }
 
 void run_test(void test(void), const char *test_name) {
@@ -246,8 +187,14 @@ void run_test(void test(void), const char *test_name) {
     print_stats(cycles_end - cycles_begin, instns_end - instns_begin, hits, misses, test_name);
 }
 
- 
-static void test_tiny_loop(void)
+
+void test_empty_loop(void)
+{
+    uint32_t acc = 0;
+    for (uint32_t i = 0; i < 100000; i++);
+}
+
+void test_tiny_loop(void)
 {
     uint32_t acc = 0;
     for (uint32_t i = 0; i < 100000; i++) {
@@ -255,7 +202,7 @@ static void test_tiny_loop(void)
     }
 }
  
-static void medium_body(uint32_t *acc, uint32_t i)
+void medium_body(uint32_t *acc, uint32_t i)
 {
     /* ~64 instructions of padding via repeated cheap ops */
     uint32_t a = *acc;
@@ -270,7 +217,7 @@ static void medium_body(uint32_t *acc, uint32_t i)
     *acc = a;
 }
  
-static void test_medium_loop(void)
+void test_medium_loop(void)
 {
     uint32_t acc = 1;
     for (uint32_t i = 0; i < 2000; i++) {
@@ -279,7 +226,7 @@ static void test_medium_loop(void)
 }
  
 #define DEFINE_BLOCK(N)                                         \
-static uint32_t block_##N(uint32_t x, uint32_t i) {            \
+uint32_t block_##N(uint32_t x, uint32_t i) {            \
     x ^= (i * (N+1));  x += (i >> (N & 7));                    \
     x ^= (i * (N+3));  x += (i >> ((N+1) & 7));               \
     x ^= (i * (N+5));  x += (i >> ((N+2) & 7));               \
@@ -291,7 +238,7 @@ DEFINE_BLOCK(4)  DEFINE_BLOCK(5)  DEFINE_BLOCK(6)  DEFINE_BLOCK(7)
 DEFINE_BLOCK(8)  DEFINE_BLOCK(9)  DEFINE_BLOCK(10) DEFINE_BLOCK(11)
 DEFINE_BLOCK(12) DEFINE_BLOCK(13) DEFINE_BLOCK(14) DEFINE_BLOCK(15)
  
-static void test_large_loop(void)
+void test_large_loop(void)
 {
     uint32_t x = 0xDEADBEEF;
     for (uint32_t i = 0; i < 500; i++) {
@@ -302,124 +249,8 @@ static void test_large_loop(void)
     }
 }
 
-static uint32_t branch_tree(uint32_t x, uint32_t depth)
-{
-    if (depth == 0) return x;
-    if (x & 1)      x = x * 3 + 1;
-    else            x = x >> 1;
-    if (x & 2)      goto label_a;
-    x ^= 0xDEAD;
-    goto label_b;
-label_a:
-    x += 0xBEEF;
-label_b:
-    if (x & 4)      x = (x << 5) | (x >> 27);
-    if (x & 8)      x -= 0x1234;
-    if (x & 16)     x ^= 0xABCD;
-    if (x & 32)     x += 0x5678;
-    return branch_tree(x, depth - 1);
-}
- 
-static void test_irregular_branch(void)
-{
-    uint32_t x = 0xFEDCBA98u;
-    for (uint32_t i = 0; i < 5000; i++) {
-        x = branch_tree(x + i, 8);
-    }
-}
- 
-static uint32_t callee_a(uint32_t x){ return x ^ 0xA1B2C3D4u; }
-static uint32_t callee_b(uint32_t x){ return x + 0x11223344u; }
-static uint32_t callee_c(uint32_t x){ return (x >> 7) | (x << 25); }
-static uint32_t callee_d(uint32_t x){ return x * 0x08040201u; }
- 
-static uint32_t caller(uint32_t x, uint32_t n)
-{
-    for (uint32_t i = 0; i < n; i++) {
-        x = callee_a(x);
-        x = callee_b(x);
-        x = callee_c(x);
-        x = callee_d(x);
-    }
-    return x;
-}
- 
-static void test_nested_call(void)
-{
-    uint32_t x = 0x9ABCDEF0u;
-    for (uint32_t i = 0; i < 500; i++) {
-        x = caller(x, 40);
-    }
-}
-
-#define INSTRUCTION(padding) __asm__ volatile ( \
-    "j 1f\n\t"                               \
-    ".rept " #padding "\n\t"                 \
-    "nop\n\t"                                \
-    ".endr\n\t"                              \
-    "1:\n\t"                                 \
-    : : :                                    \
-);
-
-#define REP2(x) x x
-#define REP4(x) REP2(x) REP2(x)
-#define REP8(x) REP4(x) REP4(x)
-#define REP16(x) REP8(x) REP8(x)
-#define REP32(x) REP16(x) REP16(x)
-#define REP64(x) REP32(x) REP32(x)
-#define REP128(x) REP64(x) REP64(x)
-#define REP256(x) REP128(x) REP128(x)
-#define REP512(x) REP256(x) REP256(x)
-#define REP1024(x) REP512(x) REP512(x)
-#define REP2048(x) REP1024(x) REP1024(x)
-
-static void test_cold_sweep_16(void)
-{
-    REP16(INSTRUCTION(0))
-}
-
-static void test_cold_sweep_128(void)
-{
-    REP128(INSTRUCTION(0))
-}
-
-static void test_cold_sweep_512(void)
-{
-    REP512(INSTRUCTION(0))
-}
-static void test_cold_sweep_1024(void)
-{
-    REP1024(INSTRUCTION(0))
-}
-static void test_cold_sweep_2048(void)
-{
-    REP2048(INSTRUCTION(0))
-}
-
-static void test_cold_sweep_16_padding(void)
-{
-    REP16(INSTRUCTION(15))
-}
-
-static void test_cold_sweep_64_padding(void)
-{
-    REP64(INSTRUCTION(15))
-}
-
-static void test_cold_sweep_128_padding(void)
-{
-    REP128(INSTRUCTION(15))
-}
-
-
-static void test_cold_sweep_256_padding(void)
-{
-    REP256(INSTRUCTION(15))
-}
-
-
-
-static void test_bubble_sort(void)
+#define ARRAY_SIZE 100
+void test_bubble_sort(void)
 {
     unsigned char numbers[ARRAY_SIZE] = {
         142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
@@ -450,7 +281,7 @@ static void test_bubble_sort(void)
     }
 }
 
-void test_quick_sort() {
+void test_quick_sort(void) {
     unsigned char numbers[ARRAY_SIZE] = {
         142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
          12, 165,  74, 201,  33, 150,  88, 245,  19, 111,
@@ -492,30 +323,119 @@ void test_quick_sort() {
     quick_sort(0 , ARRAY_SIZE -1);
 }
 
+
+void test_branch_heavy(void)
+{
+    unsigned char numbers[ARRAY_SIZE] = {
+        142,  87, 213,  42, 119,   8, 176,  54, 231,  99,
+         12, 165,  74, 201,  33, 150,  88, 245,  19, 111,
+        182,  63, 137,  95, 222,   4, 158,  81, 209,  47,
+        126,  71, 194,  28, 147, 252,  91,  16, 115, 170,
+         58, 239,  83, 132,   2, 205,  67, 149, 226,  38,
+        104, 188,  51, 161,  94, 242,  11, 123,  79, 217,
+        134,  45, 173,  89, 250,  23, 155,  61, 199, 108,
+         31, 140, 212,  76,   7, 185,  53, 167, 234,  92,
+        121,  14, 203,  69, 152,  41, 228,  85, 114, 191,
+         26, 179,  60, 247,  97, 136,   5, 221,  73, 162
+    };
+
+    int i, state;
+    state = 0; // Carry-over state to defeat basic hardware branch prediction
+
+    for (i = 0; i < ARRAY_SIZE; i++) {
+        // Unpredictable branches driven by the scattered array values
+        if (numbers[i] < 64) {
+            // Tier 2 branch dependent on historical state
+            if (state == 0) {
+                numbers[i] = numbers[i] >> 1;
+                state = 1;
+            } else {
+                numbers[i] = numbers[i] + 10;
+                state = 2;
+            }
+        } else if (numbers[i] < 128) {
+            // Jump table to scatter instruction pointers
+            switch (numbers[i] % 3) {
+                case 0: 
+                    numbers[i] = numbers[i] * 2; 
+                    break;
+                case 1: 
+                    numbers[i] = numbers[i] - 5; 
+                    break;
+                case 2: 
+                    state = 0; 
+                    break;
+            }
+        } else if (numbers[i] < 192) {
+            // Bitwise conditions linked to state
+            if ((numbers[i] ^ state) & 0x01) {
+                numbers[i] = ~numbers[i];
+            } else {
+                numbers[i] = numbers[i] ^ 0xAA;
+            }
+        } else {
+            // Complex nested conditions
+            if (i % 2 == 0) {
+                state = (state + 1) % 4;
+            } else {
+                state = 0;
+            }
+        }
+    }
+}
+
+#define INSTRUCTION(padding) __asm__ volatile ( \
+    "j 1f\n\t"                               \
+    ".rept " #padding "\n\t"                 \
+    "nop\n\t"                                \
+    ".endr\n\t"                              \
+    "1:\n\t"                                 \
+    : : :                                    \
+);
+
+#define REP2(x) x x
+#define REP4(x) REP2(x) REP2(x)
+#define REP8(x) REP4(x) REP4(x)
+#define REP16(x) REP8(x) REP8(x)
+#define REP32(x) REP16(x) REP16(x)
+#define REP64(x) REP32(x) REP32(x)
+#define REP128(x) REP64(x) REP64(x)
+#define REP256(x) REP128(x) REP128(x)
+#define REP512(x) REP256(x) REP256(x)
+#define REP1024(x) REP512(x) REP512(x)
+#define REP2048(x) REP1024(x) REP1024(x)
+
+void test_consecutive_instruction_fetches(void) {
+    REP2048(INSTRUCTION(0))
+    REP1024(INSTRUCTION(0))
+}
+
+void test_non_consecutive_instruction_fetches(void) {
+    REP2048(INSTRUCTION(16))
+    REP2048(INSTRUCTION(16))
+}
+
 void main()
 {
     setup_picosoc();
     print_str("Start of benchmarks\r\n\r\n");
+
+    // Tests for replacement policies for 8-word cache
     RUN_TEST(test_bubble_sort);
     RUN_TEST(test_quick_sort);
+    RUN_TEST(test_empty_loop);
     RUN_TEST(test_tiny_loop);
     RUN_TEST(test_medium_loop);
     RUN_TEST(test_large_loop);
-    RUN_TEST(test_nested_call);
-    RUN_TEST(test_irregular_branch);
-    RUN_TEST(test_cold_sweep_16);
-    RUN_TEST(test_cold_sweep_128);
-    RUN_TEST(test_cold_sweep_512);
-    RUN_TEST(test_cold_sweep_1024);
-    RUN_TEST(test_cold_sweep_2048);
-    RUN_TEST(test_cold_sweep_16_padding);
-    RUN_TEST(test_cold_sweep_64_padding);
-    RUN_TEST(test_cold_sweep_128_padding);
-    RUN_TEST(test_cold_sweep_256_padding);
-    
+    RUN_TEST(test_branch_heavy);
+
+    // Tests for line size for 2048-word cache
+    RUN_TEST(test_consecutive_instruction_fetches);
+    RUN_TEST(test_non_consecutive_instruction_fetches);
     unsigned char leds_value = 0x02;
     while (1) {
-        reg_7seg = run_workload(); // display
+        for(int i = 0; i < 10000; i++);
+        reg_7seg = 0x23;
         reg_leds = leds_value;
         leds_value = leds_value ^ 0x02; // toggle LED1
     }

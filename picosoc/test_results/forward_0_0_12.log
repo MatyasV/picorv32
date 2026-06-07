@@ -1,0 +1,83 @@
+Start of benchmarks
+
+Results for test_bubble_sort
+rdcycle:   2762233
+rdinstret: 142354
+CPI:       19.4
+Hits:      0
+Misses:    150154
+Total:     150154
+Miss rate: 100.0%
+
+Results for test_quick_sort
+rdcycle:   384938
+rdinstret: 18360
+CPI:       20.9
+Hits:      0
+Misses:    19516
+Total:     19516
+Miss rate: 100.0%
+
+Results for test_empty_loop
+rdcycle:   17300518
+rdinstret: 700023
+CPI:       24.7
+Hits:      0
+Misses:    800039
+Total:     800039
+Miss rate: 100.0%
+
+Results for test_tiny_loop
+rdcycle:   23700518
+rdinstret: 1100023
+CPI:       21.5
+Hits:      0
+Misses:    1200039
+Total:     1200039
+Miss rate: 100.0%
+
+Results for test_medium_loop
+rdcycle:   6680518
+rdinstret: 398023
+CPI:       16.7
+Hits:      0
+Misses:    400039
+Total:     400039
+Miss rate: 100.0%
+
+Results for test_large_loop
+rdcycle:   9279034
+rdinstret: 529024
+CPI:       17.5
+Hits:      0
+Misses:    529540
+Total:     529540
+Miss rate: 100.0%
+
+Results for test_branch_heavy
+rdcycle:   120750
+rdinstret: 5037
+CPI:       23.9
+Hits:      0
+Misses:    5558
+Total:     5558
+Miss rate: 100.0%
+
+Results for test_consecutive_instruction_fetches
+rdcycle:   49493
+rdinstret: 3087
+CPI:       16.0
+Hits:      0
+Misses:    3103
+Total:     3103
+Miss rate: 100.0%
+
+Results for test_non_consecutive_instruction_fetches
+rdcycle:   190805
+rdinstret: 3087
+CPI:       61.8
+Hits:      0
+Misses:    3103
+Total:     3103
+Miss rate: 100.0%
+

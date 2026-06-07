@@ -30,7 +30,7 @@
 `endif
 
 `ifndef SPIMEM_CACHE
-`define SPIMEM_CACHE spimem_cache_direct_mapped_hash
+`define SPIMEM_CACHE spimem_cache_direct_mapped
 `endif
 
 // this macro can be used to check if the verilog files in your
@@ -270,10 +270,7 @@ module picosoc (
 endmodule
 
 // This is a simple cache that forwards read requests from the CPU to the SPI flash.
-module spimem_cache_forward #(
-	parameter integer CACHE_SIZE = 8, // number of cache lines
-	parameter integer LINE_SIZE = 1  // number of words per cache line
-) (
+module spimem_cache_forward (
 	input clk,
 	input resetn,
 
@@ -299,8 +296,8 @@ module spimem_cache_forward #(
 	assign spimem_valid = cpu_valid;
 	assign spimem_addr = cpu_addr;
 
-	assign cpu_ready = cpu_valid && (cache_hit || spimem_ready);
-	assign cpu_rdata = cache_hit ? 32'h 0000_0000 : spimem_rdata;
+	assign cpu_ready = cpu_valid && spimem_ready;
+	assign cpu_rdata = spimem_rdata;
 	
 	always @(posedge clk) begin
 		if (!resetn) begin
@@ -319,6 +316,75 @@ module spimem_cache_forward #(
 			end
 		end
 	end
+endmodule
+
+module spimem_cache_direct_mapped_simple #(
+        parameter integer CACHE_SIZE = 8 // number of cache lines
+) (
+        input clk,
+        input resetn,
+
+        input        cpu_valid, // request from CPU to read data
+        input [23:0] cpu_addr,  // address to read from
+        input        mem_instr, // whether the current request is an instruction fetch
+        input        spimem_ready, // SPI flash is ready with data
+        input [31:0] spimem_rdata, // data read from SPI flash
+
+    input wire        hit_count_reset,
+    input wire        miss_count_reset,
+
+        output reg        cpu_ready, // data is ready to be read by the CPU
+        output reg [31:0] cpu_rdata, // data read by the CPU
+        output reg                spimem_valid, // request read from SPI flash
+        output reg [23:0] spimem_addr, // address to read from SPI flash
+
+    output reg [31:0] hit_count,
+    output reg [31:0] miss_count
+);
+    localparam INDEX_BITS = $clog2(CACHE_SIZE);
+
+     reg [23:0] cache_addr  [0:CACHE_SIZE-1];
+     reg [31:0] cache_data  [0:CACHE_SIZE-1];
+     reg        cache_valid [0:CACHE_SIZE-1];
+
+    wire [INDEX_BITS-1:0] index = cpu_addr[INDEX_BITS+1:2];
+    wire cache_hit = cache_valid[index] && (cache_addr[index] == cpu_addr);
+
+    always @(*) begin
+        cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
+        cpu_rdata    = cache_hit ? cache_data[index] : spimem_rdata;
+        spimem_valid = cpu_valid && !cache_hit;
+        spimem_addr  = cpu_addr;
+    end
+
+    integer i;
+    always @(posedge clk) begin
+        if (!resetn) begin
+            for (i = 0; i < CACHE_SIZE; i = i + 1)
+                cache_valid[i] <= 1'b0;
+
+            hit_count  <= 32'b0;
+            miss_count <= 32'b0;
+
+        end else begin
+
+            if (hit_count_reset)  hit_count  <= 32'b0;
+            if (miss_count_reset) miss_count <= 32'b0;
+
+            if (cpu_valid) begin
+                if (cache_hit) begin
+                    hit_count <= hit_count + 1;
+
+                end else if (spimem_ready) begin
+                    cache_addr[index]  <= cpu_addr;
+                    cache_data[index]  <= spimem_rdata;
+                    cache_valid[index] <= 1'b1;
+                    miss_count <= miss_count + 1;
+                end
+            end
+        end
+    end
+
 endmodule
 
 
@@ -573,8 +639,8 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
 endmodule
 
 module spimem_cache_direct_mapped #(
-    parameter integer CACHE_SIZE = 512,
-    parameter integer LINE_SIZE  = 4
+    parameter integer CACHE_SIZE = 1024,
+    parameter integer LINE_SIZE  = 2
 ) (
     input clk,
     input resetn,
@@ -712,7 +778,7 @@ module spimem_cache_direct_mapped #(
 endmodule
 
 module spimem_cache_random #(
-    parameter integer CACHE_SIZE = 16,   // number of cache lines
+    parameter integer CACHE_SIZE = 8,   // number of cache lines
     parameter integer LINE_SIZE  = 1    // words per cache line
 )(
     input clk,

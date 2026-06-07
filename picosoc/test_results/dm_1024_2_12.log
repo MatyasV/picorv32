@@ -1,0 +1,63 @@
+Results for test_empty_loop
+rdcycle:   3200107
+rdinstret: 700023
+CPI:       4.5
+Hits:      800034
+Misses:    2
+Total:     800036
+Miss rate: 0.0%
+
+Results for test_tiny_loop
+rdcycle:   5300107
+rdinstret: 1100023
+CPI:       4.8
+Hits:      1200038
+Misses:    0
+Total:     1200038
+Miss rate: 0.0%
+
+Results for test_medium_loop
+rdcycle:   1876107
+rdinstret: 398023
+CPI:       4.7
+Hits:      400038
+Misses:    0
+Total:     400038
+Miss rate: 0.0%
+
+Results for test_large_loop
+rdcycle:   2434110
+rdinstret: 529024
+CPI:       4.6
+Hits:      529539
+Misses:    0
+Total:     529539
+Miss rate: 0.0%
+
+Results for test_branch_heavy
+rdcycle:   22180
+rdinstret: 5037
+CPI:       4.4
+Hits:      5557
+Misses:    0
+Total:     5557
+Miss rate: 0.0%
+
+Results for test_consecutive_instruction_fetches
+rdcycle:   36717
+rdinstret: 3087
+CPI:       11.8
+Hits:      2048
+Misses:    1054
+Total:     3102
+Miss rate: 33.9%
+
+Results for test_non_consecutive_instruction_fetches
+rdcycle:   240051
+rdinstret: 3087
+CPI:       77.7
+Hits:      13
+Misses:    3089
+Total:     3102
+Miss rate: 99.5%
+
