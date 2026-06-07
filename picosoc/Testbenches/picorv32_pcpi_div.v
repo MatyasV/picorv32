@@ -92,29 +92,14 @@ module picorv32_pcpi_div_tb;
 		repeat (5) @(posedge clk);
 		resetn = 1;
 
-		// DIV
 		run_test(DIV,  100, 7, 14);
-
-		// DIVU
 		run_test(DIVU, 100, 7, 14);
-
-		// REM
 		run_test(REM,  100, 7, 2);
-
-		// REMU
 		run_test(REMU, 100, 7, 2);
-
-		// Signed divide
 		run_test(DIV,  -100, 7, -14);
-
-		// Signed remainder
 		run_test(REM,  -100, 7, -2);
-
-		// Negative divisor
 		run_test(DIV,  100, -7, -14);
 		run_test(REM,  100, -7, 2);
-
-		// Both negative
 		run_test(DIV,  -100, -7, 14);
 		run_test(REM,  -100, -7, -2);
 
