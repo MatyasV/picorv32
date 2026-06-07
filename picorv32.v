@@ -2551,7 +2551,8 @@ module picorv32_pcpi_fast_div (
 		begin
 			msb_pos = 0;
 
-			for (i = 31; i >= 0; i = i - 1)
+
+			for (i = 0; i < 32; i = i + 1)				
 				if (x[i])
 					msb_pos = i;
 		end
@@ -2589,6 +2590,10 @@ module picorv32_pcpi_fast_div (
 	reg running;
 	reg outsign;
 
+	reg [31:0] divisor_abs;
+	integer shift;
+
+
 	always @(posedge clk) begin
 		pcpi_ready <= 0;
 		pcpi_wr <= 0;
@@ -2603,17 +2608,15 @@ module picorv32_pcpi_fast_div (
 			// absolute values for signed ops
 			// Essentially takes two's complement if neccesary (for both divisor and dividend)
 			dividend <= (instr_div || instr_rem) && pcpi_rs1[31] ? -pcpi_rs1 : pcpi_rs1;
-			reg [31:0] divisor_abs;
 			divisor_abs = (instr_div || instr_rem) && pcpi_rs2[31] ? -pcpi_rs2 : pcpi_rs2;
 
-			// handle divide-by-zero early
+			// handle divide-by-zero 
 			if (divisor_abs == 0) begin
 				running <= 0;
 				pcpi_ready <= 1;
 				pcpi_wr <= 1;
 				pcpi_rd <= 32'hffffffff;
 			end else begin
-				integer shift;
 
 				// Use the msb function defined earlier
 				shift = msb_pos(pcpi_rs1) - msb_pos(divisor_abs);
