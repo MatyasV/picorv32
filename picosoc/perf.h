@@ -1,5 +1,4 @@
 // perf.h — performance measurement helpers
-// Include this in whatever firmware file runs your benchmark
 
 #ifndef PERF_H
 #define PERF_H
@@ -14,7 +13,7 @@
 #define reg_uart_clkdiv (*(volatile uint32_t*)0x02000004)
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 
-// Reset both counters (call this just before your benchmark starts)
+// Reset both counters
 static inline void cache_counters_reset(void) {
     REG_CACHE_HIT_COUNT  = 0;
     REG_CACHE_MISS_COUNT = 0;
