@@ -1,18 +1,18 @@
 Results for test_bubble_sort
-rdcycle:   2760532
+rdcycle:   2760502
 rdinstret: 142354
 CPI:       19.3
-Hits:      258
-Misses:    149896
+Hits:      261
+Misses:    149893
 Total:     150154
 Miss rate: 99.8%
 
 Results for test_quick_sort
-rdcycle:   374563
+rdcycle:   374533
 rdinstret: 18360
-CPI:       20.4
-Hits:      1200
-Misses:    18316
+CPI:       20.3
+Hits:      1203
+Misses:    18313
 Total:     19516
 Miss rate: 93.8%
 
@@ -53,29 +53,47 @@ Total:     529540
 Miss rate: 100.0%
 
 Results for test_branch_heavy
-rdcycle:   119049
+rdcycle:   119019
 rdinstret: 5037
 CPI:       23.6
-Hits:      258
-Misses:    5300
+Hits:      261
+Misses:    5297
 Total:     5558
 Miss rate: 95.3%
 
-Results for test_consecutive_instruction_fetches
-rdcycle:   49493
-rdinstret: 3087
+Results for test_consecutive_instruction
+rdcycle:   65941
+rdinstret: 4115
 CPI:       16.0
 Hits:      0
-Misses:    3103
-Total:     3103
+Misses:    4131
+Total:     4131
 Miss rate: 100.0%
 
-Results for test_non_consecutive_instruction_fetches
-rdcycle:   190805
-rdinstret: 3087
-CPI:       61.8
+Results for test_deep_call_chain
+rdcycle:   25841
+rdinstret: 1015
+CPI:       25.4
 Hits:      0
-Misses:    3103
-Total:     3103
+Misses:    1031
+Total:     1031
+Miss rate: 100.0%
+
+Results for test_small_if_chain
+rdcycle:   2133
+rdinstret: 66
+CPI:       32.3
+Hits:      0
+Misses:    98
+Total:     98
+Miss rate: 100.0%
+
+Results for test_large_if_chain
+rdcycle:   3414
+rdinstret: 127
+CPI:       26.8
+Hits:      0
+Misses:    164
+Total:     164
 Miss rate: 100.0%
 

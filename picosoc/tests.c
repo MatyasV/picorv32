@@ -165,9 +165,8 @@ void run_test(void test(void), const char *test_name) {
     uint32_t cycles_begin, cycles_end;
 	uint32_t instns_begin, instns_end;
     uint32_t hits = 0, misses = 0;
-    test(); // warm up cache
 
-#ifdef PERF_H
+    #ifdef PERF_H
     cache_counters_reset();
 #endif
 
@@ -384,7 +383,7 @@ void test_branch_heavy(void)
     }
 }
 
-#define INSTRUCTION(padding) __asm__ volatile ( \
+#define JUMP(padding) __asm__ volatile ( \
     "j 1f\n\t"                               \
     ".rept " #padding "\n\t"                 \
     "nop\n\t"                                \
@@ -405,19 +404,225 @@ void test_branch_heavy(void)
 #define REP1024(x) REP512(x) REP512(x)
 #define REP2048(x) REP1024(x) REP1024(x)
 
-void test_consecutive_instruction_fetches(void) {
-    REP2048(INSTRUCTION(0))
-    REP1024(INSTRUCTION(0))
+void test_consecutive_instruction(void) {
+    uint32_t x = 7, y = 3;
+    uint32_t a[256];
+    REP256(
+        a[x & 255] = x * y;
+        x++;
+        y ^= x;
+    )
 }
 
-void test_non_consecutive_instruction_fetches(void) {
-    REP2048(INSTRUCTION(16))
-    REP2048(INSTRUCTION(16))
+void test_small_if_chain(void) {
+    int x = -1;
+    if(x == 0) {
+        x += 1;
+    } else if(x == 1) {
+        x += 2;
+    } else if(x == 2) {
+        x += 3;
+    } else if(x == 3) {
+        x += 4;
+    } else if(x == 4) {
+        x += 5;
+    } else if(x == 5) {
+        x += 6;
+    } else if(x == 6) {
+        x += 7;
+    } else if(x == 7) {
+        x += 8;
+    } else if(x == 8) {
+        x += 9;
+    } else if(x == 9) {
+        x += 10;
+    } else if(x == 10) {
+        x += 11;
+    } else if(x == 11) {
+        x += 12;
+    } else if(x == 12) {
+        x += 13;
+    } else if(x == 13) {
+        x += 14;
+    } else if(x == 14) {
+        x += 15;
+    } else if(x == 15) {
+        x += 16;
+    } else {
+        x = -1;
+    }
+}
+
+void test_large_if_chain(void) {
+    int x = -1;
+    if(x == 0) {
+        REP16(x++;)
+    } else if(x == 1) {
+        REP16(x++;)
+    } else if(x == 2) {
+        REP16(x++;)
+    } else if(x == 3) {
+        REP16(x++;)
+    } else if(x == 4) {
+        REP16(x++;)
+    } else if(x == 5) {
+        REP16(x++;)
+    } else if(x == 6) {
+        REP16(x++;)
+    } else if(x == 7) {
+        REP16(x++;)
+    } else if(x == 8) {
+        REP16(x++;)
+    } else if(x == 9) {
+        REP16(x++;);
+    } else if(x == 10) {
+        REP16(x++;);
+    } else if(x == 11) {
+        REP16(x++;);
+    } else if(x == 12) {
+        REP16(x++;);
+    } else if(x == 13) {
+        REP16(x++;);
+    } else if(x == 14) {
+        REP16(x++;);
+    } else if(x == 15) {
+        REP16(x++;);
+    } else if(x == 16) {
+        REP16(x++;);
+    } else if(x == 17) {
+        REP16(x++;);
+    } else if(x == 18) {
+        REP16(x++;);
+    } else if(x == 19) {
+        REP16(x++;);
+    } else if(x == 20) {
+        REP16(x++;);
+    } else {
+        REP16(x++;);
+    }
+}
+
+void f99(void) { }
+void f98(void) { f99(); }
+void f97(void) { f98(); }
+void f96(void) { f97(); }
+void f95(void) { f96(); }
+void f94(void) { f95(); }
+void f93(void) { f94(); }
+void f92(void) { f93(); }
+void f91(void) { f92(); }
+void f90(void) { f91(); }
+
+void f89(void) { f90(); }
+void f88(void) { f89(); }
+void f87(void) { f88(); }
+void f86(void) { f87(); }
+void f85(void) { f86(); }
+void f84(void) { f85(); }
+void f83(void) { f84(); }
+void f82(void) { f83(); }
+void f81(void) { f82(); }
+void f80(void) { f81(); }
+
+void f79(void) { f80(); }
+void f78(void) { f79(); }
+void f77(void) { f78(); }
+void f76(void) { f77(); }
+void f75(void) { f76(); }
+void f74(void) { f75(); }
+void f73(void) { f74(); }
+void f72(void) { f73(); }
+void f71(void) { f72(); }
+void f70(void) { f71(); }
+
+void f69(void) { f70(); }
+void f68(void) { f69(); }
+void f67(void) { f68(); }
+void f66(void) { f67(); }
+void f65(void) { f66(); }
+void f64(void) { f65(); }
+void f63(void) { f64(); }
+void f62(void) { f63(); }
+void f61(void) { f62(); }
+void f60(void) { f61(); }
+
+void f59(void) { f60(); }
+void f58(void) { f59(); }
+void f57(void) { f58(); }
+void f56(void) { f57(); }
+void f55(void) { f56(); }
+void f54(void) { f55(); }
+void f53(void) { f54(); }
+void f52(void) { f53(); }
+void f51(void) { f52(); }
+void f50(void) { f51(); }
+
+void f49(void) { f50(); }
+void f48(void) { f49(); }
+void f47(void) { f48(); }
+void f46(void) { f47(); }
+void f45(void) { f46(); }
+void f44(void) { f45(); }
+void f43(void) { f44(); }
+void f42(void) { f43(); }
+void f41(void) { f42(); }
+void f40(void) { f41(); }
+
+void f39(void) { f40(); }
+void f38(void) { f39(); }
+void f37(void) { f38(); }
+void f36(void) { f37(); }
+void f35(void) { f36(); }
+void f34(void) { f35(); }
+void f33(void) { f34(); }
+void f32(void) { f33(); }
+void f31(void) { f32(); }
+void f30(void) { f31(); }
+
+void f29(void) { f30(); }
+void f28(void) { f29(); }
+void f27(void) { f28(); }
+void f26(void) { f27(); }
+void f25(void) { f26(); }
+void f24(void) { f25(); }
+void f23(void) { f24(); }
+void f22(void) { f23(); }
+void f21(void) { f22(); }
+void f20(void) { f21(); }
+
+void f19(void) { f20(); }
+void f18(void) { f19(); }
+void f17(void) { f18(); }
+void f16(void) { f17(); }
+void f15(void) { f16(); }
+void f14(void) { f15(); }
+void f13(void) { f14(); }
+void f12(void) { f13(); }
+void f11(void) { f12(); }
+void f10(void) { f11(); }
+
+void f9(void)  { f10(); }
+void f8(void)  { f9(); }
+void f7(void)  { f8(); }
+void f6(void)  { f7(); }
+void f5(void)  { f6(); }
+void f4(void)  { f5(); }
+void f3(void)  { f4(); }
+void f2(void)  { f3(); }
+void f1(void)  { f2(); }
+void f0(void)  { f1(); }
+
+
+void test_deep_call_chain(void) {
+    f0();
 }
 
 void main()
 {
     setup_picosoc();
+    for(int i = 0; i < 5; i++) {
+        REP2048(JUMP(0)JUMP(0)) // Small delay for my bash script to start reading UART output after reset
+    }
     print_str("Start of benchmarks\r\n\r\n");
 
     // Tests for replacement policies for 8-word cache
@@ -430,8 +635,10 @@ void main()
     RUN_TEST(test_branch_heavy);
 
     // Tests for line size for 2048-word cache
-    RUN_TEST(test_consecutive_instruction_fetches);
-    RUN_TEST(test_non_consecutive_instruction_fetches);
+    RUN_TEST(test_consecutive_instruction);
+    RUN_TEST(test_deep_call_chain);
+    RUN_TEST(test_small_if_chain);
+    RUN_TEST(test_large_if_chain);
     unsigned char leds_value = 0x02;
     while (1) {
         for(int i = 0; i < 10000; i++);

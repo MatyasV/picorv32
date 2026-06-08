@@ -1,63 +1,81 @@
 Results for test_empty_loop
-rdcycle:   3200107
+rdcycle:   3200577
 rdinstret: 700023
 CPI:       4.5
-Hits:      800031
-Misses:    4
-Total:     800035
+Hits:      799999
+Misses:    40
+Total:     800039
 Miss rate: 0.0%
 
 Results for test_tiny_loop
-rdcycle:   5300107
+rdcycle:   5300610
 rdinstret: 1100023
 CPI:       4.8
-Hits:      1200038
-Misses:    0
-Total:     1200038
+Hits:      1200002
+Misses:    40
+Total:     1200042
 Miss rate: 0.0%
 
 Results for test_medium_loop
-rdcycle:   1876107
+rdcycle:   1878841
 rdinstret: 398023
 CPI:       4.7
-Hits:      400038
-Misses:    0
-Total:     400038
+Hits:      399813
+Misses:    229
+Total:     400042
 Miss rate: 0.0%
 
 Results for test_large_loop
-rdcycle:   2434110
+rdcycle:   2448144
 rdinstret: 529024
 CPI:       4.6
-Hits:      529539
-Misses:    0
-Total:     529539
-Miss rate: 0.0%
+Hits:      528454
+Misses:    1089
+Total:     529543
+Miss rate: 0.2%
 
 Results for test_branch_heavy
-rdcycle:   22180
+rdcycle:   25202
 rdinstret: 5037
-CPI:       4.4
-Hits:      5557
-Misses:    0
-Total:     5557
-Miss rate: 0.0%
+CPI:       5.0
+Hits:      5356
+Misses:    205
+Total:     5561
+Miss rate: 3.6%
 
-Results for test_consecutive_instruction_fetches
-rdcycle:   36585
-rdinstret: 3087
-CPI:       11.8
-Hits:      1000
-Misses:    2103
-Total:     3103
-Miss rate: 67.7%
+Results for test_consecutive_instruction
+rdcycle:   65921
+rdinstret: 4115
+CPI:       16.0
+Hits:      8
+Misses:    4126
+Total:     4134
+Miss rate: 99.8%
 
-Results for test_non_consecutive_instruction_fetches
-rdcycle:   131510
-rdinstret: 3087
-CPI:       42.6
-Hits:      1005
-Misses:    2098
-Total:     3103
-Miss rate: 67.6%
+Results for test_deep_call_chain
+rdcycle:   25782
+rdinstret: 1015
+CPI:       25.4
+Hits:      1
+Misses:    1030
+Total:     1031
+Miss rate: 99.9%
+
+Results for test_small_if_chain
+rdcycle:   2064
+rdinstret: 66
+CPI:       31.2
+Hits:      2
+Misses:    96
+Total:     98
+Miss rate: 97.9%
+
+Results for test_large_if_chain
+rdcycle:   3335
+rdinstret: 127
+CPI:       26.2
+Hits:      9
+Misses:    158
+Total:     167
+Miss rate: 94.6%
 

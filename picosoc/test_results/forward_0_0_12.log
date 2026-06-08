@@ -63,21 +63,39 @@ Misses:    5558
 Total:     5558
 Miss rate: 100.0%
 
-Results for test_consecutive_instruction_fetches
-rdcycle:   49493
-rdinstret: 3087
+Results for test_consecutive_instruction
+rdcycle:   65941
+rdinstret: 4115
 CPI:       16.0
 Hits:      0
-Misses:    3103
-Total:     3103
+Misses:    4131
+Total:     4131
 Miss rate: 100.0%
 
-Results for test_non_consecutive_instruction_fetches
-rdcycle:   190805
-rdinstret: 3087
-CPI:       61.8
+Results for test_deep_call_chain
+rdcycle:   25841
+rdinstret: 1015
+CPI:       25.4
 Hits:      0
-Misses:    3103
-Total:     3103
+Misses:    1031
+Total:     1031
+Miss rate: 100.0%
+
+Results for test_small_if_chain
+rdcycle:   2133
+rdinstret: 66
+CPI:       32.3
+Hits:      0
+Misses:    98
+Total:     98
+Miss rate: 100.0%
+
+Results for test_large_if_chain
+rdcycle:   3414
+rdinstret: 127
+CPI:       26.8
+Hits:      0
+Misses:    164
+Total:     164
 Miss rate: 100.0%
 

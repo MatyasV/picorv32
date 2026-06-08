@@ -1,36 +1,36 @@
 Results for test_bubble_sort
-rdcycle:   2893709
+rdcycle:   2890350
 rdinstret: 142354
 CPI:       20.3
-Hits:      5537
-Misses:    144617
+Hits:      5553
+Misses:    144601
 Total:     150154
 Miss rate: 96.3%
 
 Results for test_quick_sort
-rdcycle:   404966
+rdcycle:   402348
 rdinstret: 18360
-CPI:       22.0
-Hits:      1774
-Misses:    17742
+CPI:       21.9
+Hits:      1768
+Misses:    17748
 Total:     19516
 Miss rate: 90.9%
 
 Results for test_empty_loop
-rdcycle:   3201043
+rdcycle:   3201082
 rdinstret: 700023
 CPI:       4.5
-Hits:      799987
-Misses:    52
+Hits:      799988
+Misses:    51
 Total:     800039
 Miss rate: 0.0%
 
 Results for test_tiny_loop
-rdcycle:   29858752
+rdcycle:   29851174
 rdinstret: 1100023
 CPI:       27.1
-Hits:      482449
-Misses:    717590
+Hits:      483217
+Misses:    716822
 Total:     1200039
 Miss rate: 59.7%
 
@@ -53,29 +53,47 @@ Total:     529540
 Miss rate: 100.0%
 
 Results for test_branch_heavy
-rdcycle:   123598
+rdcycle:   123675
 rdinstret: 5037
 CPI:       24.5
-Hits:      396
-Misses:    5162
+Hits:      373
+Misses:    5185
 Total:     5558
-Miss rate: 92.8%
+Miss rate: 93.2%
 
-Results for test_consecutive_instruction_fetches
-rdcycle:   49493
-rdinstret: 3087
+Results for test_consecutive_instruction
+rdcycle:   65941
+rdinstret: 4115
 CPI:       16.0
 Hits:      0
-Misses:    3103
-Total:     3103
+Misses:    4131
+Total:     4131
 Miss rate: 100.0%
 
-Results for test_non_consecutive_instruction_fetches
-rdcycle:   190805
-rdinstret: 3087
-CPI:       61.8
+Results for test_deep_call_chain
+rdcycle:   25841
+rdinstret: 1015
+CPI:       25.4
 Hits:      0
-Misses:    3103
-Total:     3103
+Misses:    1031
+Total:     1031
+Miss rate: 100.0%
+
+Results for test_small_if_chain
+rdcycle:   2133
+rdinstret: 66
+CPI:       32.3
+Hits:      0
+Misses:    98
+Total:     98
+Miss rate: 100.0%
+
+Results for test_large_if_chain
+rdcycle:   3414
+rdinstret: 127
+CPI:       26.8
+Hits:      0
+Misses:    164
+Total:     164
 Miss rate: 100.0%
 
