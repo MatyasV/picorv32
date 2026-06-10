@@ -2531,6 +2531,139 @@ module picorv32_pcpi_div (
 	end
 endmodule
 
+
+module picorv32_pcpi_fast_div (
+	input clk, resetn,
+
+	input             pcpi_valid,
+	input      [31:0] pcpi_insn,
+	input      [31:0] pcpi_rs1,
+	input      [31:0] pcpi_rs2,
+	output reg        pcpi_wr,
+	output reg [31:0] pcpi_rd,
+	output reg        pcpi_wait,
+	output reg        pcpi_ready
+);
+
+	function [5:0] msb_pos;
+		input [31:0] x;
+		integer i;
+		begin
+			msb_pos = 0;
+
+
+			for (i = 0; i < 32; i = i + 1)				
+				if (x[i])
+					msb_pos = i;
+		end
+	endfunction
+
+	reg instr_div, instr_divu, instr_rem, instr_remu;
+	wire instr_any_div_rem = |{instr_div, instr_divu, instr_rem, instr_remu};
+
+	reg pcpi_wait_q;
+	wire start = pcpi_wait && !pcpi_wait_q; // Start becomes true only for the first cycle
+
+	always @(posedge clk) begin
+		instr_div <= 0;
+		instr_divu <= 0;
+		instr_rem <= 0;
+		instr_remu <= 0;
+
+		if (resetn && pcpi_valid && !pcpi_ready && pcpi_insn[6:0] == 7'b0110011 && pcpi_insn[31:25] == 7'b0000001) begin
+			case (pcpi_insn[14:12])
+				3'b100: instr_div <= 1;
+				3'b101: instr_divu <= 1;
+				3'b110: instr_rem <= 1;
+				3'b111: instr_remu <= 1;
+			endcase
+		end
+
+		pcpi_wait <= instr_any_div_rem && resetn;
+		pcpi_wait_q <= pcpi_wait && resetn;
+	end
+
+	reg [31:0] dividend;
+	reg [62:0] divisor;
+	reg [31:0] quotient;
+	reg [31:0] quotient_msk;
+	reg running;
+	reg outsign;
+
+	reg [31:0] divisor_abs;
+	integer shift;
+
+
+	always @(posedge clk) begin
+		pcpi_ready <= 0;
+		pcpi_wr <= 0;
+		pcpi_rd <= 'bx;
+
+		if (!resetn) begin
+			running <= 0;
+		end else
+		if (start) begin
+			running <= 1;
+
+			// absolute values for signed ops
+			// Essentially takes two's complement if neccesary (for both divisor and dividend)
+			dividend <= (instr_div || instr_rem) && pcpi_rs1[31] ? -pcpi_rs1 : pcpi_rs1;
+			divisor_abs = (instr_div || instr_rem) && pcpi_rs2[31] ? -pcpi_rs2 : pcpi_rs2;
+
+			// handle divide-by-zero 
+			if (divisor_abs == 0) begin
+				running <= 0;
+				pcpi_ready <= 1;
+				pcpi_wr <= 1;
+				pcpi_rd <= 32'hffffffff;
+			end else begin
+
+				// Use the msb function defined earlier
+				shift = msb_pos(pcpi_rs1) - msb_pos(divisor_abs);
+
+				if (shift < 0) shift = 0;
+
+				divisor <= divisor_abs << shift;
+				quotient_msk <= 32'b1 << shift;
+
+				quotient <= 0;
+
+				outsign <= (instr_div && (pcpi_rs1[31] != pcpi_rs2[31])) ||
+						(instr_rem && pcpi_rs1[31]);
+			end
+		end
+		if (!quotient_msk && running) begin
+			running <= 0;
+			pcpi_ready <= 1;
+			pcpi_wr <= 1;
+`ifdef RISCV_FORMAL_ALTOPS
+			case (1)
+				instr_div:  pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h7f8529ec;
+				instr_divu: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h10e8fd70;
+				instr_rem:  pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h8da68fa5;
+				instr_remu: pcpi_rd <= (pcpi_rs1 - pcpi_rs2) ^ 32'h3138d0e1;
+			endcase
+`else
+			if (instr_div || instr_divu)
+				pcpi_rd <= outsign ? -quotient : quotient;
+			else
+				pcpi_rd <= outsign ? -dividend : dividend;
+`endif
+		end else begin
+			if (divisor <= dividend) begin
+				dividend <= dividend - divisor;
+				quotient <= quotient | quotient_msk;
+			end
+			divisor <= divisor >> 1;
+`ifdef RISCV_FORMAL_ALTOPS
+			quotient_msk <= quotient_msk >> 5;
+`else
+			quotient_msk <= quotient_msk >> 1;
+`endif
+		end
+	end
+endmodule
+
 // Original version of the division module, for reference.
 module picorv32_pcpi_div_old (
 	input clk, resetn,

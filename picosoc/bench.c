@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
+// #define ENABLE_DIVIDE
+
 #if defined(__has_include)
 #  if __has_include("perf.h")
     // Defines REG_CACHE_HIT_COUNT, REG_CACHE_MISS_COUNT, and cache_counters_reset()
@@ -175,7 +177,9 @@ void print_stats(uint32_t cycles, uint32_t instns, uint32_t hits, uint32_t misse
 
 uint32_t simulate_consecutive_instruction_fetches() {
     uint32_t x = 7, y = 3;
+#ifdef ENABLE_DIVIDE
     x /= y;
+#endif
     REP64(
         x *= y;
         x <<= 16;
@@ -209,7 +213,11 @@ unsigned char run_workload() {
     for(int i = 0; i < 100; i++) {
         simulate_non_consecutive_instruction_fetches();
     }
+#ifdef ENABLE_DIVIDE
     return x % 255;
+#else
+    return x & 0xff;
+#endif
 }
 
 unsigned char run_workload_timed() {
@@ -245,8 +253,11 @@ void main()
     setup_picosoc();
     
     unsigned char leds_value = 0x02;
+#ifdef ENABLE_DIVIDE
+    run_workload_timed();
+#endif
     while (1) {
-        reg_7seg = run_workload_timed(); // display
+        reg_7seg = run_workload(); // display
         reg_leds = leds_value;
         leds_value = leds_value ^ 0x02; // toggle LED1
     }
