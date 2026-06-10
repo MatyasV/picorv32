@@ -92,14 +92,26 @@ icebreaker_sections.lds: sections.lds
 tests.s: tests.c perf.h
 	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -S -o $@ tests.c
 
-icebreaker_fw.elf: icebreaker_sections.lds start.s tests.s
-	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s tests.s
+tests.elf: icebreaker_sections.lds start.s tests.s
+	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o tests.elf start.s tests.s
 
-icebreaker_fw.hex: icebreaker_fw.elf
-	$(CROSS)objcopy -O verilog icebreaker_fw.elf icebreaker_fw.hex
+tests.hex: tests.elf
+	$(CROSS)objcopy -O verilog tests.elf tests.hex
 
-icebreaker_fw.bin: icebreaker_fw.elf
-	$(CROSS)objcopy -O binary icebreaker_fw.elf icebreaker_fw.bin
+tests.bin: tests.elf
+	$(CROSS)objcopy -O binary tests.elf tests.bin
+
+bench.s: bench.c perf.h
+	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -S -o $@ bench.c
+
+bench.elf: icebreaker_sections.lds start.s bench.s
+	$(CROSS)gcc $(CFLAGS) -DICEBREAKER -mabi=ilp32 -march=rv32im -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o bench.elf start.s bench.s
+
+bench.hex: bench.elf
+	$(CROSS)objcopy -O verilog bench.elf bench.hex
+
+bench.bin: bench.elf
+	$(CROSS)objcopy -O binary bench.elf bench.bin
 
 # ---- Testbench for SPI Flash Model ----
 
@@ -120,6 +132,8 @@ clean:
 	rm -f testbench.vvp testbench.vcd spiflash_tb.vvp spiflash_tb.vcd
 	rm -f hx8kdemo_fw.elf hx8kdemo_fw.hex hx8kdemo_fw.bin cmos.log
 	rm -f icebreaker_fw.elf icebreaker_fw.hex icebreaker_fw.bin
+	rm -f tests.elf tests.hex tests.bin
+	rm -f bench.elf bench.hex bench.bin
 	rm -f hx8kdemo.json hx8kdemo.log hx8kdemo.asc hx8kdemo.rpt hx8kdemo.bin
 	rm -f hx8kdemo_syn.v hx8kdemo_syn_tb.vvp hx8kdemo_tb.vvp
 	rm -f icebreaker.json icebreaker.log icebreaker.asc icebreaker.rpt icebreaker.bin

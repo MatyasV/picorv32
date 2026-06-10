@@ -49,7 +49,7 @@ module icebreaker (
 );
 	parameter integer MEM_WORDS = 32768;
 
-	wire clk_fast; // 18.375 MHz
+	wire clk_fast; // 19.5 MHz
 	wire pll_locked;
 
 	SB_PLL40_PAD  #(
@@ -59,14 +59,15 @@ module icebreaker (
 		.DIVQ(3'b101),
 		.FILTER_RANGE(3'b001),
 	) pll (
-		.PACKAGEPIN(clk_12mhz),       // Now safely accepts your Pin 35 clock input
-		.PLLOUTCORE(clk_fast),   // Output clock is now pulled from Port A
+		.PACKAGEPIN(clk_12mhz),
+		.PLLOUTCORE(clk_fast),
 		.RESETB(1'b1),
 		.LOCK(pll_locked),
 		.BYPASS(1'b0)
 	);
 
-	wire clk = clk_fast;
+	// wire clk = clk_12mhz;
+	wire clk = clk_fast; // 19.5 MHz
 
 	reg [5:0] reset_cnt = 0;
 	wire resetn = &reset_cnt;
@@ -144,7 +145,7 @@ module icebreaker (
 	picosoc #(
 		.BARREL_SHIFTER(1),
 		.ENABLE_MUL(0),
-		.ENABLE_DIV(1),
+		.ENABLE_DIV(0),
 		.ENABLE_FAST_MUL(1),
 		.MEM_WORDS(MEM_WORDS)
 	) soc (

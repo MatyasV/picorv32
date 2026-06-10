@@ -409,30 +409,20 @@ module spimem_cache_direct_mapped_hash (
     output [31:0] miss_count
 );
     // Hash the address to reduce collisions from adversarial access patterns.
-    
+    // Note that the following is hardcoded for a 512-line cache with 4-word lines;
     wire [10:0] cpu_tag    = cpu_addr[23:13];
     wire [8:0]  cpu_index  = cpu_addr[12:4];
     wire [3:0]  cpu_offset = cpu_addr[3:0];
 
-    integer instr_start = 32'h 0010_0000;
-
-    wire first_block = cpu_addr[23:4] < instr_start[23:4] + 512;
-    // wire second_block = cpu_addr[23:4] >= instr_start[23:4] + 512 && cpu_addr[23:4] < instr_start[23:4] + 1024;
-    // wire third_block = cpu_addr[23:4] >= instr_start[23:4] + 1024 && cpu_addr[23:4] < instr_start[23:4] + 1536;
-
-    // Idea: we can do different internal indexing schemes for different blocks to reduce collisions.
-    // This method might be useful against adversarial access patterns from other teams' benchmarks
-    // For simplicity, we just invert the MSB of the index for the first block
-
     // hash
-    wire [8:0]  hashed_index =  cpu_index ^ (first_block ? 9'b 000000000 : 9'b 100000000);
+    wire [8:0]  hashed_index =  {cpu_index[8:7] ^ cpu_tag[1:0], cpu_index[6:0]};
     wire [23:0] hashed_cpu_addr = {cpu_tag, hashed_index, cpu_offset};
 
     wire [23:0] inner_spimem_addr;
     wire [3:0]  spi_offset      = inner_spimem_addr[3:0];
     assign spimem_addr = {cpu_tag, cpu_index, spi_offset};
 
-    spimem_cache_direct_mapped_1_cycle_hit #(
+    spimem_cache_direct_mapped #(
         .CACHE_SIZE(512),
         .LINE_SIZE(4)
     ) inner_cache (
@@ -441,12 +431,12 @@ module spimem_cache_direct_mapped_hash (
         
         .cpu_valid(cpu_valid),
         .cpu_ready(cpu_ready),
-        .cpu_addr(hashed_cpu_addr),      // Feed it the scrambled input
+        .cpu_addr(hashed_cpu_addr),      // Feed it the reordered input
         .cpu_rdata(cpu_rdata),
         
         .spimem_valid(spimem_valid),
         .spimem_ready(spimem_ready),
-        .spimem_addr(inner_spimem_addr), // Catch the scrambled output
+        .spimem_addr(inner_spimem_addr), // Catch the reordered output
         .spimem_rdata(spimem_rdata),
         
         .mem_instr(mem_instr),
@@ -481,6 +471,13 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
     output reg [31:0] hit_count,
     output reg [31:0] miss_count
 );
+    /*
+    Modified from spimem_cache_direct_mapped to read the cache tag and data
+    using a sequential circuit instead of a combinational one.
+    This makes the cache hit path 1 cycle instead of 0 cycles, but allows
+    cpu_addr to be driven from combinational logic rather than requiring
+    it to be a registered signal.
+    */ 
     localparam integer ADDR_BITS   = 22;                            
     localparam integer INDEX_BITS  = $clog2(CACHE_SIZE);
     localparam integer LOG_LINE    = (LINE_SIZE > 1) ? $clog2(LINE_SIZE) : 0;
@@ -502,7 +499,6 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
     generate
         if (LINE_SIZE == 1) begin : gen_single
 
-            // Synchronous Read Registers
             reg [TAG_BITS:0] bram_tag_out;
             reg [31:0]       bram_data_out;
             reg              bram_read_valid; 
@@ -511,26 +507,22 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
                 if (!resetn) begin
                     bram_read_valid <= 0;
                 end else begin
-                    // State machine to wait 1 clock cycle for BRAM read
                     if (cpu_valid && !bram_read_valid && !cpu_ready)
                         bram_read_valid <= 1'b1;
                     else if (!cpu_valid || cpu_ready)
                         bram_read_valid <= 1'b0;
                 end
 
-                // Synchronous Read - Required for iCE40 EBR inference
                 bram_tag_out  <= cache_tag[index];
                 bram_data_out <= cache_data[index];
             end
 
-            // Only evaluate hit AFTER the 1-cycle BRAM read completes
             wire cache_hit = bram_read_valid && bram_tag_out[TAG_BITS] && (bram_tag_out[TAG_BITS-1:0] == cpu_tag);
 
             assign spimem_valid = cpu_valid && bram_read_valid && !cache_hit;
             assign spimem_addr  = cpu_addr;
             assign cpu_ready    = cpu_valid && (cache_hit || spimem_ready);
             
-            // Output uses the clocked BRAM data
             assign cpu_rdata    = cache_hit ? bram_data_out : spimem_rdata;
 
             always @(posedge clk) begin
@@ -540,7 +532,6 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
                     if (hit_count_reset)  hit_count  <= 0;
                     if (miss_count_reset) miss_count <= 0;
                     
-                    // Count only when valid is fully acknowledged
                     if (cpu_valid && cache_hit && cpu_ready) hit_count <= hit_count + 1;
                     
                     if (cpu_valid && !cache_hit && bram_read_valid && spimem_ready) begin
@@ -553,7 +544,6 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
 
         end else begin : gen_multi
 
-            // Synchronous Read Registers
             reg [TAG_BITS:0] bram_tag_out;
             reg [31:0]       bram_data_out;
             reg              bram_read_valid;
@@ -569,22 +559,18 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
                 if (!resetn) begin
                     bram_read_valid <= 0;
                 end else begin
-                    // State machine to wait 1 clock cycle for BRAM read
                     if (cpu_valid && !bram_read_valid && !cpu_ready)
                         bram_read_valid <= 1'b1;
                     else if (!cpu_valid || cpu_ready)
                         bram_read_valid <= 1'b0;
                 end
 
-                // Synchronous Read - Required for iCE40 EBR inference
                 bram_tag_out  <= cache_tag[index];
                 bram_data_out <= cache_data[rd_addr];
             end
 
-            // Only evaluate hit AFTER the 1-cycle BRAM read completes
             wire cache_hit = bram_read_valid && bram_tag_out[TAG_BITS] && (bram_tag_out[TAG_BITS-1:0] == cpu_tag);
 
-            // Do not trigger SPI fetch until BRAM read has been validated as a miss
             wire start_fill = cpu_valid && bram_read_valid && !cache_hit && !fill_active;
 
             wire [LOG_LINE-1:0] cur_fill = fill_active ? fill_count : {LOG_LINE{1'b0}};
@@ -598,7 +584,6 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
                 cpu_valid &&
                 (cache_hit || (spimem_valid && spimem_ready && last_word));
 
-            // Output uses the clocked BRAM data, completely eliminating asynchronous logic
             assign cpu_rdata =
                 (!cache_hit && cpu_offset[LOG_LINE-1:0] == cur_fill)
                     ? spimem_rdata
@@ -639,8 +624,8 @@ module spimem_cache_direct_mapped_1_cycle_hit #(
 endmodule
 
 module spimem_cache_direct_mapped #(
-    parameter integer CACHE_SIZE = 1024,
-    parameter integer LINE_SIZE  = 2
+    parameter integer CACHE_SIZE = 512,
+    parameter integer LINE_SIZE  = 4
 ) (
     input clk,
     input resetn,
